@@ -12,6 +12,7 @@ typedef struct Dialog
   char* character_name;
   char* text;
   int id;
+  int nextid;
 } Dialog;
 
 typedef struct Dialog_Manager{

@@ -20,6 +20,8 @@ void Load_Dialogs_From_CSV(Dialog_Manager* manager, const char* filename) {
     while (fgets(line, sizeof(line), file)) {
         char* idToken = strtok(line,",");
         if(!idToken) continue;
+        char* nextidToken = strtok(NULL,",");
+        if(!nextidToken) continue;
         char* nameToken = strtok(NULL,",");
         if(!nameToken) continue;
         char* textToken = strtok(NULL,",");
@@ -30,6 +32,7 @@ void Load_Dialogs_From_CSV(Dialog_Manager* manager, const char* filename) {
         }
         Dialog d;
         d.id = atoi(idToken);
+        d.nextid = atoi(nextidToken);
         d.character_name = strdup(nameToken);
         d.text = strdup(textToken);
         manager->database[manager->count++]=d;
@@ -82,6 +85,10 @@ void Update_Dialog_Manager(Dialog_Manager* manager){
   if (manager->active && IsKeyPressed(KEY_SPACE)) {
     // For now, let's just close it. 
     // Later, this will call Advance_Dialogue to check for nextId
+    if(manager->active_dialog->nextid != -1){
+      Set_Active_Dialog(manager, manager->active_dialog->nextid);
+      return;
+    }
     manager->active = false;
     manager->active_dialog = NULL; 
   }
