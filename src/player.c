@@ -4,6 +4,9 @@ Player Get_Default_Player(){
   Player player = {0};
   player.position = (Vector2){ 100,340 };
   player.speed = 250.0f;
+  Image i = LoadImage("sprite.png");
+  player.sprite = LoadTextureFromImage(i);
+  UnloadImage(i);
   return player;
 }
 
@@ -41,10 +44,10 @@ void Handle_Input(Player* player, World* world){
 
 }
 
-void Draw_Player(Player* player,Texture2D* sprite){
+void Draw_Player(Player* player){
   // Image i = LoadImage("char.png");
   // DrawTexture(*sprite,player->position.x, player->position.y, WHITE);
   Rectangle r= {0,0,64,64};
-  DrawTextureRec(*sprite,r,player->position, WHITE );
+  DrawTextureRec(player->sprite,r,player->position, WHITE );
   // DrawRectangle(player->position.x, player->position.y,20,20, MAGENTA);
 }

@@ -15,7 +15,7 @@ typedef struct player
 
 Player Get_Default_Player();
 void Handle_Input(Player* player, World* world);
-void Draw_Player(Player* player, Texture2D* sprite);
+void Draw_Player(Player* player);
 
 
 #endif

@@ -14,24 +14,21 @@ int main(void) {
     // Initialization
     const int screenWidth = 800;
     const int screenHeight = 450;
-
     InitWindow(screenWidth, screenHeight, "Mineral Quest");
     SetTargetFPS(60); 
 
+    // System Setup
     GameScreen currentScreen = LOGO;
     int framesCounter = 0;
+
     Player player = Get_Default_Player();
     Character character = GetCharacterDefault();
+    World world = Init_World();
 
     Dialog_Manager manager;
     Init_Dialog_Manager(&manager,100);
     Load_Dialogs_From_CSV(&manager,"dialog.csv");
-
-    World world = Init_World();
-    Image i = LoadImage("sprite.png");
-    Texture2D sprite = LoadTextureFromImage(i);
-    UnloadImage(i);
-
+    
     // Main game loop
     while (!WindowShouldClose()) {
       // --- 1. Update Logic ---
@@ -74,7 +71,7 @@ int main(void) {
                     break;
                 case GAMEPLAY:
                     Draw_World(&world);
-                    Draw_Player(&player, &sprite); // Our "Hero"
+                    Draw_Player(&player); // Our "Hero"
                     Draw_Character(&character);
                     DrawText("The world awaits...", 20, 20, 20, PINK);
                     if (manager.active) {
@@ -85,7 +82,7 @@ int main(void) {
         EndDrawing();
     }
     Close_Dialog_Manager(&manager);
-    UnloadTexture(sprite);
+    // UnloadTexture(sprite);
     UnloadTexture(character.sprite);
     // De-Initialization
     CloseWindow();
