@@ -4,8 +4,8 @@ World Init_World() {
     World world = {0};
 
     // Define Tile Types
-    world.types[0] = (Tile){ .id = 0, .is_blocking = false, .color = WHITE }; // Grass
-    world.types[1] = (Tile){ .id = 1, .is_blocking = true,  .color = MAROON }; // Wall
+    world.types[0] = (Tile){ .id = 0, .is_blocking = false, .color = COLOR_BEAVIS_SHIRT }; // Grass
+    world.types[1] = (Tile){ .id = 1, .is_blocking = true,  .color = COLOR_NEON_CRIMSON }; // Wall
     // world.types[12] = (Tile){ .id = 1, .is_blocking = true,  .color = Aqu };
     // Create a simple room with a border
     for (int y = 0; y < MAP_HEIGHT; y++) {
