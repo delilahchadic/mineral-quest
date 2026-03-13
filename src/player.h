@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include "raylib.h"
 #include "world.h"
+#include <stddef.h>
 
 typedef struct player
 {
@@ -16,6 +17,7 @@ typedef struct player
 Player Get_Default_Player();
 void Handle_Input(Player* player, World* world);
 void Draw_Player(Player* player);
+void Close_Player(Player* player);
 
 
 #endif

@@ -51,3 +51,7 @@ void Draw_Player(Player* player){
   DrawTextureRec(player->sprite,r,player->position, WHITE );
   // DrawRectangle(player->position.x, player->position.y,20,20, MAGENTA);
 }
+
+void Close_Player(Player* player){
+  UnloadTexture(player->sprite);
+}
