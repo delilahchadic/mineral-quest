@@ -7,8 +7,27 @@
 #include "character.h"
 #include "dialog.h"
 #include <stdio.h>
+
 // Simple state to track our game "scene"
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
+
+void UpdateGameplay(Player* player, World* world,
+  Character* character, Dialog_Manager* manager){
+    Handle_Input(player, world);
+    if(!manager->active){
+      if(Vector2Distance(player->position, character->position) <50.f){
+        if (IsKeyPressed(KEY_E) && !manager->active) {
+            // Tell the manager to look up the ID stored on the character
+            Set_Active_Dialog(manager, character->dialogId);
+            manager->active = true;
+        }
+      }
+    }
+    if(manager->active){
+      Update_Dialog_Manager(manager);
+    }
+    
+}
 
 int main(void) {
     // Initialization
@@ -28,7 +47,7 @@ int main(void) {
     Dialog_Manager manager;
     Init_Dialog_Manager(&manager,100);
     Load_Dialogs_From_CSV(&manager,"dialog.csv");
-    
+
     // Main game loop
     while (!WindowShouldClose()) {
       // --- 1. Update Logic ---
@@ -41,19 +60,7 @@ int main(void) {
           if (IsKeyPressed(KEY_ENTER)) currentScreen = GAMEPLAY;
           break;
         case GAMEPLAY:
-          Handle_Input(&player, &world);
-
-          if(!manager.active){
-            if(Vector2Distance(player.position, character.position) <50.f){
-              if (IsKeyPressed(KEY_E) && !manager.active) {
-                  // Tell the manager to look up the ID stored on the character
-                  Set_Active_Dialog(&manager, character.dialogId);
-                  manager.active = true;
-              }
-            }
-          }
-          // --- Advance/Close Logic ---
-          Update_Dialog_Manager(&manager);
+          UpdateGameplay(&player,&world,&character, &manager);
           break;
       }
 

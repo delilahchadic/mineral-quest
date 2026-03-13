@@ -12,7 +12,7 @@ Player Get_Default_Player(){
 
 void Handle_Input(Player* player, World* world){
   float dt = GetFrameTime();
-  float speed = player->speed;
+  // float speed = player->speed;
   Vector2 dir = { 0, 0 };
 
   if(IsKeyDown(KEY_W)){
