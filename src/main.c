@@ -13,8 +13,9 @@ typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
 
 void UpdateGameplay(Player* player, World* world,
   Character* character, Dialog_Manager* manager){
-    Handle_Input(player, world);
+
     if(!manager->active){
+      Handle_Input(player, world);
       if(Vector2Distance(player->position, character->position) <50.f){
         if (IsKeyPressed(KEY_E) && !manager->active) {
             // Tell the manager to look up the ID stored on the character
@@ -27,6 +28,33 @@ void UpdateGameplay(Player* player, World* world,
       Update_Dialog_Manager(manager);
     }
     
+}
+
+void DrawGameplay(Player* player, World* world,
+  Character* character, Dialog_Manager* manager){
+    Draw_World(world);
+    Draw_Player(player); // Our "Hero"
+    Draw_Character(character);
+    DrawText("The world awaits...", 20, 20, 20, PINK);
+    if (manager->active) {
+      Draw_Dialog(manager); 
+    }
+}
+
+void DrawScreen(GameScreen screen, Player* player, World* world,
+  Character* character, Dialog_Manager* manager){
+    switch(screen) {
+      case LOGO:
+        DrawText("YOUR STUDIO LOGO", 250, 200, 20, LIGHTGRAY);
+        break;
+      case TITLE:
+        DrawText("Mineral Quest", 220, 150, 40, BLACK);
+        DrawText("PRESS ENTER TO START", 280, 250, 20, DARKGRAY);
+        break;
+      case GAMEPLAY:
+        DrawGameplay(player,world,character, manager);
+        break;
+    }
 }
 
 int main(void) {
@@ -51,6 +79,7 @@ int main(void) {
     // Main game loop
     while (!WindowShouldClose()) {
       // --- 1. Update Logic ---
+      
       switch(currentScreen) {
         case LOGO:
           framesCounter++;
@@ -66,26 +95,8 @@ int main(void) {
 
         // --- 2. Drawing ---
         BeginDrawing();
-            ClearBackground(RAYWHITE);
-
-            switch(currentScreen) {
-                case LOGO:
-                    DrawText("YOUR STUDIO LOGO", 250, 200, 20, LIGHTGRAY);
-                    break;
-                case TITLE:
-                    DrawText("Mineral Quest", 220, 150, 40, BLACK);
-                    DrawText("PRESS ENTER TO START", 280, 250, 20, DARKGRAY);
-                    break;
-                case GAMEPLAY:
-                    Draw_World(&world);
-                    Draw_Player(&player); // Our "Hero"
-                    Draw_Character(&character);
-                    DrawText("The world awaits...", 20, 20, 20, PINK);
-                    if (manager.active) {
-                      Draw_Dialog(&manager); 
-                    }
-                    break;
-            }
+          ClearBackground(RAYWHITE);
+          DrawScreen(currentScreen,&player,&world,&character, &manager);
         EndDrawing();
     }
     Close_Dialog_Manager(&manager);
