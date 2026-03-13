@@ -61,9 +61,28 @@ void DrawGameplay(Gamestate* gamestate){
 
 void DrawScreen(Gamestate* gamestate){
     switch(gamestate->screen) {
-      case LOGO:
-        DrawText("YOUR STUDIO LOGO", 250, 200, 20, LIGHTGRAY);
-        break;
+      case LOGO:{
+            // 1. Define the colors in the order you want them to appear
+          Color barPalette[] = {
+              COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE, 
+              COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON, 
+              COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
+          };
+          int colorCount = 8;
+          float barWidth = (float)GetScreenWidth() / colorCount;
+
+            // 2. Draw the vertical bars
+          for (int i = 0; i < colorCount; i++) {
+              DrawRectangle(i * barWidth, 0, barWidth, GetScreenHeight(), barPalette[i]);
+          }
+
+            // 3. Overlay your studio name with a "Bebop" vibe
+            // Draw a dark semi-transparent bar behind the text for readability
+            DrawRectangle(0, GetScreenHeight()/2 - 40, GetScreenWidth(), 80, Fade(BLACK, 0.6f));
+            DrawText("ARCHAEOLOGY", GetScreenWidth()/2 - 180, GetScreenHeight()/2 - 20, 30, RAYWHITE);
+            
+            break;
+      }
       case TITLE:
         DrawText("Mineral Quest", 220, 150, 40, BLACK);
         DrawText("PRESS ENTER TO START", 280, 250, 20, DARKGRAY);
@@ -73,6 +92,7 @@ void DrawScreen(Gamestate* gamestate){
         break;
     }
 }
+
 void CloseGame(Gamestate* gamestate){
   Close_Dialog_Manager(&gamestate->manager);
   Close_Character(&gamestate->character);

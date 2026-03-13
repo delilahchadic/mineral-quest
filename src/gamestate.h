@@ -9,6 +9,7 @@
 #include "character.h"
 #include "dialog.h"
 #include <stdio.h>
+#include "palette.h"
 
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
 typedef struct Gamestate
