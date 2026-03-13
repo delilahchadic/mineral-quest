@@ -11,6 +11,7 @@
 // Simple state to track our game "scene"
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
 
+
 void UpdateGameplay(Player* player, World* world,
   Character* character, Dialog_Manager* manager){
 
@@ -30,6 +31,21 @@ void UpdateGameplay(Player* player, World* world,
     
 }
 
+void UpdateScene(GameScreen* currentScreen, int* framesCounter,
+  Player* player,World* world,Character* character, Dialog_Manager* manager){
+  switch(*currentScreen) {
+    case LOGO:
+      (*framesCounter)++;
+      if (*framesCounter > 120) *currentScreen = TITLE; // Switch after 2 seconds
+      break;
+    case TITLE:
+      if (IsKeyPressed(KEY_ENTER)) *currentScreen = GAMEPLAY;
+      break;
+    case GAMEPLAY:
+      UpdateGameplay(player,world,character,manager);
+      break;
+  }
+}
 void DrawGameplay(Player* player, World* world,
   Character* character, Dialog_Manager* manager){
     Draw_World(world);
@@ -56,7 +72,11 @@ void DrawScreen(GameScreen screen, Player* player, World* world,
         break;
     }
 }
-
+void CloseGame(Player* player, Character* character,Dialog_Manager* manager){
+  Close_Dialog_Manager(manager);
+  Close_Character(character);
+  Close_Player(player);
+}
 int main(void) {
     // Initialization
     const int screenWidth = 800;
@@ -79,19 +99,8 @@ int main(void) {
     // Main game loop
     while (!WindowShouldClose()) {
       // --- 1. Update Logic ---
+      UpdateScene(&currentScreen, &framesCounter,&player,&world,&character, &manager);
       
-      switch(currentScreen) {
-        case LOGO:
-          framesCounter++;
-          if (framesCounter > 120) currentScreen = TITLE; // Switch after 2 seconds
-          break;
-        case TITLE:
-          if (IsKeyPressed(KEY_ENTER)) currentScreen = GAMEPLAY;
-          break;
-        case GAMEPLAY:
-          UpdateGameplay(&player,&world,&character, &manager);
-          break;
-      }
 
         // --- 2. Drawing ---
         BeginDrawing();
@@ -99,9 +108,7 @@ int main(void) {
           DrawScreen(currentScreen,&player,&world,&character, &manager);
         EndDrawing();
     }
-    Close_Dialog_Manager(&manager);
-    // UnloadTexture(sprite);
-    UnloadTexture(character.sprite);
+    CloseGame(&player, &character, &manager);
     // De-Initialization
     CloseWindow();
 
