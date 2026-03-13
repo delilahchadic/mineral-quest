@@ -12,4 +12,5 @@ typedef struct Character
 
 Character GetCharacterDefault();
 void Draw_Character(Character* character);
+void Close_Character(Character* character);
 #endif

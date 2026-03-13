@@ -18,3 +18,7 @@ void Draw_Character(Character* character){
   DrawTextureRec(character->sprite,r,character->position, WHITE );
   // DrawRectangle(player->position.x, player->position.y,20,20, MAGENTA);
 }
+
+void Close_Character(Character* character){
+  UnloadTexture(character->sprite);
+}
