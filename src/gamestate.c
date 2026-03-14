@@ -1,15 +1,12 @@
 #include "gamestate.h"
+
 void InitGame(Gamestate* gamestate){
+
+  //sets screen width, inits window, sets target fps
   const int screenWidth = 800;
   const int screenHeight = 450;
   InitWindow(screenWidth, screenHeight, "Mineral Quest");
   SetTargetFPS(60); 
-
-  // Camera Setup
-  gamestate->camera.target = gamestate->player.position;
-  gamestate->camera.offset = (Vector2){ 400.0f, 225.0f }; // Center of the 800x450 screen
-  gamestate->camera.rotation = 0.0f;
-  gamestate->camera.zoom = 1.0f;
   
   // System Setup
   gamestate->screen= LOGO;
@@ -17,6 +14,12 @@ void InitGame(Gamestate* gamestate){
   gamestate->player = Get_Default_Player();
   gamestate->character = GetCharacterDefault();
   gamestate->world = Init_World();
+
+  // Camera Setup
+  gamestate->camera.target = gamestate->player.position;
+  gamestate->camera.offset = (Vector2){ 400.0f, 225.0f }; // Center of the 800x450 screen
+  gamestate->camera.rotation = 0.0f;
+  gamestate->camera.zoom = 1.0f;
 
   Init_Dialog_Manager(&gamestate->manager,100);
   Load_Dialogs_From_CSV(&gamestate->manager,"dialog.csv"); 
