@@ -139,17 +139,17 @@ void DrawScreen(Gamestate* gamestate){
               COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
           };
           int colorCount = 8;
-          float barWidth = (float)GetScreenWidth() / colorCount;
+          float barWidth = SCREEN_WIDTH / colorCount;
 
             // 2. Draw the vertical bars
           for (int i = 0; i < colorCount; i++) {
-              DrawRectangle(i * barWidth, 0, barWidth, GetScreenHeight(), barPalette[i]);
+              DrawRectangle(i * barWidth, 0, barWidth,SCREEN_HEIGHT, barPalette[i]);
           }
 
             // 3. 
             // Draw a dark semi-transparent bar behind the text for readability
-            DrawRectangle(0, GetScreenHeight()/2 - 40, GetScreenWidth(), 80, Fade(COLOR_SUNKEN_INK, 0.6f));
-            DrawText("ARCHAEOLOGY", GetScreenWidth()/2 - 180, GetScreenHeight()/2 - 20, 30, COLOR_PULP_PAPER);
+            DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
+            DrawText("ARCHAEOLOGY", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 - 20, 30, COLOR_PULP_PAPER);
             
             break;
       }
