@@ -53,7 +53,7 @@ void DrawGameplay(Gamestate* gamestate){
     Draw_World(&gamestate->world);
     Draw_Player(&gamestate->player); // Our "Hero"
     Draw_Character(&gamestate->character);
-    DrawText("The world awaits...", 20, 20, 20, PINK);
+    DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
     if (gamestate->manager.active) {
       Draw_Dialog(&gamestate->manager); 
     }
@@ -76,16 +76,16 @@ void DrawScreen(Gamestate* gamestate){
               DrawRectangle(i * barWidth, 0, barWidth, GetScreenHeight(), barPalette[i]);
           }
 
-            // 3. Overlay your studio name with a "Bebop" vibe
+            // 3. 
             // Draw a dark semi-transparent bar behind the text for readability
-            DrawRectangle(0, GetScreenHeight()/2 - 40, GetScreenWidth(), 80, Fade(BLACK, 0.6f));
-            DrawText("ARCHAEOLOGY", GetScreenWidth()/2 - 180, GetScreenHeight()/2 - 20, 30, RAYWHITE);
+            DrawRectangle(0, GetScreenHeight()/2 - 40, GetScreenWidth(), 80, Fade(COLOR_SUNKEN_INK, 0.6f));
+            DrawText("ARCHAEOLOGY", GetScreenWidth()/2 - 180, GetScreenHeight()/2 - 20, 30, COLOR_PULP_PAPER);
             
             break;
       }
       case TITLE:
-        DrawText("Mineral Quest", 220, 150, 40, BLACK);
-        DrawText("PRESS ENTER TO START", 280, 250, 20, DARKGRAY);
+        DrawText("Mineral Quest", 220, 150, 40, COLOR_SUNKEN_INK);
+        DrawText("PRESS ENTER TO START", 280, 250, 20, COLOR_SUNKEN_INK);
         break;
       case GAMEPLAY:
         DrawGameplay(gamestate);

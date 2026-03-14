@@ -13,6 +13,7 @@
 #define COLOR_VHS_BLUE    (Color){ 0, 20, 100, 255 }
 #define COLOR_NEON_CRIMSON (Color){ 220, 20, 60, 255 }
 #define COLOR_TAROT_GOLD   (Color){ 255, 215, 0, 255 }
+
 // The "Americana" Warm Tones (Faded, dusty, sun-bleached)
 #define COLOR_DUSTY_ROSE    (Color){ 194, 118, 128, 255 }
 #define COLOR_DUSTY_SALMON  (Color){ 214, 140, 121, 255 }
@@ -26,5 +27,14 @@
 
 // A bonus "Slacker" background color (The color of a dirty Texas sky)
 #define COLOR_TEXAS_HAZE    (Color){ 220, 210, 190, 255 }
+
+// The "Pulp Novel" - An off-white/beige that feels like old paper
+#define COLOR_PULP_PAPER    (Color){ 225, 210, 185, 255 } 
+
+// The "Sun-Aged Ink" - A deep, dark yellow-tinted black (Game Boy "Dark" style)
+#define COLOR_SUNKEN_INK    (Color){ 35, 30, 20, 255 }
+
+// Optional: A "Highlighter" color for that 90s office look
+#define COLOR_OFFICE_LEMON  (Color){ 210, 200, 80, 255 }
 
 #endif

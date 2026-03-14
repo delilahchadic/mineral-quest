@@ -1,5 +1,5 @@
 #include "gamestate.h"
-
+#include "palette.h"
 int main(void) {
     // Initialization
     Gamestate gamestate;
@@ -11,7 +11,7 @@ int main(void) {
       UpdateScene(&gamestate);
         // --- 2. Drawing ---
         BeginDrawing();
-          ClearBackground(RAYWHITE);
+          ClearBackground(COLOR_PULP_PAPER);
           DrawScreen(&gamestate);
         EndDrawing();
     }

@@ -5,7 +5,7 @@ World Init_World() {
 
     // Define Tile Types
     world.types[0] = (Tile){ .id = 0, .is_blocking = false, .color = COLOR_BEAVIS_SHIRT }; // Grass
-    world.types[1] = (Tile){ .id = 1, .is_blocking = true,  .color = COLOR_NEON_CRIMSON }; // Wall
+    world.types[1] = (Tile){ .id = 1, .is_blocking = true,  .color = COLOR_DUSTY_ROSE }; // Wall
     // world.types[12] = (Tile){ .id = 1, .is_blocking = true,  .color = Aqu };
     // Create a simple room with a border
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -26,7 +26,7 @@ void Draw_World(World* world) {
             Tile t = world->types[world->tiles[y][x]];
             DrawRectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, t.color);
             // Draw a subtle grid line
-            DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(BLACK, 0.1f));
+            DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(COLOR_SUNKEN_INK, 0.1f));
         }
     }
 }

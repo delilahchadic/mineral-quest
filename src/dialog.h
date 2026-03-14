@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include "palette.h"
+
 typedef struct Dialog
 {
   char* character_name;
