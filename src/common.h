@@ -15,4 +15,12 @@ typedef struct {
     // Co lor rarityColor;
     ItemType type; // For that "Bebop" flair
 } ItemDefinition;
+
+typedef struct Dialog
+{
+  char character_name[32];
+  char text[256];
+  int id;
+  int nextid;
+} Dialog;
 #endif
