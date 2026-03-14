@@ -55,6 +55,23 @@ void UpdateGameplay(Gamestate* gamestate){
     
 }
 
+void UpdateInventory(Gamestate* gamestate){
+  if(IsKeyPressed(KEY_W)){
+    gamestate->player.inventory.selected--;
+    if(gamestate->player.inventory.selected == -1){
+      gamestate->player.inventory.selected = gamestate->player.inventory.count-1;
+    }
+  }
+  if(IsKeyPressed(KEY_S)){
+    gamestate->player.inventory.selected++;
+    if(gamestate->player.inventory.selected == gamestate->player.inventory.count){
+      gamestate->player.inventory.selected = 0;
+    }
+  }
+  if (IsKeyPressed(KEY_I)) gamestate->screen = GAMEPLAY;
+    
+}
+
 void UpdateScene(Gamestate* gamestate){
   switch(gamestate->screen) {
     case LOGO:
@@ -68,8 +85,8 @@ void UpdateScene(Gamestate* gamestate){
       UpdateGameplay(gamestate);
       break;
     case INVENTORY:
-      if (IsKeyPressed(KEY_I)) gamestate->screen = GAMEPLAY;
-        break;
+      UpdateInventory(gamestate);
+      break;
   }
 }
 void DrawGameplay(Gamestate* gamestate){
