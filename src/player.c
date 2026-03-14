@@ -8,7 +8,9 @@ Player Get_Default_Player(){
   player.sprite = LoadTextureFromImage(i);
   InitInventory(&player.inventory);
   player.inventory.itemIds[0]=1;
-  player.inventory.count = 1;
+  player.inventory.itemIds[1]=2;
+  player.inventory.itemIds[2]=3;
+  player.inventory.count = 3;
   UnloadImage(i);
   return player;
 }
