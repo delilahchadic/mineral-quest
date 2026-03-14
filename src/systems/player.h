@@ -2,7 +2,7 @@
 #define PLAYER_H
 #include "raylib.h"
 #include "world.h"
-#include "inventory.h"
+#include "systems/inventory.h"
 #include <stddef.h>
 
 typedef struct player

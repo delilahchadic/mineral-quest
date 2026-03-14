@@ -1,4 +1,4 @@
-#include "register.h"
+#include "engine/register.h"
 
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Dialog DIALOG_REGISTRY[500] = {0};
@@ -58,9 +58,9 @@ void LoadRegistry(const char* filename, void (*parser)(char*)){
 }
 // reads item csv and is the keystore for all items
 void LoadItemRegistry(){
-  LoadRegistry("item.csv",ParseItemRow);
+  LoadRegistry("data/tables/item.csv",ParseItemRow);
 }
 
 void LoadDialogRegistry() {
-  LoadRegistry("dialog.csv", ParseDialogRow);
+  LoadRegistry("data/tables/dialog.csv", ParseDialogRow);
 }

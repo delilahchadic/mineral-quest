@@ -1,4 +1,4 @@
-#include "character.h"
+#include "systems/character.h"
 
 Character GetCharacterDefault(){
   Character character = {0};

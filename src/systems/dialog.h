@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include "palette.h"
-#include "common.h"
-#include "register.h"
+#include "engine/palette.h"
+#include "engine/common.h"
+#include "engine/register.h"
 
 
 typedef struct Dialog_Manager{

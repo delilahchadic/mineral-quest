@@ -2,7 +2,7 @@
 #define WORLD_H
 
 #include "raylib.h"
-#include "palette.h"
+#include "engine/palette.h"
 #include <stdbool.h>
 
 #define MAP_WIDTH 20

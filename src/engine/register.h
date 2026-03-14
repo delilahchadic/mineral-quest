@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include "palette.h"
+#include "engine/palette.h"
 // 1. The Schemas (The "Blueprints")
 
 

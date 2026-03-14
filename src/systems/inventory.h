@@ -1,7 +1,7 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
-#include "palette.h"
-#include "common.h"
+#include "engine/palette.h"
+#include "engine/common.h"
 #define MAX_INVENTORY_SLOTS 20
 
 typedef struct Inventory{

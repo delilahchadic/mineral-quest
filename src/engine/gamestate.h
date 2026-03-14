@@ -3,11 +3,11 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdbool.h>
-#include "player.h"
+#include "systems/player.h"
 #include "world.h"
 #include <math.h>
-#include "character.h"
-#include "dialog.h"
+#include "systems/character.h"
+#include "systems/dialog.h"
 #include <stdio.h>
 #include "palette.h"
 #include "register.h"

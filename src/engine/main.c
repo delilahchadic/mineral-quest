@@ -1,5 +1,5 @@
-#include "gamestate.h"
-#include "palette.h"
+#include "engine/gamestate.h"
+#include "engine/palette.h"
 int main(void) {
   //Begin Engine
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mineral Quest");

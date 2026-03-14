@@ -1,4 +1,4 @@
-#include "dialog.h"
+#include "systems/dialog.h"
 
 void Init_Dialog_Manager(Dialog_Manager* manager, int initialCapacity){
   manager->count =0;
