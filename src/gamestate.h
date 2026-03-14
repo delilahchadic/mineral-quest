@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "palette.h"
 
-typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
+typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,INVENTORY } GameScreen;
 typedef struct Gamestate
 {
   GameScreen screen;
