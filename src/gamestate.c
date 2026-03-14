@@ -1,13 +1,7 @@
 #include "gamestate.h"
 
 void InitGame(Gamestate* gamestate){
-
-  //sets screen width, inits window, sets target fps
-  const int screenWidth = 800;
-  const int screenHeight = 450;
-  InitWindow(screenWidth, screenHeight, "Mineral Quest");
-  SetTargetFPS(60); 
-
+  
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 

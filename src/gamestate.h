@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include "palette.h"
 
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 450
+#define TARGET_FPS 60
+
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,INVENTORY } GameScreen;
 typedef struct Gamestate
 {
