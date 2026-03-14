@@ -1,7 +1,7 @@
 #include "gamestate.h"
 
 void InitGame(Gamestate* gamestate){
-  
+
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
@@ -11,7 +11,7 @@ void InitGame(Gamestate* gamestate){
 
   // Camera Setup
   gamestate->camera.target = gamestate->player.position;
-  gamestate->camera.offset = (Vector2){ 400.0f, 225.0f }; // Center of the 800x450 screen
+  gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   gamestate->camera.rotation = 0.0f;
   gamestate->camera.zoom = 1.0f;
 
