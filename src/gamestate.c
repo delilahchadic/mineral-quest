@@ -7,7 +7,7 @@ void InitGame(Gamestate* gamestate){
   const int screenHeight = 450;
   InitWindow(screenWidth, screenHeight, "Mineral Quest");
   SetTargetFPS(60); 
-  
+
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
@@ -48,6 +48,9 @@ void UpdateGameplay(Gamestate* gamestate){
 
     if(gamestate->manager.active){
       Update_Dialog_Manager(&gamestate->manager);
+      gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
+    } else{
+      gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
     }
     
 }
@@ -78,10 +81,7 @@ void DrawGameplay(Gamestate* gamestate){
     
     DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
     if (gamestate->manager.active) {
-      gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
       Draw_Dialog(&gamestate->manager); 
-    }else{
-      gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
     }
 }
 
