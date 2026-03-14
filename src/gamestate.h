@@ -20,6 +20,7 @@ typedef struct Gamestate
   World world;
   Character character;
   Dialog_Manager manager;
+  Camera2D camera;
 } Gamestate;
 
 void InitGame(Gamestate* gamestate);

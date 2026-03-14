@@ -5,10 +5,15 @@ void InitGame(Gamestate* gamestate){
   InitWindow(screenWidth, screenHeight, "Mineral Quest");
   SetTargetFPS(60); 
 
+  // Camera Setup
+  gamestate->camera.target = gamestate->player.position;
+  gamestate->camera.offset = (Vector2){ 400.0f, 225.0f }; // Center of the 800x450 screen
+  gamestate->camera.rotation = 0.0f;
+  gamestate->camera.zoom = 1.0f;
+  
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
-
   gamestate->player = Get_Default_Player();
   gamestate->character = GetCharacterDefault();
   gamestate->world = Init_World();
@@ -29,6 +34,11 @@ void UpdateGameplay(Gamestate* gamestate){
         }
       }
     }
+
+    float smoothness = 0.1f;
+    gamestate->camera.target.x += (gamestate->player.position.x - gamestate->camera.target.x) * smoothness;
+    gamestate->camera.target.y += (gamestate->player.position.y - gamestate->camera.target.y) * smoothness;
+
     if(gamestate->manager.active){
       Update_Dialog_Manager(&gamestate->manager);
     }
@@ -50,12 +60,18 @@ void UpdateScene(Gamestate* gamestate){
   }
 }
 void DrawGameplay(Gamestate* gamestate){
-    Draw_World(&gamestate->world);
-    Draw_Player(&gamestate->player); // Our "Hero"
-    Draw_Character(&gamestate->character);
+    BeginMode2D(gamestate->camera);
+      Draw_World(&gamestate->world);
+      Draw_Player(&gamestate->player); // Our "Hero"
+      Draw_Character(&gamestate->character);
+    EndMode2D();
+    
     DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
     if (gamestate->manager.active) {
+      gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
       Draw_Dialog(&gamestate->manager); 
+    }else{
+      gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
     }
 }
 
