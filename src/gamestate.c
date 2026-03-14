@@ -33,6 +33,10 @@ void UpdateGameplay(Gamestate* gamestate){
             gamestate->manager.active = true;
         }
       }
+
+      if(IsKeyPressed(KEY_I)){
+        gamestate->screen = INVENTORY;
+      }
     }
 
     float smoothness = 0.1f;
@@ -57,6 +61,9 @@ void UpdateScene(Gamestate* gamestate){
     case GAMEPLAY:
       UpdateGameplay(gamestate);
       break;
+    case INVENTORY:
+      if (IsKeyPressed(KEY_I)) gamestate->screen = GAMEPLAY;
+        break;
   }
 }
 void DrawGameplay(Gamestate* gamestate){
@@ -73,6 +80,34 @@ void DrawGameplay(Gamestate* gamestate){
     }else{
       gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
     }
+}
+
+void DrawInventory(Gamestate* gamestate) {
+    // 1. Background - The Aged Paper
+    ClearBackground(COLOR_PULP_PAPER);
+    
+    // 2. Title - The "Ink" look
+    DrawText("ARCHAELOGY LOG", 50, 40, 30, COLOR_SUNKEN_INK);
+    DrawRectangle(50, 80, 700, 2, COLOR_SUNKEN_INK); // A simple line
+
+    // 3. List Items
+    for (int i = 0; i < gamestate->player.inventory.count; i++) {
+        int itemId = gamestate->player.inventory.itemIds[i];
+        Color textColor = (i == gamestate->player.inventory.selected) ? COLOR_JADE : COLOR_SUNKEN_INK;
+        
+        // Draw selection cursor
+        if (i == gamestate->player.inventory.selected) {
+            DrawText("> ", 40, 120 + (i * 30), 20, COLOR_JADE);
+        }
+        
+        DrawText(ITEM_DB[itemId].name, 70, 120 + (i * 30), 20, textColor);
+    }
+
+    // 4. Description Box (Bottom)
+    int selectedId = gamestate->player.inventory.itemIds[gamestate->player.inventory.selected];
+    DrawRectangle(50, 300, 700, 100, Fade(COLOR_SUNKEN_INK, 0.1f));
+    DrawText("ITEM LORE:", 60, 310, 15, COLOR_MUSTARD);
+    DrawText(ITEM_DB[selectedId].description, 60, 340, 18, COLOR_SUNKEN_INK);
 }
 
 void DrawScreen(Gamestate* gamestate){
@@ -105,6 +140,9 @@ void DrawScreen(Gamestate* gamestate){
         break;
       case GAMEPLAY:
         DrawGameplay(gamestate);
+        break;
+      case INVENTORY:
+        DrawInventory(gamestate);
         break;
     }
 }
