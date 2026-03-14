@@ -3,6 +3,7 @@
 void InitGame(Gamestate* gamestate){
 
   // System Setup
+  LoadItemRegistry();
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
@@ -14,7 +15,7 @@ void InitGame(Gamestate* gamestate){
   gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   gamestate->camera.rotation = 0.0f;
   gamestate->camera.zoom = 1.0f;
-
+  
   Init_Dialog_Manager(&gamestate->manager,100);
   Load_Dialogs_From_CSV(&gamestate->manager,"dialog.csv"); 
 }
@@ -120,8 +121,8 @@ void DrawInventory(Gamestate* gamestate) {
         }
 
         
-        DrawRectangle(65, 122 + (i * 30), 4, 16, ITEM_DB[itemId].rarityColor);
-        DrawText(ITEM_DB[itemId].name, 75, 120 + (i * 30), 20, textColor);
+        // DrawRectangle(65, 122 + (i * 30), 4, 16, ITEM_REGISTRY[itemId].rarityColor);
+        DrawText(ITEM_REGISTRY[itemId].name, 75, 120 + (i * 30), 20, textColor);
       }
 
       // 4. Description Box (Bottom)
@@ -130,7 +131,7 @@ void DrawInventory(Gamestate* gamestate) {
       int selectedId = gamestate->player.inventory.itemIds[gamestate->player.inventory.selected];
       DrawRectangle(margin, descBoxY, uiWidth, descBoxHeight, Fade(COLOR_SUNKEN_INK, 0.1f));
       DrawText("ITEM LORE:", margin + 10, descBoxY +10, 15, COLOR_MUSTARD);
-      DrawText(ITEM_DB[selectedId].description, margin+10, descBoxY +40, 18, COLOR_SUNKEN_INK);
+      DrawText(ITEM_REGISTRY[selectedId].description, margin+10, descBoxY +40, 18, COLOR_SUNKEN_INK);
     }else {
         // 3. What to show when the bag is empty
         DrawText("YOUR LOGBOOK IS EMPTY...", 70, 120, 20, Fade(COLOR_SUNKEN_INK, 0.4f));

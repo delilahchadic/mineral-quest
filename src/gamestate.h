@@ -10,6 +10,7 @@
 #include "dialog.h"
 #include <stdio.h>
 #include "palette.h"
+#include "register.h"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
