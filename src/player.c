@@ -6,6 +6,9 @@ Player Get_Default_Player(){
   player.speed = 250.0f;
   Image i = LoadImage("sprite.png");
   player.sprite = LoadTextureFromImage(i);
+  InitInventory(&player.inventory);
+  player.inventory.itemIds[0]=1;
+  player.inventory.count = 1;
   UnloadImage(i);
   return player;
 }

@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include "raylib.h"
 #include "world.h"
+#include "inventory.h"
 #include <stddef.h>
 
 typedef struct player
@@ -12,6 +13,7 @@ typedef struct player
   Texture2D sprite; // The visual representation
   Rectangle frameRec; // Which part of the sprite sheet to show (for animation)
   int facing;
+  Inventory inventory;
 } Player;
 
 Player Get_Default_Player();
