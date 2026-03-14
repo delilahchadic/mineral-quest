@@ -4,6 +4,7 @@ void InitGame(Gamestate* gamestate){
 
   // System Setup
   LoadItemRegistry();
+  LoadDialogRegistry();
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
@@ -17,7 +18,6 @@ void InitGame(Gamestate* gamestate){
   gamestate->camera.zoom = 1.0f;
   
   Init_Dialog_Manager(&gamestate->manager,100);
-  Load_Dialogs_From_CSV(&gamestate->manager,"dialog.csv"); 
 }
 
 void UpdateGameplay(Gamestate* gamestate){
@@ -176,7 +176,6 @@ void DrawScreen(Gamestate* gamestate){
 }
 
 void CloseGame(Gamestate* gamestate){
-  Close_Dialog_Manager(&gamestate->manager);
   Close_Character(&gamestate->character);
   Close_Player(&gamestate->player);
   CloseWindow();
