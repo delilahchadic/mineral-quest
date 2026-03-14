@@ -99,10 +99,14 @@ void DrawGameplay(Gamestate* gamestate){
 void DrawInventory(Gamestate* gamestate) {
     // 1. Background - The Aged Paper
     ClearBackground(COLOR_PULP_PAPER);
+
+    // Dynamic horizontal line based on screen width
+    int margin = 50;
+    int uiWidth = SCREEN_WIDTH - (margin * 2);
     
     // 2. Title - The "Ink" look
-    DrawText("ARCHAELOGY LOG", 50, 40, 30, COLOR_SUNKEN_INK);
-    DrawRectangle(50, 80, 700, 2, COLOR_SUNKEN_INK); // A simple line
+    DrawText("ARCHAELOGY LOG", margin, 40, 30, COLOR_SUNKEN_INK);
+    DrawRectangle(50, 80, uiWidth, 2, COLOR_SUNKEN_INK); // A simple line
 
     if(gamestate->player.inventory.count >0){
       // 3. List Items
@@ -114,15 +118,19 @@ void DrawInventory(Gamestate* gamestate) {
         if (i == gamestate->player.inventory.selected) {
           DrawText("> ", 40, 120 + (i * 30), 20, COLOR_JADE);
         }
+
+        
         DrawRectangle(65, 122 + (i * 30), 4, 16, ITEM_DB[itemId].rarityColor);
         DrawText(ITEM_DB[itemId].name, 75, 120 + (i * 30), 20, textColor);
       }
 
       // 4. Description Box (Bottom)
+      int descBoxHeight = 100;
+      int descBoxY = SCREEN_HEIGHT - descBoxHeight - margin;
       int selectedId = gamestate->player.inventory.itemIds[gamestate->player.inventory.selected];
-      DrawRectangle(50, 300, 700, 100, Fade(COLOR_SUNKEN_INK, 0.1f));
-      DrawText("ITEM LORE:", 60, 310, 15, COLOR_MUSTARD);
-      DrawText(ITEM_DB[selectedId].description, 60, 340, 18, COLOR_SUNKEN_INK);
+      DrawRectangle(margin, descBoxY, uiWidth, descBoxHeight, Fade(COLOR_SUNKEN_INK, 0.1f));
+      DrawText("ITEM LORE:", margin + 10, descBoxY +10, 15, COLOR_MUSTARD);
+      DrawText(ITEM_DB[selectedId].description, margin+10, descBoxY +40, 18, COLOR_SUNKEN_INK);
     }else {
         // 3. What to show when the bag is empty
         DrawText("YOUR LOGBOOK IS EMPTY...", 70, 120, 20, Fade(COLOR_SUNKEN_INK, 0.4f));
