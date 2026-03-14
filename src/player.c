@@ -10,7 +10,8 @@ Player Get_Default_Player(){
   player.inventory.itemIds[0]=1;
   player.inventory.itemIds[1]=2;
   player.inventory.itemIds[2]=3;
-  player.inventory.count = 3;
+  player.inventory.itemIds[3]=4;
+  player.inventory.count = 4;
   UnloadImage(i);
   return player;
 }
