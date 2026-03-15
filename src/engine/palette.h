@@ -59,4 +59,16 @@
 // Between Cerulean and Mint (The Blue-Green bridge)
 #define COLOR_CERULEAN_BERYL     (Color){ 119, 158, 145, 255 }
 
+// The "Dusty" Greens & Earths
+#define COLOR_DUSTY_SAP      (Color){ 131, 145, 102, 255 } // Muted, olive-leaning green
+#define COLOR_SAGE_BRUSH     (Color){ 147, 157, 143, 255 } // Very low chroma, almost silver-green
+#define COLOR_OCHRE_SILT     (Color){ 191, 156, 107, 255 } // A dusty, sandy yellow-brown
+#define COLOR_TERRA_PALE     (Color){ 175, 128, 114, 255 } // A lighter, clay-like earth tone
+
+// Low-Chroma Accents
+#define COLOR_SLATE_MIST     (Color){ 118, 134, 146, 255 } // A blue-gray that isn't too "electric"
+#define COLOR_WITHERED_LILAC (Color){ 158, 136, 152, 255 } // A purple that feels like it’s been in the sun
+#define COLOR_BONE_WHITE     (Color){ 220, 215, 201, 255 } // Better for "white" text/UI than pure 255,255,255
+#define COLOR_DEEP_MOSS      (Color){ 85,  94,  70,  255 } // A dark green for shadows or deeper foliage
+
 #endif
