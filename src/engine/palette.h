@@ -36,5 +36,27 @@
 
 // Optional: A "Highlighter" color for that 90s office look
 #define COLOR_OFFICE_LEMON  (Color){ 210, 200, 80, 255 }
+// --- THE CERULEAN CORE ---
+// The anchor point: a classic, pigment-rich sky blue.
+#define COLOR_CERULEAN_CORE      (Color){ 42,  82,  190, 255 }
+// High Chroma: More "electric," good for highlighting interactive items.
+#define COLOR_CERULEAN_VIVID     (Color){ 0,   123, 167, 255 }
+// Low Chroma: Desaturated, like weathered paint or old pottery.
+#define COLOR_CERULEAN_FADED     (Color){ 93,  118, 130, 255 }
+#define COLOR_CERULEAN_DUSTY     (Color){ 135, 165, 190, 255 }
+// --- HUE SHIFTS (Warm & Cool) ---
+// Toward Yellow: A warmer, sea-depth blue.
+#define COLOR_CERULEAN_TEAL      (Color){ 54,  117, 136, 255 }
+// Toward Blue: A purer, punchier cobalt.
+#define COLOR_CERULEAN_COBALT    (Color){ 0,   71,  171, 255 }
+// Toward Red: Deep, dark, and slightly "bloody" blue.
+#define COLOR_CERULEAN_PRUSSIAN  (Color){ 0,   49,  83,  255 }
+
+// --- THE BRIDGES ---
+// Between Cerulean and Wisteria (The Lavender/Violet bridge)
+#define COLOR_CERULEAN_WISTFUL   (Color){ 100, 149, 237, 255 }
+
+// Between Cerulean and Mint (The Blue-Green bridge)
+#define COLOR_CERULEAN_BERYL     (Color){ 119, 158, 145, 255 }
 
 #endif
