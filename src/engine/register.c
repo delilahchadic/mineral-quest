@@ -2,6 +2,27 @@
 
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Dialog DIALOG_REGISTRY[500] = {0};
+Character CHARACTER_REGISTRY[200] = {0};
+
+void ParseCharacterRow(char* line) {
+  char* idToken = strtok(line,",");
+ 
+  char* nameToken = strtok(NULL,",");
+  char* dialogToken = strtok(NULL,",");
+  char* textToken = strtok(NULL,",");
+  if(idToken && nameToken && dialogToken && textToken){
+    int id = atoi(idToken);
+    Character* d =&CHARACTER_REGISTRY[id];
+
+    Image image = LoadImage(textToken);
+    d->sprite = LoadTextureFromImage(image);
+    UnloadImage(image);
+    d->dialogId = atoi(dialogToken);
+    strncpy(d->name, nameToken, sizeof(d->name) - 1);
+    d->name[sizeof(d->name) - 1] = '\0'; 
+    
+  }     
+}
 
 void ParseItemRow(char* line) {
   char* idToken = strtok(line,",");
@@ -63,4 +84,8 @@ void LoadItemRegistry(){
 
 void LoadDialogRegistry() {
   LoadRegistry("data/tables/dialog.csv", ParseDialogRow);
+}
+
+void LoadCharacterRegistry(){
+  LoadRegistry("data/tables/characters.csv", ParseCharacterRow);
 }
