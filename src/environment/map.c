@@ -98,6 +98,13 @@ void CloseMap(Map* map){
   if(map == NULL){
     return;
   }
+  MapEntity* tmp = NULL;
+  tmp = map->entities;
+  while(tmp != NULL){
+    map->entities = tmp->next;
+    free(tmp);
+    tmp = map->entities;
+  }
 }
 
 
