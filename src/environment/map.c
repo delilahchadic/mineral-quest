@@ -137,7 +137,7 @@ void Draw_Map(Map* map) {
       // Draw the actual entity
       if(tmp->type==0){
         Character* c = tmp->data.character;
-        Rectangle r= {16,0,27,64};
+        Rectangle r= {0,0,32,64};
         DrawTextureRec(c->sprite,r,tmp->position, WHITE );
         DrawText(tmp->data.character->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }else{
