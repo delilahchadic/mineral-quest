@@ -53,7 +53,7 @@ void Handle_Input(Player* player, Map* map){
 void Draw_Player(Player* player){
   // Image i = LoadImage("char.png");
   // DrawTexture(*sprite,player->position.x, player->position.y, WHITE);
-  Rectangle r= {0,0,64,64};
+  Rectangle r= {16,0,27,64};
   DrawTextureRec(player->sprite,r,player->position, WHITE );
   // DrawRectangle(player->position.x, player->position.y,20,20, MAGENTA);
 }
