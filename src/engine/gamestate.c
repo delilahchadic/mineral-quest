@@ -9,8 +9,7 @@ void InitGame(Gamestate* gamestate){
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
   gamestate->character = GetCharacterDefault();
-  gamestate->world = Init_World();
-
+  InitMap(&gamestate->map);
   // Camera Setup
   gamestate->camera.target = gamestate->player.position;
   gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
@@ -23,7 +22,7 @@ void InitGame(Gamestate* gamestate){
 void UpdateGameplay(Gamestate* gamestate){
 
     if(!gamestate->manager.active){
-      Handle_Input(&gamestate->player, &gamestate->world);
+      Handle_Input(&gamestate->player, &gamestate->map);
       if(Vector2Distance(gamestate->player.position, gamestate->character.position) <50.f){
         if (IsKeyPressed(KEY_E) && !gamestate->manager.active) {
             // Tell the manager to look up the ID stored on the character
@@ -86,7 +85,7 @@ void UpdateScene(Gamestate* gamestate){
 }
 void DrawGameplay(Gamestate* gamestate){
     BeginMode2D(gamestate->camera);
-      Draw_World(&gamestate->world);
+      Draw_Map(&gamestate->map);
       Draw_Player(&gamestate->player); // Our "Hero"
       Draw_Character(&gamestate->character);
     EndMode2D();

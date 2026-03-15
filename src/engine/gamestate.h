@@ -4,14 +4,15 @@
 #include "raymath.h"
 #include <stdbool.h>
 #include "systems/player.h"
-#include "world.h"
+#include "environment/map.h"
+// #include "world.h"
 #include <math.h>
 #include "systems/character.h"
 #include "systems/dialog.h"
 #include <stdio.h>
 #include "palette.h"
 #include "register.h"
-
+#include "environment/map.h"
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60
@@ -22,7 +23,7 @@ typedef struct Gamestate
   GameScreen screen;
   int framesCounter;
   Player player;
-  World world;
+  Map map;
   Character character;
   Dialog_Manager manager;
   Camera2D camera;
