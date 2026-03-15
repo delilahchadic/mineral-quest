@@ -1,10 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "raylib.h"
-#include "environment/map.h"
 #include "systems/inventory.h"
 #include <stddef.h>
-#include "environment/map.h"
 typedef struct player
 {
   /* data */
@@ -17,7 +15,6 @@ typedef struct player
 } Player;
 
 Player Get_Default_Player();
-void Handle_Input(Player* player, Map* map);
 void Draw_Player(Player* player);
 void Close_Player(Player* player);
 
