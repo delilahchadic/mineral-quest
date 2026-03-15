@@ -2,7 +2,7 @@
 
 Player Get_Default_Player(){
   Player player = {0};
-  player.position = (Vector2){ 100,340 };
+  player.position = (Vector2){ 0,0 };
   player.speed = 250.0f;
   Image i = LoadImage("sprite.png");
   player.sprite = LoadTextureFromImage(i);
@@ -16,7 +16,7 @@ Player Get_Default_Player(){
   return player;
 }
 
-void Handle_Input(Player* player, World* world){
+void Handle_Input(Player* player, Map* map){
   float dt = GetFrameTime();
   // float speed = player->speed;
   Vector2 dir = { 0, 0 };
@@ -42,7 +42,7 @@ void Handle_Input(Player* player, World* world){
         Vector2 potentialPosition = {player->position.x, player->position.y};
         potentialPosition.x += dir.x * player->speed * length * dt;
         potentialPosition.y += dir.y * player->speed * length * dt;
-        if(!Check_Collision(world,potentialPosition)){
+        if(!Check_Collision(map,potentialPosition)){
           player->position.x = potentialPosition.x;
           player->position.y = potentialPosition.y;
         }
