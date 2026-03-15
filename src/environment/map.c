@@ -5,7 +5,7 @@ TileDefinition TILE_REGISTRY[6] = {
     { TILE_STONE, false,  1.0f, 102, COLOR_TEXAS_HAZE    },
     { TILE_SAND,  false, 0.4f, 103, COLOR_DUSTY_ROSE    },
     { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON  },
-    { TILE_GRASS, false, 0.9f, 105, COLOR_JADE          },
+    { TILE_GRASS, false, 0.9f, 105, COLOR_DUSTY_SAP          },
     { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
 };
 
@@ -32,8 +32,16 @@ void LoadMapEntityFile(const char* filename, Map* map){
       m->type = (EntityType) atoi(typeToken);
       m->position = (Vector2) {(float)atoi(xToken), (float)atoi(yToken)};
       m->next = NULL;
-      strncpy(m->name, nameToken, sizeof(m->name) - 1);
-      m->name[sizeof(m->name) - 1] = '\0'; 
+
+      if(m->type == ENTITY_CHARACTER){
+        m->data.character = &CHARACTER_REGISTRY[atoi(nameToken)];
+      }else{
+        strncpy(m->name, nameToken, sizeof(m->name) - 1);
+        m->name[sizeof(m->name) - 1] = '\0';
+      }
+      
+
+       
       Add_Entity(map,m);
     }
     
@@ -90,16 +98,7 @@ void CloseMap(Map* map){
   if(map == NULL){
     return;
   }
-
-  MapEntity* tmp = NULL;
-  tmp = map->entities;
-  while(tmp != NULL){
-    map->entities = tmp->next;
-    free(tmp);
-    tmp = map->entities;
-  }
 }
-
 
 
 void Draw_Map(Map* map) {
@@ -136,10 +135,19 @@ void Draw_Map(Map* map) {
       DrawRectangle(tmp->position.x + 2, tmp->position.y + 14, 16, 4, Fade(BLACK, 0.3f));
     
       // Draw the actual entity
-      DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, color);
+      if(tmp->type==0){
+        Character* c = tmp->data.character;
+        Rectangle r= {16,0,27,64};
+        DrawTextureRec(c->sprite,r,tmp->position, WHITE );
+        DrawText(tmp->data.character->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+      }else{
+        DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, color);
+        DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+      }
+      
       
       // Draw the name if you want to see who's who
-      DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+      
       tmp = tmp->next;
     }
 
@@ -195,6 +203,59 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
     }
 
     return false;
+}
+
+void Handle_Input(Player* player, Map* map){
+  float dt = GetFrameTime();
+  // float speed = player->speed;
+  Vector2 dir = { 0, 0 };
+
+  if(IsKeyDown(KEY_W)){
+    dir.y -=1;
+  }
+  if(IsKeyDown(KEY_A)){
+    dir.x -=1;
+
+  }
+   if(IsKeyDown(KEY_D)){
+    dir.x +=1;
+  }
+
+   if(IsKeyDown(KEY_S)){
+    dir.y +=1;
+  }
+
+  if (dir.x != 0 || dir.y != 0) {
+        // This is the "proper" way to get 0.707 for diagonals
+        float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
+        Vector2 potentialPosition = {player->position.x, player->position.y};
+        potentialPosition.x += dir.x * player->speed * length * dt;
+        potentialPosition.y += dir.y * player->speed * length * dt;
+        if(!Check_Collision(map,potentialPosition)){
+          player->position.x = potentialPosition.x;
+          player->position.y = potentialPosition.y;
+        }
+    }
+
+}
+
+void Update_Map(Player* player,Map* map, Dialog_Manager* manager){
+   MapEntity* tmp = map->entities;
+    while (tmp != NULL) {
+      if(tmp->type==0){
+        Character* c = tmp->data.character;
+        if(Vector2Distance(player->position, tmp->position) <50.f){
+          if (IsKeyPressed(KEY_E) && !manager->active) {
+              // Tell the manager to look up the ID stored on the character
+
+              Set_Active_Dialog(manager, c->dialogId);
+              manager->active = true;
+          }
+        }
+      }
+    
+        tmp = tmp->next;
+    }
 }
 
 void Add_Entity(Map* map, MapEntity* entity){

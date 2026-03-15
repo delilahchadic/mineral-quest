@@ -5,9 +5,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include "engine/palette.h"
-#define TILE_SIZE 32
 #include "raylib.h"
+#include "raymath.h"
+#include "engine/palette.h"
+#include "systems/character.h"
+#include "systems/player.h"
+#include "systems/dialog.h"
+#include "engine/register.h"
+#define TILE_SIZE 32
+
 #define MAP_WIDTH 100
 #define MAP_HEIGHT 100
 // Physical dimensions in pixels
@@ -34,10 +40,15 @@ typedef enum {
 } EntityType;
 
 typedef struct MapEntity {
+    bool isPlayer;
     EntityType type;      // Is this a person or a flower?
     Vector2 position;     // Physical location on the highway
     char name[32];      // Pointer to the actual Character, Item, or Plant struct
     struct MapEntity* next; // For the linked list
+    union{
+      Character* character;
+      int id;
+    } data;
 } MapEntity;
 
 typedef struct Map{
@@ -48,6 +59,7 @@ typedef struct Map{
   int columns;
   char name[32];
   MapEntity* entities;
+  MapEntity* player; 
 }Map;
 
 void LoadMapGridFile(const char* filename, Map* map);
@@ -55,7 +67,8 @@ void InitMap(Map* map);
 void Draw_Map(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
-
+void Handle_Input(Player* player, Map* map);
+void Update_Map(Player* player, Map* map,Dialog_Manager* manager);
 
 
 #endif
