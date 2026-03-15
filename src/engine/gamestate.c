@@ -5,10 +5,11 @@ void InitGame(Gamestate* gamestate){
   // System Setup
   LoadItemRegistry();
   LoadDialogRegistry();
+  LoadCharacterRegistry();
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
-  gamestate->character = GetCharacterDefault();
+  // gamestate->character = GetCharacterDefault();
   InitMap(&gamestate->map);
   // Camera Setup
   gamestate->camera.target = gamestate->player.position;
@@ -23,13 +24,7 @@ void UpdateGameplay(Gamestate* gamestate){
 
     if(!gamestate->manager.active){
       Handle_Input(&gamestate->player, &gamestate->map);
-      if(Vector2Distance(gamestate->player.position, gamestate->character.position) <50.f){
-        if (IsKeyPressed(KEY_E) && !gamestate->manager.active) {
-            // Tell the manager to look up the ID stored on the character
-            Set_Active_Dialog(&gamestate->manager, gamestate->character.dialogId);
-            gamestate->manager.active = true;
-        }
-      }
+      Update_Map(&gamestate->player, &gamestate->map,&gamestate->manager);
 
       if(IsKeyPressed(KEY_I)){
         gamestate->screen = INVENTORY;
@@ -87,7 +82,7 @@ void DrawGameplay(Gamestate* gamestate){
     BeginMode2D(gamestate->camera);
       Draw_Map(&gamestate->map);
       Draw_Player(&gamestate->player); // Our "Hero"
-      Draw_Character(&gamestate->character);
+      // Draw_Character(&gamestate->character);
     EndMode2D();
     
     DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
