@@ -3,9 +3,8 @@
 void InitGame(Gamestate* gamestate){
 
   // System Setup
-  LoadItemRegistry();
-  LoadDialogRegistry();
-  LoadCharacterRegistry();
+  
+  InitRegistries();
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
@@ -172,5 +171,6 @@ void DrawScreen(Gamestate* gamestate){
 void CloseGame(Gamestate* gamestate){
   Close_Character(&gamestate->character);
   Close_Player(&gamestate->player);
+  Close_Map(&gamestate->map);
   CloseWindow();
 }

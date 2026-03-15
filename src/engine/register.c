@@ -89,3 +89,17 @@ void LoadDialogRegistry() {
 void LoadCharacterRegistry(){
   LoadRegistry("data/tables/characters.csv", ParseCharacterRow);
 }
+
+void CloseCharacterRegistry(){
+  for(int i =0; i<200;i++){
+    if(CHARACTER_REGISTRY[i].sprite.id >0){
+      Close_Character(&CHARACTER_REGISTRY[i]);
+    }
+  }
+}
+
+void InitRegistries(){
+  LoadItemRegistry();
+  LoadDialogRegistry();
+  LoadCharacterRegistry();
+}

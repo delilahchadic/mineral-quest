@@ -25,4 +25,6 @@ void LoadCharacterRegistry();
 void ParseItemRow(char* line);
 void ParseDialogRow(char* line);
 void ParseCharacterRow(char* line);
+void CloseCharacterRegistry();
+void InitRegistries();
 #endif
