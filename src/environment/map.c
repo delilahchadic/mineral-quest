@@ -94,7 +94,7 @@ void InitMap(Map* map){
   map->pixel_height = map->rows * TILE_SIZE;
 }
 
-void CloseMap(Map* map){
+void Close_Map(Map* map){
   if(map == NULL){
     return;
   }

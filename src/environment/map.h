@@ -69,6 +69,7 @@ bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
 void Handle_Input(Player* player, Map* map);
 void Update_Map(Player* player, Map* map,Dialog_Manager* manager);
+void Close_Map(Map* map);
 
 
 #endif
