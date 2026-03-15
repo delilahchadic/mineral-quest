@@ -26,13 +26,19 @@ typedef struct TileDefinition{
     Color color;// sound??
 } TileDefinition;
 
+typedef enum {
+    ENTITY_CHARACTER,
+    ENTITY_ITEM,
+    ENTITY_PLANT,
+    ENTITY_DECOR
+} EntityType;
 
-typedef struct MapEntity{
-  char name[32];
-  Vector2 position;
-  Texture2D sprite;
-  MapEnityType type;
-}MapEntity;
+typedef struct MapEntity {
+    EntityType type;      // Is this a person or a flower?
+    Vector2 position;     // Physical location on the highway
+    char name[32];      // Pointer to the actual Character, Item, or Plant struct
+    struct MapEntity* next; // For the linked list
+} MapEntity;
 
 typedef struct Map{
   int grid[MAP_WIDTH][MAP_HEIGHT];
@@ -48,6 +54,7 @@ void LoadMapGridFile(const char* filename, Map* map);
 void InitMap(Map* map);
 void Draw_Map(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
+void Add_Entity(Map* map, MapEntity* entity);
 
 
 
