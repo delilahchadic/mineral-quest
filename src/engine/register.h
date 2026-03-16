@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "systems/character.h"
 #include "common.h"
+#include "systems/player.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,6 +19,7 @@ extern Plant PLANT_REGISTRY[100];
 extern ItemDefinition ITEM_REGISTRY[100];
 extern Dialog DIALOG_REGISTRY[500];
 extern Character CHARACTER_REGISTRY[200];
+extern Player* PLAYER;
 // 3. The Master Functions
 void LoadItemRegistry();
 void LoadDialogRegistry();

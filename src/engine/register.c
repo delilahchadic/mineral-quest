@@ -4,7 +4,8 @@ ItemDefinition ITEM_REGISTRY[100] = {0};
 Dialog DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
 Plant PLANT_REGISTRY[100] = {0};
-
+Player GLOBAL_PLAYER;
+Player* PLAYER;
 /// @brief parses line of the plant csv
 /// @param line 
 void ParsePlantRow(char* line) {
@@ -144,4 +145,9 @@ void InitRegistries(){
   LoadDialogRegistry();
   LoadCharacterRegistry();
   LoadPlantRegistry();
+  
+  PLAYER = &GLOBAL_PLAYER;
+  GLOBAL_PLAYER = Get_Default_Player();
+  
+
 }
