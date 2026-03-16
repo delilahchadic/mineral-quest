@@ -92,8 +92,20 @@ void LoadMapGridFile(const char* filename, Map* map){
 
 void InitMap(Map* map){
   map->entities = NULL;
+  
+
   LoadMapGridFile("data/maps/highway.map", map);
+  
   LoadMapEntityFile("data/maps/highway.ents", map);
+  MapEntity* player = malloc(sizeof(MapEntity)); 
+  player->type = ENTITY_PLAYER;
+  player->position = (Vector2){0,0};
+  player->sprite = &PLAYER->sprite;
+  strncpy(player->name, "player", sizeof(player->name) - 1);
+  player->name[sizeof(player->name) - 1] = '\0'; 
+  Add_Entity(map,player);
+  map->player = player;
+  
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
 }
@@ -125,39 +137,23 @@ void Draw_Map(Map* map) {
 
     MapEntity* tmp = map->entities;
     while(tmp!=NULL){
-      Color color;
-      switch (tmp->type)
-      {
-      case ENTITY_CHARACTER:
-        color = COLOR_DUSTY_ROSE;
-        break;
-      case ENTITY_PLANT:
-        color = COLOR_CERULEAN_TEAL;
-        break;
-      case ENTITY_DECOR:
-        color = COLOR_TAROT_GOLD;
-        break;
-      case ENTITY_ITEM:
-        color = COLOR_DUSTY_CORAL;
-        break;
-      default:
-        break;
-      }
-      DrawRectangle(tmp->position.x + 2, tmp->position.y + 14, 16, 4, Fade(BLACK, 0.3f));
     
       // Draw the actual entity
       if(tmp->type== ENTITY_CHARACTER){
         Character* c = tmp->data.character;
         Rectangle r= {0,0,32,64};
         DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
-        DrawText(tmp->data.character->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+        DrawText(c->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }else if(tmp->type == ENTITY_PLANT){
         Plant* c = tmp->data.plant;
         Rectangle r= {0,0,32,64};
         DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
-        DrawText(tmp->data.plant->species_name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+        DrawText(c->species_name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+      }else if(tmp->type == ENTITY_PLAYER){
+        Rectangle r= {0,0,32,64};
+        DrawTextureRec(PLAYER->sprite,r,tmp->position, WHITE );
       } else{
-        DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, color);
+        DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, COLOR_PULP_PAPER);
         DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }
       
@@ -202,23 +198,26 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
     // 3. Entity Check (Future proofing for those Barrels/Plants)
     MapEntity* curr = map->entities;
     while (curr != NULL) {
-      if (curr->type == ENTITY_PLANT) {
-        Plant* plant = curr->data.plant;
+      if(curr->type != ENTITY_PLAYER){
+        if (curr->type == ENTITY_PLANT) {
+          Plant* plant = curr->data.plant;
 
-        float plantLeft   = curr->position.x + 4;
-        float plantRight  = curr->position.x + 23;
-        float plantBottom = curr->position.y + 63; // 63 is the last pixel of the 64px height
-        float plantTop    = curr->position.y + 54; 
-        // // Define the player's small foot-patch rectangle
-        Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
-        
-        // // Define the entity's rectangle (matching your 16x16 Draw size)
-        Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight};
-        
-        if (CheckCollisionRecs(playerFeet, entityBox)) {
-            return true; // Stop the player!
+          float plantLeft   = curr->position.x ;
+          // float plantRight  = curr->position.x + 31;
+          // float plantBottom = curr->position.y + 63; // 63 is the last pixel of the 64px height
+          float plantTop    = curr->position.y + 54; 
+          // // Define the player's small foot-patch rectangle
+          Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
+          
+          // // Define the entity's rectangle (matching your 16x16 Draw size)
+          Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight};
+          
+          if (CheckCollisionRecs(playerFeet, entityBox)) {
+              return true; // Stop the player!
+          }
         }
-    }
+      }
+      
         // If we add an 'is_blocking' flag to entities later, check it here
         curr = curr->next;
     }
@@ -226,7 +225,7 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
     return false;
 }
 
-void Handle_Input(Player* player, Map* map){
+void Handle_Input(Map* map){
   float dt = GetFrameTime();
   // float speed = player->speed;
   Vector2 dir = { 0, 0 };
@@ -249,23 +248,23 @@ void Handle_Input(Player* player, Map* map){
   if (dir.x != 0 || dir.y != 0) {
         // This is the "proper" way to get 0.707 for diagonals
         float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
-        Vector2 potentialPosition = {player->position.x, player->position.y};
-        potentialPosition.x += dir.x * player->speed * length * dt;
-        potentialPosition.y += dir.y * player->speed * length * dt;
+        Vector2 potentialPosition = {map->player->position.x, map->player->position.y};
+        potentialPosition.x += dir.x * PLAYER->speed * length * dt;
+        potentialPosition.y += dir.y * PLAYER->speed * length * dt;
         if(!Check_Collision(map,potentialPosition)){
-          player->position.x = potentialPosition.x;
-          player->position.y = potentialPosition.y;
+          map->player->position.x = potentialPosition.x;
+          map->player->position.y = potentialPosition.y;
         }
     }
 
 }
 
-void Update_Map(Player* player,Map* map, Dialog_Manager* manager){
+void Update_Map(Map* map, Dialog_Manager* manager){
    MapEntity* tmp = map->entities;
     while (tmp != NULL) {
-      if(tmp->type==0){
+      if(tmp->type== ENTITY_CHARACTER){
         Character* c = tmp->data.character;
-        if(Vector2Distance(player->position, tmp->position) <50.f){
+        if(Vector2Distance(map->player->position, tmp->position) <50.f){
           if (IsKeyPressed(KEY_E) && !manager->active) {
               // Tell the manager to look up the ID stored on the character
 

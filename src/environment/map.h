@@ -36,11 +36,12 @@ typedef enum {
     ENTITY_CHARACTER,
     ENTITY_ITEM,
     ENTITY_PLANT,
-    ENTITY_DECOR
+    ENTITY_DECOR,
+    ENTITY_PLAYER
 } EntityType;
 
 typedef struct MapEntity {
-    bool isPlayer;
+    // bool isPlayer;
     EntityType type;      // Is this a person or a flower?
     Vector2 position;     // Physical location on the highway
     char name[32];      // Pointer to the actual Character, Item, or Plant struct
@@ -49,6 +50,7 @@ typedef struct MapEntity {
     union{
       Character* character;
       Plant* plant;
+      Player player;
       int id;
     } data;
 } MapEntity;
@@ -69,8 +71,8 @@ void InitMap(Map* map);
 void Draw_Map(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
-void Handle_Input(Player* player, Map* map);
-void Update_Map(Player* player, Map* map,Dialog_Manager* manager);
+void Handle_Input(Map* map);
+void Update_Map(Map* map,Dialog_Manager* manager);
 void Close_Map(Map* map);
 
 
