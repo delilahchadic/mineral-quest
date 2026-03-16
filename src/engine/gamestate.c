@@ -11,7 +11,7 @@ void InitGame(Gamestate* gamestate){
   // gamestate->character = GetCharacterDefault();
   InitMap(&gamestate->map);
   // Camera Setup
-  gamestate->camera.target = gamestate->player.position;
+  gamestate->camera.target = gamestate->map.player->position;
   gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   gamestate->camera.rotation = 0.0f;
   gamestate->camera.zoom = 1.0f;
@@ -22,8 +22,8 @@ void InitGame(Gamestate* gamestate){
 void UpdateGameplay(Gamestate* gamestate){
 
     if(!gamestate->manager.active){
-      Handle_Input(&gamestate->player, &gamestate->map);
-      Update_Map(&gamestate->player, &gamestate->map,&gamestate->manager);
+      Handle_Input(&gamestate->map);
+      Update_Map(&gamestate->map,&gamestate->manager);
 
       if(IsKeyPressed(KEY_I)){
         gamestate->screen = INVENTORY;
@@ -31,8 +31,8 @@ void UpdateGameplay(Gamestate* gamestate){
     }
 
     float smoothness = 0.1f;
-    gamestate->camera.target.x += (gamestate->player.position.x - gamestate->camera.target.x) * smoothness;
-    gamestate->camera.target.y += (gamestate->player.position.y - gamestate->camera.target.y) * smoothness;
+    gamestate->camera.target.x += (gamestate->map.player->position.x - gamestate->camera.target.x) * smoothness;
+    gamestate->camera.target.y += (gamestate->map.player->position.y - gamestate->camera.target.y) * smoothness;
 
     if(gamestate->manager.active){
       Update_Dialog_Manager(&gamestate->manager);
@@ -80,7 +80,7 @@ void UpdateScene(Gamestate* gamestate){
 void DrawGameplay(Gamestate* gamestate){
     BeginMode2D(gamestate->camera);
       Draw_Map(&gamestate->map);
-      Draw_Player(&gamestate->player); // Our "Hero"
+      // Draw_Player(&gamestate->player); // Our "Hero"
       // Draw_Character(&gamestate->character);
     EndMode2D();
     
@@ -170,7 +170,7 @@ void DrawScreen(Gamestate* gamestate){
 
 void CloseGame(Gamestate* gamestate){
   Close_Character(&gamestate->character);
-  Close_Player(&gamestate->player);
+  Close_Player(PLAYER);
   Close_Map(&gamestate->map);
   CloseWindow();
 }
