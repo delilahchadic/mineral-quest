@@ -5,31 +5,40 @@ Dialog DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
 Plant PLANT_REGISTRY[100] = {0};
 
+/// @brief parses line of the plant csv
+/// @param line 
 void ParsePlantRow(char* line) {
+  // Plant ID
   char* idToken = strtok(line,",");
+  //Plant Species Name
   char* nameToken = strtok(NULL,",");
-  char* textToken = strtok(NULL,",");
+  //Plant sprite
+  char* spriteToken = strtok(NULL,",");
+  //Plant sprite height
   char* heightToken = strtok(NULL,",");
+  //Plant sprite width
   char* widthToken = strtok(NULL,",");
+  //Plant hitbox height
   char*  hitheightToken = strtok(NULL,",");
+  //Plant hitbox width
   char* hitwidthToken = strtok(NULL,",");
-  if(idToken && nameToken && textToken && heightToken && widthToken && hitheightToken && hitwidthToken){
+
+  // if all are valid
+  if(idToken && nameToken && spriteToken && heightToken && widthToken && hitheightToken && hitwidthToken){
+    // grab the appropriate plant
     int id = atoi(idToken);
     Plant* d =&PLANT_REGISTRY[id];
-
-    Image image = LoadImage(textToken);
-    d->sprite = LoadTextureFromImage(image);
-
-    UnloadImage(image);
+    //Load the sprite
+    d->sprite = LoadTexture(spriteToken);
+    // get the species name
     strncpy(d->species_name, nameToken, sizeof(d->species_name) - 1);
-
     d->species_name[sizeof(d->species_name) - 1] = '\0'; 
 
+    //grab our size info
     d->frameheight = atoi(heightToken);
     d->framewidth = atoi(widthToken);
     d->hitboxheight = atoi(hitheightToken);
     d->hitboxwidth = atoi(hitwidthToken);
-    
   }     
 }
 
