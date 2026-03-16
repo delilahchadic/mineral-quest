@@ -6,16 +6,12 @@
 typedef struct player
 {
   /* data */
-  Vector2 position; // x and y coordinates
-  float speed;      // How fast we move
-  Texture2D sprite; // The visual representation
-  Rectangle frameRec; // Which part of the sprite sheet to show (for animation)
-  int facing;
-  Inventory inventory;
+    Inventory inventory;
+  float speed; 
+  Texture2D sprite;     // How fast we move
 } Player;
 
 Player Get_Default_Player();
-void Draw_Player(Player* player);
 void Close_Player(Player* player);
 
 
