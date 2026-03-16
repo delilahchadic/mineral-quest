@@ -35,10 +35,10 @@ void LoadMapEntityFile(const char* filename, Map* map){
 
       if(m->type == ENTITY_CHARACTER){
         m->data.character = &CHARACTER_REGISTRY[atoi(nameToken)];
-        m->sprite = &CHARACTER_REGISTRY[atoi(nameToken)].sprite;
+        m->sprite = &m->data.character->sprite;
       }else if(m->type == ENTITY_PLANT){
         m->data.plant = &PLANT_REGISTRY[atoi(nameToken)];
-        m->sprite = &PLANT_REGISTRY[atoi(nameToken)].sprite;
+        m->sprite = &m->data.plant->sprite;
       }else{
         strncpy(m->name, nameToken, sizeof(m->name) - 1);
         m->name[sizeof(m->name) - 1] = '\0';
@@ -151,7 +151,7 @@ void Draw_Map(Map* map) {
         DrawText(c->species_name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }else if(tmp->type == ENTITY_PLAYER){
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(PLAYER->sprite,r,tmp->position, WHITE );
+        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
       } else{
         DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, COLOR_PULP_PAPER);
         DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
