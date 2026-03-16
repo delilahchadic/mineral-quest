@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+#include "raylib.h"
 
 typedef enum{
   ITEM_VHS_TAPE,
@@ -23,4 +24,16 @@ typedef struct Dialog
   int id;
   int nextid;
 } Dialog;
+
+typedef struct Plant
+{
+  char species_name[32];
+  Texture2D sprite;
+  int frameheight;
+  int framewidth;
+  int hitboxheight;
+  int hitboxwidth;
+} Plant;
+
+
 #endif
