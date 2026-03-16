@@ -14,6 +14,7 @@
 
 
 // 2. The Stores (The "Warehouses")
+extern Plant PLANT_REGISTRY[100];
 extern ItemDefinition ITEM_REGISTRY[100];
 extern Dialog DIALOG_REGISTRY[500];
 extern Character CHARACTER_REGISTRY[200];
@@ -21,10 +22,12 @@ extern Character CHARACTER_REGISTRY[200];
 void LoadItemRegistry();
 void LoadDialogRegistry();
 void LoadCharacterRegistry();
+void LoadPlantRegistry();
 
 void ParseItemRow(char* line);
 void ParseDialogRow(char* line);
 void ParseCharacterRow(char* line);
+void ParsePlantRow(char* line);
 void CloseCharacterRegistry();
 void InitRegistries();
 #endif

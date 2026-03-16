@@ -3,6 +3,35 @@
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Dialog DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
+Plant PLANT_REGISTRY[100] = {0};
+
+void ParsePlantRow(char* line) {
+  char* idToken = strtok(line,",");
+  char* nameToken = strtok(NULL,",");
+  char* textToken = strtok(NULL,",");
+  char* heightToken = strtok(NULL,",");
+  char* widthToken = strtok(NULL,",");
+  char*  hitheightToken = strtok(NULL,",");
+  char* hitwidthToken = strtok(NULL,",");
+  if(idToken && nameToken && textToken && heightToken && widthToken && hitheightToken && hitwidthToken){
+    int id = atoi(idToken);
+    Plant* d =&PLANT_REGISTRY[id];
+
+    Image image = LoadImage(textToken);
+    d->sprite = LoadTextureFromImage(image);
+
+    UnloadImage(image);
+    strncpy(d->species_name, nameToken, sizeof(d->species_name) - 1);
+
+    d->species_name[sizeof(d->species_name) - 1] = '\0'; 
+
+    d->frameheight = atoi(heightToken);
+    d->framewidth = atoi(widthToken);
+    d->hitboxheight = atoi(hitheightToken);
+    d->hitboxwidth = atoi(hitwidthToken);
+    
+  }     
+}
 
 void ParseCharacterRow(char* line) {
   char* idToken = strtok(line,",");
@@ -89,6 +118,9 @@ void LoadDialogRegistry() {
 void LoadCharacterRegistry(){
   LoadRegistry("data/tables/characters.csv", ParseCharacterRow);
 }
+void LoadPlantRegistry(){
+  LoadRegistry("data/tables/plants.csv", ParsePlantRow);
+}
 
 void CloseCharacterRegistry(){
   for(int i =0; i<200;i++){
@@ -102,4 +134,5 @@ void InitRegistries(){
   LoadItemRegistry();
   LoadDialogRegistry();
   LoadCharacterRegistry();
+  LoadPlantRegistry();
 }
