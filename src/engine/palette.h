@@ -71,4 +71,40 @@
 #define COLOR_BONE_WHITE     (Color){ 220, 215, 201, 255 } // Better for "white" text/UI than pure 255,255,255
 #define COLOR_DEEP_MOSS      (Color){ 85,  94,  70,  255 } // A dark green for shadows or deeper foliage
 
+// --- THE WARM SPECTRUM (Reds & Earths) ---
+#define COLOR_MAGENTA          (Color){ 202,  31, 123, 255 } // Quin. Magenta (PR122)
+#define COLOR_ROSE             (Color){ 184,  32,  72, 255 } // Quin. Rose (PV19)
+#define COLOR_RED_OCHRE        (Color){ 166,  68,  46, 255 } // Earthy PR101
+#define COLOR_SCARLET          (Color){ 255,  36,   0, 255 } // Vibrant Scarlet
+#define COLOR_PERYLENE_RED     (Color){ 177,  24,  44, 255 } // Deep, bloody red (PR149)
+#define COLOR_POTTERS_PINK     (Color){ 195, 141, 131, 255 } // Granulating, desaturated pink
+
+// --- THE GOLDEN SPECTRUM (Yellows & Browns) ---
+#define COLOR_QUIN_GOLD        (Color){ 178, 125,  38, 255 } // Glowing PO49/PY150 blend
+#define COLOR_AMBER            (Color){ 255, 191,   0, 255 } 
+#define COLOR_SAFFRON          (Color){ 244, 196,  48, 255 } 
+#define COLOR_YELLOW_OCHRE     (Color){ 203, 153,  50, 255 } // Golden-earth PY42
+#define COLOR_BURNT_SIENNA     (Color){ 140,  71,  44, 255 } // Warm brown PBr7
+#define COLOR_CADMIUM_YELLOW   (Color){ 255, 246,   0, 255 } // Punchy, opaque yellow
+#define COLOR_NICKEL_TITANITE  (Color){ 238, 230, 150, 255 } // Pale, cool "Lemon Sorbet"
+#define COLOR_NAPLES_YELLOW    (Color){ 250, 218,  94, 255 } // Creamy, earthy yellow
+// #define COLOR_MUSTARD          (Color){ 225, 173,   1, 255 } 
+
+// --- THE COOL SPECTRUM (Blues & Greens) ---
+#define COLOR_ULTRAMARINE      (Color){  18,  10, 143, 255 } // Deep warm blue (PB29)
+#define COLOR_CERULEAN         (Color){  42,  82, 190, 255 } // Sky-like PB35
+#define COLOR_COBALT_BLUE      (Color){   0,  71, 171, 255 } // Pure, neutral blue
+#define COLOR_PRUSSIAN_BLUE    (Color){   0,  49,  83, 255 } // Moody, dark PB27
+#define COLOR_PTHALO_BLUE      (Color){   0,  15, 137, 255 } // Intense, staining blue
+#define COLOR_PTHALO_TEAL      (Color){   0, 128, 128, 255 } 
+#define COLOR_VIRIDIAN         (Color){   0, 127, 106, 255 } // Cool, transparent green
+#define COLOR_SAP_GREEN        (Color){  106, 125, 45, 255 } // Natural, leafy green
+#define COLOR_GREEN_GOLD       (Color){  170, 163,  58, 255 } // Glowing, mossy yellow-green
+#define COLOR_MAY_GREEN        (Color){  115, 190,  69, 255 } // Bright, spring green
+#define COLOR_CELADON          (Color){  172, 192, 172, 255 } // Pale, minty ceramic gray
+
+// --- THE "ARTIST'S CHOICE" (Bonus Recommendations) ---
+#define COLOR_MOONGLOW         (Color){  111, 103, 138, 255 } // Daniel Smith's famous granulating violet-grey
+#define COLOR_AUREOLIN         (Color){  255, 238,   0, 255 } // The essential transparent cool yellow
+#define COLOR_INDANTHRONE_BLUE (Color){   19,  35,  77, 255 }
 #endif
