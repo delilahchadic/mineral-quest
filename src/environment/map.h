@@ -47,6 +47,7 @@ typedef struct MapEntity {
     struct MapEntity* next; // For the linked list
     union{
       Character* character;
+      Plant* plant;
       int id;
     } data;
 } MapEntity;
