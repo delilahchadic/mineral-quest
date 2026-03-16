@@ -35,8 +35,10 @@ void LoadMapEntityFile(const char* filename, Map* map){
 
       if(m->type == ENTITY_CHARACTER){
         m->data.character = &CHARACTER_REGISTRY[atoi(nameToken)];
+        m->sprite = &CHARACTER_REGISTRY[atoi(nameToken)].sprite;
       }else if(m->type == ENTITY_PLANT){
         m->data.plant = &PLANT_REGISTRY[atoi(nameToken)];
+        m->sprite = &PLANT_REGISTRY[atoi(nameToken)].sprite;
       }else{
         strncpy(m->name, nameToken, sizeof(m->name) - 1);
         m->name[sizeof(m->name) - 1] = '\0';
@@ -147,12 +149,12 @@ void Draw_Map(Map* map) {
       if(tmp->type== ENTITY_CHARACTER){
         Character* c = tmp->data.character;
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(c->sprite,r,tmp->position, WHITE );
+        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
         DrawText(tmp->data.character->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }else if(tmp->type == ENTITY_PLANT){
         Plant* c = tmp->data.plant;
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(c->sprite,r,tmp->position, WHITE );
+        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
         DrawText(tmp->data.plant->species_name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       } else{
         DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, color);
@@ -211,7 +213,7 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
         Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
         
         // // Define the entity's rectangle (matching your 16x16 Draw size)
-        Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight };
+        Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight};
         
         if (CheckCollisionRecs(playerFeet, entityBox)) {
             return true; // Stop the player!

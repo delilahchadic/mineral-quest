@@ -44,7 +44,8 @@ typedef struct MapEntity {
     EntityType type;      // Is this a person or a flower?
     Vector2 position;     // Physical location on the highway
     char name[32];      // Pointer to the actual Character, Item, or Plant struct
-    struct MapEntity* next; // For the linked list
+    struct MapEntity* next; 
+    Texture2D* sprite; // For the linked list
     union{
       Character* character;
       Plant* plant;
