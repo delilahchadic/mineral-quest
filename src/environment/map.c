@@ -93,10 +93,9 @@ void LoadMapGridFile(const char* filename, Map* map){
 void InitMap(Map* map){
   map->entities = NULL;
   
-
   LoadMapGridFile("data/maps/highway.map", map);
-  
   LoadMapEntityFile("data/maps/highway.ents", map);
+
   MapEntity* player = malloc(sizeof(MapEntity)); 
   player->type = ENTITY_PLAYER;
   player->position = (Vector2){0,0};
@@ -125,15 +124,17 @@ void Close_Map(Map* map){
 
 
 void Draw_Map(Map* map) {
-    for (int y = 0; y < map->rows; y++) {
-        for (int x = 0; x < map->columns; x++) {
-            Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
-            // Tile t = world->types[world->tiles[y][x]];
-            DrawRectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
-            // Draw a subtle grid line
-            DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(COLOR_SUNKEN_INK, 0.1f));
-        }
+
+  //draws the world
+  for (int y = 0; y < map->rows; y++) {
+    for (int x = 0; x < map->columns; x++) {
+      Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
+      // Tile t = world->types[world->tiles[y][x]];
+      DrawRectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
+      // Draw a subtle grid line
+      DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(COLOR_SUNKEN_INK, 0.1f));
     }
+  }
 
     MapEntity* tmp = map->entities;
     while(tmp!=NULL){
@@ -156,10 +157,6 @@ void Draw_Map(Map* map) {
         DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, COLOR_PULP_PAPER);
         DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
       }
-      
-      
-      // Draw the name if you want to see who's who
-      
       tmp = tmp->next;
     }
 
@@ -252,8 +249,14 @@ void Handle_Input(Map* map){
         potentialPosition.x += dir.x * PLAYER->speed * length * dt;
         potentialPosition.y += dir.y * PLAYER->speed * length * dt;
         if(!Check_Collision(map,potentialPosition)){
+          bool ychanged=map->player->position.y != potentialPosition.y;
+          
           map->player->position.x = potentialPosition.x;
           map->player->position.y = potentialPosition.y;
+          if(ychanged){
+            Remove_Entity(map, map->player);
+            Add_Entity(map, map->player);
+          }
         }
     }
 
@@ -278,16 +281,38 @@ void Update_Map(Map* map, Dialog_Manager* manager){
     }
 }
 
+void Remove_Entity(Map* map, MapEntity* entity){
+  if(map==NULL || entity == NULL) return;
+
+  if(map->entities == entity){
+    map->entities = entity->next;
+    entity->next =  NULL;
+    return;
+  }
+
+  MapEntity* curr = map->entities;
+  while(curr->next != NULL && curr->next != entity){
+    curr = curr->next;
+  }
+  if(curr->next == entity){
+    curr->next = entity->next;
+    entity->next = NULL;
+    return;
+  }
+}
+
 void Add_Entity(Map* map, MapEntity* entity){
-  if(map->entities == NULL){
+  if(map->entities == NULL || entity->position.y < map->entities->position.y){
+    entity->next = map->entities;
     map->entities = entity;
     return;
   }
-  MapEntity* tmp = map->entities;
-  while(tmp->next != NULL){
-    tmp = tmp->next;
-  }
-  tmp->next = entity;
-  return;
 
+  MapEntity* curr = map->entities;
+  while(curr->next != NULL && curr->next->position.y < entity->position.y){
+    curr = curr->next;
+  }
+  entity->next= curr->next; 
+  curr->next = entity;
+  return;
 }

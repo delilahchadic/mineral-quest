@@ -74,6 +74,6 @@ void Add_Entity(Map* map, MapEntity* entity);
 void Handle_Input(Map* map);
 void Update_Map(Map* map,Dialog_Manager* manager);
 void Close_Map(Map* map);
-
+void Remove_Entity(Map* map, MapEntity* entity);
 
 #endif
