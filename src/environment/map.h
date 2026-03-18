@@ -68,6 +68,8 @@ typedef struct Map{
 
 void LoadMapGridFile(const char* filename, Map* map);
 void InitMap(Map* map);
+void Draw_Tiles(Map* map);
+void Draw_MapEntity(MapEntity* entity);
 void Draw_Map(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
@@ -75,5 +77,6 @@ void Handle_Input(Map* map);
 void Update_Map(Map* map,Dialog_Manager* manager);
 void Close_Map(Map* map);
 void Remove_Entity(Map* map, MapEntity* entity);
+void Init_Player(Map* map); 
 
 #endif

@@ -1,5 +1,5 @@
 #include "map.h"
-
+// registry types temporary till we move into a dedicated register
 TileDefinition TILE_REGISTRY[6] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
     { TILE_STONE, false,  1.0f, 102, COLOR_TEXAS_HAZE    },
@@ -10,6 +10,7 @@ TileDefinition TILE_REGISTRY[6] = {
 };
 
 void LoadMapEntityFile(const char* filename, Map* map){
+  map->entities = NULL;
   FILE* file = fopen(filename, "r");
   if (!file) {
     TraceLog(LOG_ERROR, "Failed to open %s", filename);
@@ -90,12 +91,7 @@ void LoadMapGridFile(const char* filename, Map* map){
     fclose(file);
 }
 
-void InitMap(Map* map){
-  map->entities = NULL;
-  
-  LoadMapGridFile("data/maps/highway.map", map);
-  LoadMapEntityFile("data/maps/highway.ents", map);
-
+void Init_Player(Map* map){
   MapEntity* player = malloc(sizeof(MapEntity)); 
   player->type = ENTITY_PLAYER;
   player->position = (Vector2){0,0};
@@ -104,6 +100,12 @@ void InitMap(Map* map){
   player->name[sizeof(player->name) - 1] = '\0'; 
   Add_Entity(map,player);
   map->player = player;
+}
+
+void InitMap(Map* map){
+  LoadMapGridFile("data/maps/highway.map", map);
+  LoadMapEntityFile("data/maps/highway.ents", map);
+  Init_Player(map);
   
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
@@ -124,42 +126,46 @@ void Close_Map(Map* map){
 
 
 void Draw_Map(Map* map) {
+  Draw_Tiles(map);
 
+  MapEntity* curr = map->entities;
+  while(curr!=NULL){
+    // Draw the actual entity
+    Draw_MapEntity(curr);
+    curr = curr->next;
+  }
+}
+
+void Draw_Tiles(Map* map){
   //draws the world
   for (int y = 0; y < map->rows; y++) {
     for (int x = 0; x < map->columns; x++) {
       Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
-      // Tile t = world->types[world->tiles[y][x]];
       DrawRectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
       // Draw a subtle grid line
       DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(COLOR_SUNKEN_INK, 0.1f));
     }
   }
+}
 
-    MapEntity* tmp = map->entities;
-    while(tmp!=NULL){
-    
-      // Draw the actual entity
-      if(tmp->type== ENTITY_CHARACTER){
-        Character* c = tmp->data.character;
+void Draw_MapEntity(MapEntity* entity){
+  if(entity->type== ENTITY_CHARACTER){
+        Character* c = entity->data.character;
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
-        DrawText(c->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
-      }else if(tmp->type == ENTITY_PLANT){
-        Plant* c = tmp->data.plant;
+        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
+        DrawText(c->name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
+      }else if(entity->type == ENTITY_PLANT){
+        Plant* c = entity->data.plant;
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
-        DrawText(c->species_name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
-      }else if(tmp->type == ENTITY_PLAYER){
+        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
+        DrawText(c->species_name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
+      }else if(entity->type == ENTITY_PLAYER){
         Rectangle r= {0,0,32,64};
-        DrawTextureRec(*tmp->sprite,r,tmp->position, WHITE );
+        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
       } else{
-        DrawRectangle(tmp->position.x, tmp->position.y, 16, 16, COLOR_PULP_PAPER);
-        DrawText(tmp->name, tmp->position.x, tmp->position.y - 10, 10, COLOR_SUNKEN_INK);
+        DrawRectangle(entity->position.x, entity->position.y, 16, 16, COLOR_PULP_PAPER);
+        DrawText(entity->name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
       }
-      tmp = tmp->next;
-    }
-
 }
 
 bool Check_Collision(Map* map, Vector2 nextPos) {
@@ -200,12 +206,10 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
           Plant* plant = curr->data.plant;
 
           float plantLeft   = curr->position.x ;
-          // float plantRight  = curr->position.x + 31;
-          // float plantBottom = curr->position.y + 63; // 63 is the last pixel of the 64px height
           float plantTop    = curr->position.y + 54; 
+
           // // Define the player's small foot-patch rectangle
           Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
-          
           // // Define the entity's rectangle (matching your 16x16 Draw size)
           Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight};
           
@@ -224,7 +228,6 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
 
 void Handle_Input(Map* map){
   float dt = GetFrameTime();
-  // float speed = player->speed;
   Vector2 dir = { 0, 0 };
 
   if(IsKeyDown(KEY_W)){
