@@ -7,11 +7,6 @@ void InitGame(Gamestate* gamestate){
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
   InitMap(&gamestate->map);
-  // Camera Setup
-  gamestate->camera.target = gamestate->map.player->position;
-  gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
-  gamestate->camera.rotation = 0.0f;
-  gamestate->camera.zoom = 1.0f;
   Init_Dialog_Manager(&gamestate->manager,100);
 }
 
@@ -21,24 +16,19 @@ void UpdateGameplay(Gamestate* gamestate){
     //handle okayer input and update map enitities as necessary
     Handle_Input(&gamestate->map);
     Update_Map(&gamestate->map,&gamestate->manager);
-
     //inventory
     if(IsKeyPressed(KEY_I)){
       gamestate->screen = INVENTORY;
     }
   }
 
-  // readjust camera to where the player is
-  float smoothness = 0.1f;
-  gamestate->camera.target.x += (gamestate->map.player->position.x - gamestate->camera.target.x) * smoothness;
-  gamestate->camera.target.y += (gamestate->map.player->position.y - gamestate->camera.target.y) * smoothness;
-
+  
   //control camera if manager is active or not
   if(gamestate->manager.active){
     Update_Dialog_Manager(&gamestate->manager);
-    gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
+    AdjustCamera(&gamestate->map,true);
   } else{
-    gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
+    AdjustCamera(&gamestate->map, false);
   }
     
 }
@@ -81,14 +71,11 @@ void UpdateScene(Gamestate* gamestate){
   }
 }
 void DrawGameplay(Gamestate* gamestate){
-    BeginMode2D(gamestate->camera);
-      Draw_Map(&gamestate->map);
-    EndMode2D();
-    
-    DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
-    if (gamestate->manager.active) {
-      Draw_Dialog(&gamestate->manager); 
-    }
+  Draw_Map(&gamestate->map);    
+  DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
+  if (gamestate->manager.active) {
+    Draw_Dialog(&gamestate->manager); 
+  }
 }
 
 void DrawInventory(Gamestate* gamestate) {

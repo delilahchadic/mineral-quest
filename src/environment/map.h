@@ -62,6 +62,7 @@ typedef struct Map{
   int rows;
   int columns;
   char name[32];
+  Camera2D camera;
   MapEntity* entities;
   MapEntity* player; 
 }Map;
@@ -78,5 +79,6 @@ void Update_Map(Map* map,Dialog_Manager* manager);
 void Close_Map(Map* map);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map); 
+void AdjustCamera(Map* map,bool dialog);
 
 #endif

@@ -1,4 +1,7 @@
 #include "map.h"
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 450
+#define TARGET_FPS 60
 // registry types temporary till we move into a dedicated register
 TileDefinition TILE_REGISTRY[6] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
@@ -43,10 +46,7 @@ void LoadMapEntityFile(const char* filename, Map* map){
       }else{
         strncpy(m->name, nameToken, sizeof(m->name) - 1);
         m->name[sizeof(m->name) - 1] = '\0';
-      }
-      
-
-       
+      }      
       Add_Entity(map,m);
     }
     
@@ -106,9 +106,14 @@ void InitMap(Map* map){
   LoadMapGridFile("data/maps/highway.map", map);
   LoadMapEntityFile("data/maps/highway.ents", map);
   Init_Player(map);
-  
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
+  map->camera.target = map->player->position;
+  map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
+  map->camera.rotation = 0.0f;
+  map->camera.zoom = 1.0f;
+  
+
 }
 
 void Close_Map(Map* map){
@@ -126,14 +131,16 @@ void Close_Map(Map* map){
 
 
 void Draw_Map(Map* map) {
-  Draw_Tiles(map);
-
-  MapEntity* curr = map->entities;
-  while(curr!=NULL){
-    // Draw the actual entity
-    Draw_MapEntity(curr);
-    curr = curr->next;
-  }
+  BeginMode2D(map->camera);
+    Draw_Tiles(map);
+    MapEntity* curr = map->entities;
+    while(curr!=NULL){
+      // Draw the actual entity
+      Draw_MapEntity(curr);
+      curr = curr->next;
+    }
+    EndMode2D();
+  
 }
 
 void Draw_Tiles(Map* map){
@@ -282,6 +289,19 @@ void Update_Map(Map* map, Dialog_Manager* manager){
     
         tmp = tmp->next;
     }
+    // readjust camera to where the player is
+  float smoothness = 0.1f;
+  map->camera.target.x += (map->player->position.x - map->camera.target.x) * smoothness;
+  map->camera.target.y += (map->player->position.y - map->camera.target.y) * smoothness;
+
+}
+
+void AdjustCamera(Map* map, bool dialog){
+  if(dialog){
+    map->camera.zoom += (1.2f - map->camera.zoom) * 0.05f;
+  }else{
+    map->camera.zoom += (1.0f - map->camera.zoom) * 0.05f;
+  }
 }
 
 void Remove_Entity(Map* map, MapEntity* entity){
