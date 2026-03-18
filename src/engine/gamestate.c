@@ -1,48 +1,50 @@
 #include "engine/gamestate.h"
 
 void InitGame(Gamestate* gamestate){
-
   // System Setup
-  
   InitRegistries();
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
-  // gamestate->character = GetCharacterDefault();
   InitMap(&gamestate->map);
   // Camera Setup
   gamestate->camera.target = gamestate->map.player->position;
   gamestate->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   gamestate->camera.rotation = 0.0f;
   gamestate->camera.zoom = 1.0f;
-  
   Init_Dialog_Manager(&gamestate->manager,100);
 }
 
 void UpdateGameplay(Gamestate* gamestate){
+  //if dialog manager is active input is disabled
+  if(!gamestate->manager.active){
+    //handle okayer input and update map enitities as necessary
+    Handle_Input(&gamestate->map);
+    Update_Map(&gamestate->map,&gamestate->manager);
 
-    if(!gamestate->manager.active){
-      Handle_Input(&gamestate->map);
-      Update_Map(&gamestate->map,&gamestate->manager);
-
-      if(IsKeyPressed(KEY_I)){
-        gamestate->screen = INVENTORY;
-      }
+    //inventory
+    if(IsKeyPressed(KEY_I)){
+      gamestate->screen = INVENTORY;
     }
+  }
 
-    float smoothness = 0.1f;
-    gamestate->camera.target.x += (gamestate->map.player->position.x - gamestate->camera.target.x) * smoothness;
-    gamestate->camera.target.y += (gamestate->map.player->position.y - gamestate->camera.target.y) * smoothness;
+  // readjust camera to where the player is
+  float smoothness = 0.1f;
+  gamestate->camera.target.x += (gamestate->map.player->position.x - gamestate->camera.target.x) * smoothness;
+  gamestate->camera.target.y += (gamestate->map.player->position.y - gamestate->camera.target.y) * smoothness;
 
-    if(gamestate->manager.active){
-      Update_Dialog_Manager(&gamestate->manager);
-      gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
-    } else{
-      gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
-    }
+  //control camera if manager is active or not
+  if(gamestate->manager.active){
+    Update_Dialog_Manager(&gamestate->manager);
+    gamestate->camera.zoom += (1.2f - gamestate->camera.zoom) * 0.05f;
+  } else{
+    gamestate->camera.zoom += (1.0f - gamestate->camera.zoom) * 0.05f;
+  }
     
 }
 
+/// @brief manages input while game is in inventory mode
+/// @param gamestate 
 void UpdateInventory(Gamestate* gamestate){
   if(IsKeyPressed(KEY_W)){
     gamestate->player.inventory.selected--;
@@ -60,6 +62,7 @@ void UpdateInventory(Gamestate* gamestate){
     
 }
 
+//routes to update based on gamestate
 void UpdateScene(Gamestate* gamestate){
   switch(gamestate->screen) {
     case LOGO:
@@ -80,8 +83,6 @@ void UpdateScene(Gamestate* gamestate){
 void DrawGameplay(Gamestate* gamestate){
     BeginMode2D(gamestate->camera);
       Draw_Map(&gamestate->map);
-      // Draw_Player(&gamestate->player); // Our "Hero"
-      // Draw_Character(&gamestate->character);
     EndMode2D();
     
     DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
