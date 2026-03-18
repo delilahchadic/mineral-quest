@@ -2,6 +2,7 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60
+
 // registry types temporary till we move into a dedicated register
 TileDefinition TILE_REGISTRY[6] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
@@ -94,7 +95,7 @@ void LoadMapGridFile(const char* filename, Map* map){
 void Init_Player(Map* map){
   MapEntity* player = malloc(sizeof(MapEntity)); 
   player->type = ENTITY_PLAYER;
-  player->position = (Vector2){0,0};
+  player->position = (Vector2){30,30};
   player->sprite = &PLAYER->sprite;
   strncpy(player->name, "player", sizeof(player->name) - 1);
   player->name[sizeof(player->name) - 1] = '\0'; 
@@ -108,12 +109,10 @@ void InitMap(Map* map){
   Init_Player(map);
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
-  map->camera.target = map->player->position;
+  map->camera.target = GetWorldToIso(map->player->position);
   map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   map->camera.rotation = 0.0f;
   map->camera.zoom = 1.0f;
-  
-
 }
 
 void Close_Map(Map* map){
@@ -127,6 +126,15 @@ void Close_Map(Map* map){
     free(tmp);
     tmp = map->entities;
   }
+}
+
+// This function takes your "Normal" coordinates and returns "Isometric" screen pixels
+Vector2 GetWorldToIso(Vector2 worldPos) {
+    Vector2 iso;
+    // The Standard Formula:
+    iso.x = (worldPos.x - worldPos.y);
+    iso.y = (worldPos.x + worldPos.y) / 2.0f; // This /2 creates the 50% "squash"
+    return iso;
 }
 
 
@@ -143,36 +151,62 @@ void Draw_Map(Map* map) {
   
 }
 
-void Draw_Tiles(Map* map){
-  //draws the world
-  for (int y = 0; y < map->rows; y++) {
-    for (int x = 0; x < map->columns; x++) {
-      Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
-      DrawRectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
-      // Draw a subtle grid line
-      DrawRectangleLines(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, Fade(COLOR_SUNKEN_INK, 0.1f));
+void Draw_Tiles(Map* map) {
+    for (int y = 0; y < map->rows; y++) {
+        for (int x = 0; x < map->columns; x++) {
+            // 1. Get the 4 corners in FLAT WORLD PIXELS
+            // If TILE_SIZE is 32, (1,0) becomes (32, 0)
+            float fx = (float)x * TILE_SIZE;
+            float fy = (float)y * TILE_SIZE;
+
+            Vector2 nw = { fx, fy };
+            Vector2 ne = { fx + TILE_SIZE, fy };
+            Vector2 se = { fx + TILE_SIZE, fy + TILE_SIZE };
+            Vector2 sw = { fx, fy + TILE_SIZE };
+
+            // 2. Project those corners to ISO SCREEN PIXELS
+            Vector2 p1 = GetWorldToIso(nw);
+            Vector2 p2 = GetWorldToIso(ne);
+            Vector2 p3 = GetWorldToIso(se);
+            Vector2 p4 = GetWorldToIso(sw);
+
+            // 3. Get the color for THIS specific tile
+            Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
+
+            // 4. Draw the Diamond
+            // TriangleFan connects p1->p2->p3->p4 to fill the diamond
+            DrawTriangleFan((Vector2[]){ p1, p4, p3, p2 }, 4, tileColor);
+            
+            // 5. Grid lines (helps you see if they are overlapping)
+            DrawLineV(p1, p2, Fade(BLACK, 0.2f));
+            DrawLineV(p2, p3, Fade(BLACK, 0.2f));
+            DrawLineV(p3, p4, Fade(BLACK, 0.2f));
+            DrawLineV(p4, p1, Fade(BLACK, 0.2f));
+        }
     }
-  }
 }
 
 void Draw_MapEntity(MapEntity* entity){
+  Vector2 position = GetWorldToIso(entity->position);
+
+  Vector2 origin = { 16, 64 }; 
+  Vector2 drawPos = { position.x - origin.x, position.y - origin.y };
+
+  Rectangle r= {0,0,32,64};
+  DrawTextureRec(*entity->sprite,r,drawPos, WHITE );
+  // Draw a small gray ellipse at 'position' to ground the character
+DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
+  //draws their name
   if(entity->type== ENTITY_CHARACTER){
-        Character* c = entity->data.character;
-        Rectangle r= {0,0,32,64};
-        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
-        DrawText(c->name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
-      }else if(entity->type == ENTITY_PLANT){
-        Plant* c = entity->data.plant;
-        Rectangle r= {0,0,32,64};
-        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
-        DrawText(c->species_name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
-      }else if(entity->type == ENTITY_PLAYER){
-        Rectangle r= {0,0,32,64};
-        DrawTextureRec(*entity->sprite,r,entity->position, WHITE );
-      } else{
-        DrawRectangle(entity->position.x, entity->position.y, 16, 16, COLOR_PULP_PAPER);
-        DrawText(entity->name, entity->position.x, entity->position.y - 10, 10, COLOR_SUNKEN_INK);
-      }
+    Character* c = entity->data.character;
+    DrawText(c->name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+  }else if(entity->type == ENTITY_PLANT){
+    Plant* c = entity->data.plant;
+    DrawText(c->species_name,drawPos.x,drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+  } else{
+      DrawText(entity->name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+  }
+  
 }
 
 bool Check_Collision(Map* map, Vector2 nextPos) {
@@ -180,10 +214,10 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
     // 27px wide sprite, so we check from x+4 to x+23 (narrower for forgiveness)
     // 64px tall sprite, so we check near the bottom (y+60)
     
-    float footLeft   = nextPos.x + 4;
-    float footRight  = nextPos.x + 23;
-    float footBottom = nextPos.y + 63; // 63 is the last pixel of the 64px height
-    float footTop    = nextPos.y + 54; // A 10-pixel high collision strip
+    float footLeft   = nextPos.x - 10;
+    float footRight  = nextPos.x + 10;
+    float footBottom = nextPos.y + 5; // 63 is the last pixel of the 64px height
+    float footTop    = nextPos.y - 5; // A 10-pixel high collision strip
 
     // 1. Map Boundary Check (Keep him inside the world)
     if (footLeft < 0 || footRight >= map->pixel_width || 
@@ -213,7 +247,7 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
           Plant* plant = curr->data.plant;
 
           float plantLeft   = curr->position.x ;
-          float plantTop    = curr->position.y + 54; 
+          float plantTop    = curr->position.y; 
 
           // // Define the player's small foot-patch rectangle
           Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
@@ -253,22 +287,18 @@ void Handle_Input(Map* map){
   }
 
   if (dir.x != 0 || dir.y != 0) {
-        // This is the "proper" way to get 0.707 for diagonals
-        float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
-        Vector2 potentialPosition = {map->player->position.x, map->player->position.y};
-        potentialPosition.x += dir.x * PLAYER->speed * length * dt;
-        potentialPosition.y += dir.y * PLAYER->speed * length * dt;
-        if(!Check_Collision(map,potentialPosition)){
-          bool ychanged=map->player->position.y != potentialPosition.y;
-          
-          map->player->position.x = potentialPosition.x;
-          map->player->position.y = potentialPosition.y;
-          if(ychanged){
-            Remove_Entity(map, map->player);
-            Add_Entity(map, map->player);
-          }
-        }
+    // This is the "proper" way to get 0.707 for diagonals
+    float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
+    Vector2 potentialPosition = map->player->position;
+    potentialPosition.x += dir.x * PLAYER->speed * length * dt;
+    potentialPosition.y += dir.y * PLAYER->speed * length * dt;
+    if(!Check_Collision(map,potentialPosition)){
+      map->player->position.x = potentialPosition.x;
+      map->player->position.y = potentialPosition.y;
     }
+    Remove_Entity(map, map->player);
+    Add_Entity(map, map->player);
+  }
 
 }
 
@@ -280,7 +310,6 @@ void Update_Map(Map* map, Dialog_Manager* manager){
         if(Vector2Distance(map->player->position, tmp->position) <50.f){
           if (IsKeyPressed(KEY_E) && !manager->active) {
               // Tell the manager to look up the ID stored on the character
-
               Set_Active_Dialog(manager, c->dialogId);
               manager->active = true;
           }
@@ -291,8 +320,9 @@ void Update_Map(Map* map, Dialog_Manager* manager){
     }
     // readjust camera to where the player is
   float smoothness = 0.1f;
-  map->camera.target.x += (map->player->position.x - map->camera.target.x) * smoothness;
-  map->camera.target.y += (map->player->position.y - map->camera.target.y) * smoothness;
+  Vector2 playerIsoPosition = GetWorldToIso(map->player->position);
+  map->camera.target.x += (playerIsoPosition.x - map->camera.target.x) * smoothness;
+  map->camera.target.y += (playerIsoPosition.y - map->camera.target.y) * smoothness;
 
 }
 
@@ -325,14 +355,14 @@ void Remove_Entity(Map* map, MapEntity* entity){
 }
 
 void Add_Entity(Map* map, MapEntity* entity){
-  if(map->entities == NULL || entity->position.y < map->entities->position.y){
+  if(map->entities == NULL || (entity->position.x + entity->position.y) < map->entities->position.x + map->entities->position.y){
     entity->next = map->entities;
     map->entities = entity;
     return;
   }
 
   MapEntity* curr = map->entities;
-  while(curr->next != NULL && curr->next->position.y < entity->position.y){
+  while(curr->next != NULL && (curr->next->position.x + curr->next->position.y) < (entity->position.x + entity->position.y)){
     curr = curr->next;
   }
   entity->next= curr->next; 
