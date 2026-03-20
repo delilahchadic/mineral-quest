@@ -6,10 +6,10 @@
 // registry types temporary till we move into a dedicated register
 TileDefinition TILE_REGISTRY[6] = {
   { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
-  { TILE_STONE, false,  1.0f, 102, COLOR_TEXAS_HAZE    },
-  { TILE_SAND,  false, 0.4f, 103, COLOR_DUSTY_ROSE    },
+  { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP    },
+  { TILE_SAND,  false, 0.4f, 103, COLOR_CERULEAN_BERYL    },
   { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON  },
-  { TILE_GRASS, false, 0.9f, 105, COLOR_DUSTY_SAP          },
+  { TILE_STONE, false, 0.9f, 105, COLOR_DUSTY_SAP          },
   { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
 };
 
@@ -128,6 +128,7 @@ void InitMap(Map* map){
   LoadMapGridFile("data/maps/highway.map", map);
   LoadMapEntityFile("data/maps/highway.ents", map);
   Init_Player(map);
+  map->lastTileHeight = -1;
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
   map->camera.target = GetWorldToIso(map->player->position);
@@ -161,23 +162,29 @@ Vector2 GetWorldToIso(Vector2 worldPos) {
 
 void Draw_Map(Map* map) {
   BeginMode2D(map->camera);
-    Draw_Tiles(map);
-    MapEntity* curr = map->entities;
-    while(curr!=NULL){
-      // Draw the actual entity
-      Draw_MapEntity(curr,map);
-      curr = curr->next;
-    }
+    for (int y = 0; y < map->rows; y++) {
+      for (int x = 0; x < map->columns; x++) {
+        Draw_Tile(map,x,y);
+
+        MapEntity* curr = map->entities;
+      while(curr != NULL) {
+        int tx = (int)(curr->position.x / TILE_SIZE);
+        int ty = (int)(curr->position.y / TILE_SIZE);
+        
+        if (tx == x && ty == y) {
+          Draw_MapEntity(curr, map);
+        }
+        curr = curr->next;
+      }
+    }}
+
     EndMode2D();
   
 }
 
-void Draw_Tiles(Map* map) {
-  for (int y = 0; y < map->rows; y++) {
-    for (int x = 0; x < map->columns; x++) {
-      float h = map->grid[y][x].height * 8.0f;
+void Draw_Tile(Map* map, int x, int y){
+  float h = map->grid[y][x].height * 8.0f;
       Color base = TILE_REGISTRY[map->grid[y][x].type].color;
-
 
       // Calculate 4 ground corners
       Vector2 g1 = GetWorldToIso((Vector2){ x * TILE_SIZE, y * TILE_SIZE });
@@ -194,20 +201,14 @@ void Draw_Tiles(Map* map) {
       // Draw Walls (The 'sides' of the block)
       if (h > 0) {
         // Right Side (Darker)
-          Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+        Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
         Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
-        
         //  right side
         DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
-
         // back side
         DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
-        // // Left Side (Medium)
-
         //front side
-        // // Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
         DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
-        
       }
 
       // Draw Top Face
@@ -217,10 +218,7 @@ void Draw_Tiles(Map* map) {
       DrawLineV(t2, t3, Fade(BLACK, 0.1f));
       DrawLineV(t3, t4, Fade(BLACK, 0.1f));
       DrawLineV(t4, t1, Fade(BLACK, 0.1f));
-    }
-  }
 }
-
 
 void Draw_MapEntity(MapEntity* entity,Map* map){
   Vector2 position = GetWorldToIso(entity->position);
@@ -263,7 +261,7 @@ void Handle_Input(Map* map){
   if (IsKeyDown(KEY_SPACE)){
     if(map->player->state != JUMPING_STATE){
       map->player->state = JUMPING_STATE;
-      map->player->verticalVelocity= 10.0f;
+      map->player->verticalVelocity= 8.0f;
     }
   }
   if (dir.x != 0 || dir.y != 0) {
@@ -332,15 +330,14 @@ void Apply_Gravity(Map* map) {
 
   // If we move to a lower tile, the "jumpoffset" needs to increase 
   // to keep us at the same visual height while we start falling.
-  static int lastTileHeight = -1;
   int currentTileHeight = map->grid[ty][tx].height;
 
-  if (lastTileHeight != -1 && currentTileHeight < lastTileHeight) {
+  if (map->lastTileHeight != -1 && currentTileHeight < map->lastTileHeight) {
       // We just stepped down! Add the difference to jumpoffset so we don't "snap" down.
-      map->player->jumpoffset += (lastTileHeight - currentTileHeight) * 8.0f;
+      map->player->jumpoffset += (map->lastTileHeight - currentTileHeight) * 8.0f;
       map->player->state = JUMPING_STATE;
   }
-  lastTileHeight = currentTileHeight;
+  map->lastTileHeight = currentTileHeight;
 
   // Standard Gravity Logic
   if (map->player->state == JUMPING_STATE || map->player->jumpoffset > 0.0f) {

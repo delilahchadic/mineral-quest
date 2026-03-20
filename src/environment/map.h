@@ -20,7 +20,7 @@
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
 
-typedef enum { TILE_WATER, TILE_STONE,TILE_SAND, TILE_DIRT,TILE_GRASS, TILE_ROAD} TileType;
+typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD} TileType;
 typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
 
 
@@ -78,6 +78,7 @@ typedef struct Map{
   Camera2D camera;
   MapEntity* entities;
   MapEntity* player; 
+  int lastTileHeight;
 }Map;
 
 
@@ -96,6 +97,7 @@ void Close_Map(Map* map);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map); 
 void AdjustCamera(Map* map,bool dialog);
+void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
 
 #endif
