@@ -10,6 +10,7 @@ Player Get_Default_Player(){
   player.inventory.itemIds[3]=4;
   player.inventory.count = 4;
   player.speed = 250.0f;
+  // player.jumpOffset = 10.0f;
   player.sprite = LoadTexture("sprite.png");
   return player;
 }

@@ -5,12 +5,12 @@
 
 // registry types temporary till we move into a dedicated register
 TileDefinition TILE_REGISTRY[6] = {
-    { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
-    { TILE_STONE, false,  1.0f, 102, COLOR_TEXAS_HAZE    },
-    { TILE_SAND,  false, 0.4f, 103, COLOR_DUSTY_ROSE    },
-    { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON  },
-    { TILE_GRASS, false, 0.9f, 105, COLOR_DUSTY_SAP          },
-    { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
+  { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
+  { TILE_STONE, false,  1.0f, 102, COLOR_TEXAS_HAZE    },
+  { TILE_SAND,  false, 0.4f, 103, COLOR_DUSTY_ROSE    },
+  { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON  },
+  { TILE_GRASS, false, 0.9f, 105, COLOR_DUSTY_SAP          },
+  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
 };
 
 void LoadMapEntityFile(const char* filename, Map* map){
@@ -35,9 +35,9 @@ void LoadMapEntityFile(const char* filename, Map* map){
       MapEntity* m = malloc(sizeof(MapEntity)); 
       if (m == NULL) continue; // Safety check
       m->type = (EntityType) atoi(typeToken);
+      m->jumpoffset = 0.0f;
       m->position = (Vector2) {(float)atoi(xToken), (float)atoi(yToken)};
       m->next = NULL;
-
       if(m->type == ENTITY_CHARACTER){
         m->data.character = &CHARACTER_REGISTRY[atoi(nameToken)];
         m->sprite = &m->data.character->sprite;
@@ -114,12 +114,14 @@ void LoadMapGridFile(const char* filename, Map* map){
 void Init_Player(Map* map){
   MapEntity* player = malloc(sizeof(MapEntity)); 
   player->type = ENTITY_PLAYER;
+  player->state = NORMAL_STATE;
   player->position = (Vector2){30,30};
   player->sprite = &PLAYER->sprite;
   strncpy(player->name, "player", sizeof(player->name) - 1);
   player->name[sizeof(player->name) - 1] = '\0'; 
   Add_Entity(map,player);
   map->player = player;
+  player->jumpoffset = 0.0f;
 }
 
 void InitMap(Map* map){
@@ -149,11 +151,11 @@ void Close_Map(Map* map){
 
 // This function takes your "Normal" coordinates and returns "Isometric" screen pixels
 Vector2 GetWorldToIso(Vector2 worldPos) {
-    Vector2 iso;
-    // The Standard Formula:
-    iso.x = (worldPos.x - worldPos.y);
-    iso.y = (worldPos.x + worldPos.y) / 2.0f; // This /2 creates the 50% "squash"
-    return iso;
+  Vector2 iso;
+  // The Standard Formula:
+  iso.x = (worldPos.x - worldPos.y);
+  iso.y = (worldPos.x + worldPos.y) / 2.0f; // This /2 creates the 50% "squash"
+  return iso;
 }
 
 
@@ -191,21 +193,21 @@ void Draw_Tiles(Map* map) {
 
       // Draw Walls (The 'sides' of the block)
       if (h > 0) {
-          // Right Side (Darker)
-            Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
-          Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
-          
-          //  right side
-          DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+        // Right Side (Darker)
+          Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+        Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
+        
+        //  right side
+        DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
 
-          // back side
-          DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
-          // // Left Side (Medium)
+        // back side
+        DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
+        // // Left Side (Medium)
 
-          //front side
-          // // Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
-          DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
-          
+        //front side
+        // // Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+        DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
+        
       }
 
       // Draw Top Face
@@ -227,7 +229,7 @@ void Draw_MapEntity(MapEntity* entity,Map* map){
   int ty = (int)(entity->position.y / TILE_SIZE);
   if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
       float hOffset = map->grid[ty][tx].height * 8.0f;
-      position.y -= hOffset; // Lift the character up!
+      position.y -= (hOffset + entity->jumpoffset); // Lift the character up!
   }
 
   Vector2 origin = { 16, 64 }; 
@@ -236,7 +238,7 @@ void Draw_MapEntity(MapEntity* entity,Map* map){
   Rectangle r= {0,0,32,64};
   DrawTextureRec(*entity->sprite,r,drawPos, WHITE );
   // Draw a small gray ellipse at 'position' to ground the character
-DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
+  DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
   //draws their name
   if(entity->type== ENTITY_CHARACTER){
     Character* c = entity->data.character;
@@ -250,73 +252,6 @@ DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
   
 }
 
-bool Check_Collision(Map* map, Vector2 nextPos) {
-  // We define a small "collision patch" at the feet.
-  // 27px wide sprite, so we check from x+4 to x+23 (narrower for forgiveness)
-  // 64px tall sprite, so we check near the bottom (y+60)
-  // Inside Check_Collision...
-  // Get current tile height
-  int currentX = (int)(map->player->position.x / TILE_SIZE);
-  int currentY = (int)(map->player->position.y / TILE_SIZE);
-
-  int currentHeight = map->grid[currentY][currentX].height;
-  
-  float footLeft   = nextPos.x - 14;
-  float footRight  = nextPos.x + 14;
-  float footBottom = nextPos.y + 8; // 63 is the last pixel of the 64px height
-  float footTop    = nextPos.y - 8; // A 10-pixel high collision strip
-
-  // 1. Map Boundary Check (Keep him inside the world)
-  if (footLeft < 0 || footRight >= map->pixel_width || 
-      footTop < 0 || footBottom >= map->pixel_height) {
-      return true; 
-  }
-
-    // 2. Multi-Point Tile Check
-    // We check the left-foot corner and the right-foot corner.
-    int checkX[] = { (int)(footLeft / TILE_SIZE), (int)(footRight / TILE_SIZE) };
-    int checkY[] = { (int)(footTop / TILE_SIZE), (int)(footBottom / TILE_SIZE) };
-
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-            int tileID = map->grid[checkY[j]][checkX[i]].type;
-            int targetHeight = map->grid[checkY[j]][checkX[i]].height;
-            if (TILE_REGISTRY[tileID].is_blocking || targetHeight > currentHeight+1) {
-                return true;
-            }
-
-
-        }
-    }
-
-    // 3. Entity Check (Future proofing for those Barrels/Plants)
-    MapEntity* curr = map->entities;
-    while (curr != NULL) {
-      if(curr->type != ENTITY_PLAYER){
-        if (curr->type == ENTITY_PLANT) {
-          Plant* plant = curr->data.plant;
-
-          float plantLeft   = curr->position.x ;
-          float plantTop    = curr->position.y; 
-
-          // // Define the player's small foot-patch rectangle
-          Rectangle playerFeet = { footLeft, footTop, 19, 9 }; 
-          // // Define the entity's rectangle (matching your 16x16 Draw size)
-          Rectangle entityBox = { plantLeft, plantTop, plant->hitboxwidth, plant->hitboxheight};
-          
-          if (CheckCollisionRecs(playerFeet, entityBox)) {
-              return true; // Stop the player!
-          }
-        }
-      }
-      
-        // If we add an 'is_blocking' flag to entities later, check it here
-        curr = curr->next;
-    }
-
-    return false;
-}
-
 void Handle_Input(Map* map){
   float dt = GetFrameTime();
   Vector2 dir = { 0, 0 };
@@ -325,7 +260,12 @@ void Handle_Input(Map* map){
   if (IsKeyDown(KEY_A)) dir.x -= 1;
   if (IsKeyDown(KEY_D)) dir.x += 1;
   if (IsKeyDown(KEY_S)) dir.y += 1;
-
+  if (IsKeyDown(KEY_SPACE)){
+    if(map->player->state != JUMPING_STATE){
+      map->player->state = JUMPING_STATE;
+      map->player->verticalVelocity= 10.0f;
+    }
+  }
   if (dir.x != 0 || dir.y != 0) {
     // This is the "proper" way to get 0.707 for diagonals
     float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
@@ -347,6 +287,73 @@ void Handle_Input(Map* map){
     Add_Entity(map, map->player);
   }
 
+}
+
+bool Check_Collision(Map* map, Vector2 nextPos) {
+    // 1. Get the tile coordinates for the CURRENT position
+    int curX = (int)(map->player->position.x / TILE_SIZE);
+    int curY = (int)(map->player->position.y / TILE_SIZE);
+    
+    // Safety check
+    if (curX < 0 || curX >= map->columns || curY < 0 || curY >= map->rows) return true;
+
+    // IMPORTANT: Calculate current world height (Tile + Jump)
+    float currentWorldHeight = (float)map->grid[curY][curX].height + (map->player->jumpoffset / 8.0f);
+
+    // Collision Box
+    float footLeft   = nextPos.x - 14;
+    float footRight  = nextPos.x + 14;
+    float footTop    = nextPos.y - 8;
+    float footBottom = nextPos.y + 8;
+
+    if (footLeft < 0 || footRight >= map->pixel_width || footTop < 0 || footBottom >= map->pixel_height) return true;
+
+    int checkX[] = { (int)(footLeft / TILE_SIZE), (int)(footRight / TILE_SIZE) };
+    int checkY[] = { (int)(footTop / TILE_SIZE), (int)(footBottom / TILE_SIZE) };
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            float targetHeight = (float)map->grid[checkY[j]][checkX[i]].height;
+            bool isBlocking = TILE_REGISTRY[map->grid[checkY[j]][checkX[i]].type].is_blocking;
+
+            // Use 1.1f to allow for tiny float errors when stepping up 1 unit
+            if (isBlocking || targetHeight > (currentWorldHeight + 1.1f)) {
+                return true; 
+            }
+        }
+    }
+    return false;
+}
+
+void Apply_Gravity(Map* map) {
+  int tx = (int)(map->player->position.x / TILE_SIZE);
+  int ty = (int)(map->player->position.y / TILE_SIZE);
+  if (tx < 0 || tx >= map->columns || ty < 0 || ty >= map->rows) return;
+
+  // If we move to a lower tile, the "jumpoffset" needs to increase 
+  // to keep us at the same visual height while we start falling.
+  static int lastTileHeight = -1;
+  int currentTileHeight = map->grid[ty][tx].height;
+
+  if (lastTileHeight != -1 && currentTileHeight < lastTileHeight) {
+      // We just stepped down! Add the difference to jumpoffset so we don't "snap" down.
+      map->player->jumpoffset += (lastTileHeight - currentTileHeight) * 8.0f;
+      map->player->state = JUMPING_STATE;
+  }
+  lastTileHeight = currentTileHeight;
+
+  // Standard Gravity Logic
+  if (map->player->state == JUMPING_STATE || map->player->jumpoffset > 0.0f) {
+      map->player->verticalVelocity -= 1.0f; 
+      map->player->jumpoffset += map->player->verticalVelocity;
+  }
+
+  // Hit the floor
+  if (map->player->jumpoffset <= 0.0f) {
+      map->player->jumpoffset = 0.0f;
+      map->player->verticalVelocity = 0.0f;
+      map->player->state = NORMAL_STATE;
+  }
 }
 
 void Update_Map(Map* map, Dialog_Manager* manager){

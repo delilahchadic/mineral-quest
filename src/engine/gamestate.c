@@ -15,6 +15,7 @@ void UpdateGameplay(Gamestate* gamestate){
   if(!gamestate->manager.active){
     //handle okayer input and update map enitities as necessary
     Handle_Input(&gamestate->map);
+    Apply_Gravity(&gamestate->map);
     Update_Map(&gamestate->map,&gamestate->manager);
     //inventory
     if(IsKeyPressed(KEY_I)){

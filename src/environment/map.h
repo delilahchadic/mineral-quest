@@ -40,6 +40,11 @@ typedef enum {
     ENTITY_PLAYER
 } EntityType;
 
+typedef enum {
+  NORMAL_STATE,
+  JUMPING_STATE
+} State;
+
 typedef struct MapEntity {
     // bool isPlayer;
     EntityType type;      // Is this a person or a flower?
@@ -53,6 +58,9 @@ typedef struct MapEntity {
       Player player;
       int id;
     } data;
+    State state;
+    float jumpoffset;
+    float verticalVelocity;
 } MapEntity;
 
 typedef struct Tile{
@@ -79,6 +87,7 @@ void InitMap(Map* map);
 void Draw_Tiles(Map* map);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map);
+void Apply_Gravity(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
 void Handle_Input(Map* map);
