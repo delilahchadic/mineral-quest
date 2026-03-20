@@ -160,5 +160,6 @@ void CloseGame(Gamestate* gamestate){
   Close_Character(&gamestate->character);
   Close_Player(PLAYER);
   Close_Map(&gamestate->map);
+  free(gamestate);
   CloseWindow();
 }
