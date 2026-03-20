@@ -55,8 +55,13 @@ typedef struct MapEntity {
     } data;
 } MapEntity;
 
+typedef struct Tile{
+  int height;
+  TileType type;
+} Tile;
+
 typedef struct Map{
-  int grid[MAP_WIDTH][MAP_HEIGHT];
+  Tile grid[MAP_WIDTH][MAP_HEIGHT];
   int pixel_width;
   int pixel_height;
   int rows;
@@ -67,10 +72,12 @@ typedef struct Map{
   MapEntity* player; 
 }Map;
 
+
+
 void LoadMapGridFile(const char* filename, Map* map);
 void InitMap(Map* map);
 void Draw_Tiles(Map* map);
-void Draw_MapEntity(MapEntity* entity);
+void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);

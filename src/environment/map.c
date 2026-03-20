@@ -63,6 +63,7 @@ void LoadMapGridFile(const char* filename, Map* map){
   }
   TraceLog(LOG_INFO,"File Loaded - %s", filename);
   char line[1024];
+  // Read Header
   fgets(line, sizeof(line),file);
   char* rowToken = strtok(line,",");
   char* colToken = strtok(NULL,",");
@@ -76,14 +77,32 @@ void LoadMapGridFile(const char* filename, Map* map){
   }
   int row =0;
   int col =0;
-  while (fgets(line, sizeof(line), file) && row<map->rows) {
-    // col = 0;
+
+  //cycle through file to get types
+  while (row<map->rows) {
+    fgets(line, sizeof(line), file);
     line[strcspn(line, "\n")] = 0;
     char* colToken = strtok(line,",");
-    // map->grid[row][0] = atoi(colToken);
     for (col = 0;col<map->columns;col++){
-      map->grid[row][col] = atoi(colToken);
+      if (colToken != NULL)
+      {map->grid[row][col].type = atoi(colToken);
+      colToken = strtok(NULL,",");} 
+    }
+    row++;
+  }
+  // process blank line
+  fgets(line, sizeof(line), file);
+  //process for tile heigh
+  row=0;
+  while (row<map->rows) {
+    fgets(line, sizeof(line), file);
+    line[strcspn(line, "\n")] = 0;
+    char* colToken = strtok(line,",");
+    for (col = 0;col<map->columns;col++){
+      if (colToken != NULL)
+      {map->grid[row][col].height = atoi(colToken);
       colToken = strtok(NULL,",");
+    }
       
     }
     
@@ -144,7 +163,7 @@ void Draw_Map(Map* map) {
     MapEntity* curr = map->entities;
     while(curr!=NULL){
       // Draw the actual entity
-      Draw_MapEntity(curr);
+      Draw_MapEntity(curr,map);
       curr = curr->next;
     }
     EndMode2D();
@@ -152,42 +171,64 @@ void Draw_Map(Map* map) {
 }
 
 void Draw_Tiles(Map* map) {
-    for (int y = 0; y < map->rows; y++) {
-        for (int x = 0; x < map->columns; x++) {
-            // 1. Get the 4 corners in FLAT WORLD PIXELS
-            // If TILE_SIZE is 32, (1,0) becomes (32, 0)
-            float fx = (float)x * TILE_SIZE;
-            float fy = (float)y * TILE_SIZE;
+  for (int y = 0; y < map->rows; y++) {
+    for (int x = 0; x < map->columns; x++) {
+      float h = map->grid[y][x].height * 8.0f;
+      Color base = TILE_REGISTRY[map->grid[y][x].type].color;
 
-            Vector2 nw = { fx, fy };
-            Vector2 ne = { fx + TILE_SIZE, fy };
-            Vector2 se = { fx + TILE_SIZE, fy + TILE_SIZE };
-            Vector2 sw = { fx, fy + TILE_SIZE };
 
-            // 2. Project those corners to ISO SCREEN PIXELS
-            Vector2 p1 = GetWorldToIso(nw);
-            Vector2 p2 = GetWorldToIso(ne);
-            Vector2 p3 = GetWorldToIso(se);
-            Vector2 p4 = GetWorldToIso(sw);
+      // Calculate 4 ground corners
+      Vector2 g1 = GetWorldToIso((Vector2){ x * TILE_SIZE, y * TILE_SIZE });
+      Vector2 g2 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, y * TILE_SIZE });
+      Vector2 g3 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE });
+      Vector2 g4 = GetWorldToIso((Vector2){ x * TILE_SIZE, (y + 1) * TILE_SIZE });
 
-            // 3. Get the color for THIS specific tile
-            Color tileColor = TILE_REGISTRY[map->grid[y][x]].color;
+      // Calculate 4 top corners (lifted by h)
+      Vector2 t1 = { g1.x, g1.y - h };
+      Vector2 t2 = { g2.x, g2.y - h };
+      Vector2 t3 = { g3.x, g3.y - h };
+      Vector2 t4 = { g4.x, g4.y - h };
 
-            // 4. Draw the Diamond
-            // TriangleFan connects p1->p2->p3->p4 to fill the diamond
-            DrawTriangleFan((Vector2[]){ p1, p4, p3, p2 }, 4, tileColor);
-            
-            // 5. Grid lines (helps you see if they are overlapping)
-            DrawLineV(p1, p2, Fade(BLACK, 0.2f));
-            DrawLineV(p2, p3, Fade(BLACK, 0.2f));
-            DrawLineV(p3, p4, Fade(BLACK, 0.2f));
-            DrawLineV(p4, p1, Fade(BLACK, 0.2f));
-        }
+      // Draw Walls (The 'sides' of the block)
+      if (h > 0) {
+          // Right Side (Darker)
+            Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+          Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
+          
+          //  right side
+          DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+
+          // back side
+          DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
+          // // Left Side (Medium)
+
+          //front side
+          // // Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+          DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
+          
+      }
+
+      // Draw Top Face
+      DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, base);
+      // Grid Outlines
+      DrawLineV(t1, t2, Fade(BLACK, 0.1f));
+      DrawLineV(t2, t3, Fade(BLACK, 0.1f));
+      DrawLineV(t3, t4, Fade(BLACK, 0.1f));
+      DrawLineV(t4, t1, Fade(BLACK, 0.1f));
     }
+  }
 }
 
-void Draw_MapEntity(MapEntity* entity){
+
+void Draw_MapEntity(MapEntity* entity,Map* map){
   Vector2 position = GetWorldToIso(entity->position);
+
+  int tx = (int)(entity->position.x / TILE_SIZE);
+  int ty = (int)(entity->position.y / TILE_SIZE);
+  if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
+      float hOffset = map->grid[ty][tx].height * 8.0f;
+      position.y -= hOffset; // Lift the character up!
+  }
 
   Vector2 origin = { 16, 64 }; 
   Vector2 drawPos = { position.x - origin.x, position.y - origin.y };
@@ -210,20 +251,26 @@ DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
 }
 
 bool Check_Collision(Map* map, Vector2 nextPos) {
-    // We define a small "collision patch" at the feet.
-    // 27px wide sprite, so we check from x+4 to x+23 (narrower for forgiveness)
-    // 64px tall sprite, so we check near the bottom (y+60)
-    
-    float footLeft   = nextPos.x - 10;
-    float footRight  = nextPos.x + 10;
-    float footBottom = nextPos.y + 5; // 63 is the last pixel of the 64px height
-    float footTop    = nextPos.y - 5; // A 10-pixel high collision strip
+  // We define a small "collision patch" at the feet.
+  // 27px wide sprite, so we check from x+4 to x+23 (narrower for forgiveness)
+  // 64px tall sprite, so we check near the bottom (y+60)
+  // Inside Check_Collision...
+  // Get current tile height
+  int currentX = (int)(map->player->position.x / TILE_SIZE);
+  int currentY = (int)(map->player->position.y / TILE_SIZE);
 
-    // 1. Map Boundary Check (Keep him inside the world)
-    if (footLeft < 0 || footRight >= map->pixel_width || 
-        footTop < 0 || footBottom >= map->pixel_height) {
-        return true; 
-    }
+  int currentHeight = map->grid[currentY][currentX].height;
+  
+  float footLeft   = nextPos.x - 14;
+  float footRight  = nextPos.x + 14;
+  float footBottom = nextPos.y + 8; // 63 is the last pixel of the 64px height
+  float footTop    = nextPos.y - 8; // A 10-pixel high collision strip
+
+  // 1. Map Boundary Check (Keep him inside the world)
+  if (footLeft < 0 || footRight >= map->pixel_width || 
+      footTop < 0 || footBottom >= map->pixel_height) {
+      return true; 
+  }
 
     // 2. Multi-Point Tile Check
     // We check the left-foot corner and the right-foot corner.
@@ -232,10 +279,13 @@ bool Check_Collision(Map* map, Vector2 nextPos) {
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
-            int tileID = map->grid[checkY[j]][checkX[i]];
-            if (TILE_REGISTRY[tileID].is_blocking) {
+            int tileID = map->grid[checkY[j]][checkX[i]].type;
+            int targetHeight = map->grid[checkY[j]][checkX[i]].height;
+            if (TILE_REGISTRY[tileID].is_blocking || targetHeight > currentHeight+1) {
                 return true;
             }
+
+
         }
     }
 
@@ -271,31 +321,28 @@ void Handle_Input(Map* map){
   float dt = GetFrameTime();
   Vector2 dir = { 0, 0 };
 
-  if(IsKeyDown(KEY_W)){
-    dir.y -=1;
-  }
-  if(IsKeyDown(KEY_A)){
-    dir.x -=1;
-
-  }
-   if(IsKeyDown(KEY_D)){
-    dir.x +=1;
-  }
-
-   if(IsKeyDown(KEY_S)){
-    dir.y +=1;
-  }
+  if (IsKeyDown(KEY_W)) dir.y -= 1;
+  if (IsKeyDown(KEY_A)) dir.x -= 1;
+  if (IsKeyDown(KEY_D)) dir.x += 1;
+  if (IsKeyDown(KEY_S)) dir.y += 1;
 
   if (dir.x != 0 || dir.y != 0) {
     // This is the "proper" way to get 0.707 for diagonals
     float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
-    Vector2 potentialPosition = map->player->position;
-    potentialPosition.x += dir.x * PLAYER->speed * length * dt;
-    potentialPosition.y += dir.y * PLAYER->speed * length * dt;
-    if(!Check_Collision(map,potentialPosition)){
-      map->player->position.x = potentialPosition.x;
-      map->player->position.y = potentialPosition.y;
-    }
+    float moveSpeed = PLAYER->speed * length * dt;
+      // 1. Try X movement
+      Vector2 nextX = map->player->position;
+      nextX.x += dir.x * moveSpeed;
+      if (!Check_Collision(map, nextX)) {
+          map->player->position.x = nextX.x;
+      }
+
+      // 2. Try Y movement
+      Vector2 nextY = map->player->position;
+      nextY.y += dir.y * moveSpeed;
+      if (!Check_Collision(map, nextY)) {
+          map->player->position.y = nextY.y;
+      }
     Remove_Entity(map, map->player);
     Add_Entity(map, map->player);
   }
@@ -369,3 +416,4 @@ void Add_Entity(Map* map, MapEntity* entity){
   curr->next = entity;
   return;
 }
+
