@@ -159,7 +159,6 @@ Vector2 GetWorldToIso(Vector2 worldPos) {
   return iso;
 }
 
-
 void Draw_Map(Map* map) {
   BeginMode2D(map->camera);
     for (int y = 0; y < map->rows; y++) {
@@ -209,6 +208,7 @@ void Draw_Tile(Map* map, int x, int y){
         DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
         //front side
         DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
+        
       }
 
       // Draw Top Face
@@ -269,18 +269,13 @@ void Handle_Input(Map* map){
     float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
     float moveSpeed = PLAYER->speed * length * dt;
       // 1. Try X movement
-      Vector2 nextX = map->player->position;
-      nextX.x += dir.x * moveSpeed;
-      if (!Check_Collision(map, nextX)) {
-          map->player->position.x = nextX.x;
-      }
-
-      // 2. Try Y movement
-      Vector2 nextY = map->player->position;
-      nextY.y += dir.y * moveSpeed;
-      if (!Check_Collision(map, nextY)) {
-          map->player->position.y = nextY.y;
-      }
+      // Vector2 nextX = map->player->position;
+    if(map->player->velocity.x < PLAYER->maxSpeed)
+      map->player->velocity.x += dir.x * moveSpeed;
+    
+    if(map->player->velocity.y < PLAYER->maxSpeed)
+      map->player->velocity.y += dir.y * moveSpeed;
+      
     Remove_Entity(map, map->player);
     Add_Entity(map, map->player);
   }
@@ -350,6 +345,33 @@ void Apply_Gravity(Map* map) {
       map->player->jumpoffset = 0.0f;
       map->player->verticalVelocity = 0.0f;
       map->player->state = NORMAL_STATE;
+  }
+}
+
+void Update_Physics(Map* map){
+  Apply_Gravity(map);
+  Apply_Friction(map);
+  Resolve_Movement(map);
+}
+
+void Resolve_Movement(Map* map){
+  Vector2 nextX = map->player->position;
+  nextX.x += map->player->velocity.x;
+  if (!Check_Collision(map, nextX)) {
+      map->player->position.x = nextX.x;
+  }
+
+  Vector2 nextY = map->player->position;
+  nextY.y += map->player->velocity.y;
+  if (!Check_Collision(map, nextY)) {
+      map->player->position.y = nextY.y;
+  }
+}
+
+void Apply_Friction(Map* map){
+   if(map->player->velocity.x != 0 || map->player->velocity.y != 0 ){
+    map->player->velocity.x *= 0.9f;
+    map->player->velocity.y *= 0.9f;
   }
 }
 

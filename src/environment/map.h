@@ -59,6 +59,7 @@ typedef struct MapEntity {
       int id;
     } data;
     State state;
+    Vector2 velocity;
     float jumpoffset;
     float verticalVelocity;
 } MapEntity;
@@ -99,5 +100,8 @@ void Init_Player(Map* map);
 void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
+void Apply_Friction(Map* map);
+void Resolve_Movement(Map* map);
+void Update_Physics(Map* map);
 
 #endif
