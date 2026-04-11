@@ -10,6 +10,25 @@ void InitGame(Gamestate* gamestate){
   Init_Dialog_Manager(&gamestate->manager,100);
 }
 
+//routes to update based on gamestate
+void UpdateScene(Gamestate* gamestate){
+  switch(gamestate->screen) {
+    case LOGO:
+      gamestate->framesCounter++;
+      if (gamestate->framesCounter > 120) gamestate->screen = TITLE; // Switch after 2 seconds
+      break;
+    case TITLE:
+      if (IsKeyPressed(KEY_ENTER)) gamestate->screen = GAMEPLAY;
+      break;
+    case GAMEPLAY:
+      UpdateGameplay(gamestate);
+      break;
+    case INVENTORY:
+      UpdateInventory(gamestate);
+      break;
+  }
+}
+
 void UpdateGameplay(Gamestate* gamestate){
   //if dialog manager is active input is disabled
   if(!gamestate->manager.active){
@@ -53,24 +72,7 @@ void UpdateInventory(Gamestate* gamestate){
     
 }
 
-//routes to update based on gamestate
-void UpdateScene(Gamestate* gamestate){
-  switch(gamestate->screen) {
-    case LOGO:
-      gamestate->framesCounter++;
-      if (gamestate->framesCounter > 120) gamestate->screen = TITLE; // Switch after 2 seconds
-      break;
-    case TITLE:
-      if (IsKeyPressed(KEY_ENTER)) gamestate->screen = GAMEPLAY;
-      break;
-    case GAMEPLAY:
-      UpdateGameplay(gamestate);
-      break;
-    case INVENTORY:
-      UpdateInventory(gamestate);
-      break;
-  }
-}
+
 void DrawGameplay(Gamestate* gamestate){
   Draw_Map(&gamestate->map);    
   DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);

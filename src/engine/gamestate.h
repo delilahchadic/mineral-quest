@@ -35,4 +35,5 @@ void UpdateScene(Gamestate *gamestate);
 void DrawGameplay(Gamestate *gamestate);
 void DrawScreen(Gamestate *gamestate);
 void CloseGame(Gamestate *gamestate);
+void UpdateInventory(Gamestate* gamestate);
 #endif

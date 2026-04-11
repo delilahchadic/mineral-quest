@@ -86,12 +86,15 @@ typedef struct Map{
 
 void LoadMapGridFile(const char* filename, Map* map);
 void InitMap(Map* map);
-void Draw_Tiles(Map* map);
+
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map);
+
 void Apply_Gravity(Map* map);
 bool Check_Collision(Map* map, Vector2 nextPos);
+
 void Add_Entity(Map* map, MapEntity* entity);
+
 void Handle_Input(Map* map);
 void Update_Map(Map* map,Dialog_Manager* manager);
 void Close_Map(Map* map);
