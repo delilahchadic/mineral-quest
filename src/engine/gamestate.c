@@ -2,7 +2,7 @@
 
 void InitGame(Gamestate* gamestate){
   // System Setup
-  InitRegistries();
+  
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
