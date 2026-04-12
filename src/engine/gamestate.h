@@ -24,7 +24,6 @@ typedef struct Gamestate
   int framesCounter;
   Player player;
   Map map;
-  Character character;
   Dialog_Manager manager;
 
 } Gamestate;

@@ -2,7 +2,6 @@
 
 void InitGame(Gamestate* gamestate){
   // System Setup
-  
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
   gamestate->player = Get_Default_Player();
@@ -160,7 +159,6 @@ void DrawScreen(Gamestate* gamestate){
 }
 
 void CloseGame(Gamestate* gamestate){
-  Close_Character(&gamestate->character);
   Close_Player(PLAYER);
   Close_Map(&gamestate->map);
   free(gamestate);
