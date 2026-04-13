@@ -2,14 +2,15 @@
 #define COMMON_H
 #include "raylib.h"
 
-typedef enum{
+typedef enum ItemType{
   ITEM_VHS_TAPE,
   ITEM_TAROT_CARD,
   ITEM_MISC,
   ITEM_KEY_ITEM,
   ITEM_MINERAL
 } ItemType;
-typedef struct {
+
+typedef struct ItemDefinition{
     int id;
     char name[32];
     char description[128];
@@ -17,16 +18,14 @@ typedef struct {
     ItemType type; // For that "Bebop" flair
 } ItemDefinition;
 
-typedef struct Dialog
-{
+typedef struct Dialog {
   char character_name[32];
   char text[256];
   int id;
   int nextid;
 } Dialog;
 
-typedef struct Plant
-{
+typedef struct Plant{
   char species_name[32];
   Texture2D sprite;
   int frameheight;
@@ -34,6 +33,5 @@ typedef struct Plant
   int hitboxheight;
   int hitboxwidth;
 } Plant;
-
 
 #endif
