@@ -8,17 +8,18 @@ void InitPlaySession(PlaySession* session){
 }
 
 void UpdatePlaySession(PlaySession* session){
-
   switch(session->state){
     case ADVENTURE:
       if(!session->manager.active){
-        //handle okayer input and update map enitities as necessary
-        Handle_Input(&session->map);
-        Update_Physics(&session->map);
-        Update_Map(&session->map,&session->manager);
-        //inventory
-        if(IsKeyPressed(KEY_I)){
+        Input input = CaptureInput();
+
+        if(input.inventory){
           session->state = INVENTORY;
+        } else if(input.dialog){
+          InitDialog(&session->map, &session->manager);
+        }else{
+          bool moved = UpdatePhysics(&session->map, input.dir, input.jump);
+          Update_Map(&session->map, moved);
         }
       }
       //control camera if manager is active or not
@@ -113,4 +114,21 @@ void DrawPlaySession(PlaySession* session){
     break;
   }
   
+}
+
+void InitDialog(Map* map, DialogManager* manager){
+  MapEntity* tmp = map->entities;
+  while (tmp != NULL) {
+    if(tmp->type== ENTITY_CHARACTER){
+      Character* c = tmp->data.character;
+      if(Vector2Distance(map->player->position, tmp->position) <50.f){
+        if (IsKeyPressed(KEY_E) && !manager->active) {
+            // Tell the manager to look up the ID stored on the character
+            Set_Active_Dialog(manager, c->dialogId);
+            manager->active = true;
+        }
+      }
+    }
+        tmp = tmp->next;
+    }
 }

@@ -3,7 +3,8 @@
 #include "systems/player.h"
 #include "environment/map.h"
 #include "environment/map_loader.h"
-
+#include "systems/input.h"
+#include "systems/physics.h"
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60
@@ -23,4 +24,5 @@ void UpdatePlaySession(PlaySession* session);
 void DrawPlaySession(PlaySession* session);
 void DrawInventory(PlaySession* session);
 void UpdateInventory(PlaySession* session);
+void InitDialog(Map* map, DialogManager* manager);
 #endif
