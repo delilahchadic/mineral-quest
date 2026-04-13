@@ -1,12 +1,12 @@
 #include "engine/play_session.h"
 
-void InitPlaySession(Play_Session* session){
+void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   InitMap(&session->map);
   Init_Dialog_Manager(&session->manager,100);
 }
 
-void UpdatePlaySession(Play_Session* session){
+void UpdatePlaySession(PlaySession* session){
 
   switch(session->state){
     case ADVENTURE:
@@ -38,7 +38,7 @@ void UpdatePlaySession(Play_Session* session){
 
 /// @brief manages input while game is in inventory mode
 /// @param gamestate 
-void UpdateInventory(Play_Session* session){
+void UpdateInventory(PlaySession* session){
   if(IsKeyPressed(KEY_W)){
     session->player.inventory.selected--;
     if(session->player.inventory.selected == -1){
@@ -55,7 +55,7 @@ void UpdateInventory(Play_Session* session){
     
 }
 
-void DrawInventory(Play_Session* session) {
+void DrawInventory(PlaySession* session) {
     // 1. Background - The Aged Paper
     ClearBackground(COLOR_PULP_PAPER);
 
@@ -96,7 +96,7 @@ void DrawInventory(Play_Session* session) {
     }
 }
 
-void DrawPlaySession(Play_Session* session){
+void DrawPlaySession(PlaySession* session){
   switch (session->state)
   {
   case ADVENTURE:

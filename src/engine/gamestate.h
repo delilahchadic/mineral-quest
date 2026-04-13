@@ -21,7 +21,7 @@ typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
 typedef struct Gamestate{
   GameScreen screen;
   int framesCounter;
-  Play_Session session;
+  PlaySession session;
 } Gamestate;
 
 void InitGame(Gamestate* gamestate);

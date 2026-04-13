@@ -6,19 +6,19 @@
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60
 
-typedef enum Play_State { ADVENTURE = 0, INVENTORY } Play_State;
+typedef enum PlayState { ADVENTURE = 0, INVENTORY } PlayState;
 
-typedef struct Play_Session{
+typedef struct PlaySession{
   Player player;
   Map map;
-  Dialog_Manager manager;
-  Play_State state;
-} Play_Session;
+  DialogManager manager;
+  PlayState state;
+} PlaySession;
 
 
-void InitPlaySession(Play_Session* session);
-void UpdatePlaySession(Play_Session* session);
-void DrawPlaySession(Play_Session* session);
-void DrawInventory(Play_Session* session);
-void UpdateInventory(Play_Session* session);
+void InitPlaySession(PlaySession* session);
+void UpdatePlaySession(PlaySession* session);
+void DrawPlaySession(PlaySession* session);
+void DrawInventory(PlaySession* session);
+void UpdateInventory(PlaySession* session);
 #endif
