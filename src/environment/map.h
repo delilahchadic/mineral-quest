@@ -11,6 +11,7 @@
 #include "systems/character.h"
 #include "systems/player.h"
 #include "systems/dialog.h"
+#include "systems/input.h"
 #include "engine/register.h"
 #define TILE_SIZE 32
 
@@ -20,17 +21,8 @@
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
 
-typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD} TileType;
+
 typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
-
-
-typedef struct TileDefinition{
-    int id;             // 0 = Sand, 1 = Asphalt, 2 = Magnetic Pit
-    bool is_blocking;   //
-    float friction;     // 1.0 = Normal, 0.2 = Ice/Oil, 1.5 = Deep Sand
-    int footstep_sfx;
-    Color color;// sound??
-} TileDefinition;
 
 typedef enum {
     ENTITY_CHARACTER,
@@ -83,25 +75,22 @@ typedef struct Map{
 }Map;
 
 void InitMap(Map* map);
-
+void Update_Map(Map* map, bool moved);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map);
 
-void Apply_Gravity(Map* map);
-bool Check_Collision(Map* map, Vector2 nextPos);
 
-void Add_Entity(Map* map, MapEntity* entity);
 
-void Handle_Input(Map* map);
-void Update_Map(Map* map,DialogManager* manager);
+
 void Close_Map(Map* map);
+void Add_Entity(Map* map, MapEntity* entity);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map); 
+void InitDialog(Map* map, DialogManager* manager);
 void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
-void Apply_Friction(Map* map);
-void Resolve_Movement(Map* map);
-void Update_Physics(Map* map);
+
+
 
 #endif
