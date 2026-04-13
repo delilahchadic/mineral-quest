@@ -2,6 +2,8 @@
 #define PlAY_SESSION_H
 #include "systems/player.h"
 #include "environment/map.h"
+#include "environment/map_loader.h"
+
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60

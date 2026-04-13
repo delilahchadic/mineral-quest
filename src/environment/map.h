@@ -82,9 +82,6 @@ typedef struct Map{
   int lastTileHeight;
 }Map;
 
-
-
-void LoadMapGridFile(const char* filename, Map* map);
 void InitMap(Map* map);
 
 void Draw_MapEntity(MapEntity* entity, Map* map);

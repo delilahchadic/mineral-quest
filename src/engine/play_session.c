@@ -2,6 +2,7 @@
 
 void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
+  LoadMap("highway",&session->map);
   InitMap(&session->map);
   Init_Dialog_Manager(&session->manager,100);
 }
