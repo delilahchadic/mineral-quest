@@ -175,9 +175,7 @@ void Handle_Input(Map* map){
     
     if(map->player->velocity.y < PLAYER->maxSpeed)
       map->player->velocity.y += dir.y * moveSpeed;
-      
-    Remove_Entity(map, map->player);
-    Add_Entity(map, map->player);
+    
   }
 
 }
@@ -256,15 +254,23 @@ void Update_Physics(Map* map){
 
 void Resolve_Movement(Map* map){
   Vector2 nextX = map->player->position;
+  bool moved = false;
   nextX.x += map->player->velocity.x;
   if (!Check_Collision(map, nextX)) {
-      map->player->position.x = nextX.x;
+    map->player->position.x = nextX.x;
+    moved = true;
   }
 
   Vector2 nextY = map->player->position;
   nextY.y += map->player->velocity.y;
   if (!Check_Collision(map, nextY)) {
-      map->player->position.y = nextY.y;
+    map->player->position.y = nextY.y;
+    moved = true;
+  }
+
+  if(moved){
+    Remove_Entity(map, map->player);
+    Add_Entity(map, map->player);
   }
 }
 
