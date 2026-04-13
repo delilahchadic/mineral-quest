@@ -86,7 +86,7 @@ void Close_Map(Map* map);
 void Add_Entity(Map* map, MapEntity* entity);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map); 
-void InitDialog(Map* map, DialogManager* manager);
+
 void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
