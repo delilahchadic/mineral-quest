@@ -44,4 +44,12 @@ typedef struct TileDefinition{
     int footstep_sfx;
     Color color;// sound??
 } TileDefinition;
+
+typedef enum EntityType{
+    ENTITY_CHARACTER,
+    ENTITY_ITEM,
+    ENTITY_PLANT,
+    ENTITY_DECOR,
+    ENTITY_PLAYER
+} EntityType;
 #endif
