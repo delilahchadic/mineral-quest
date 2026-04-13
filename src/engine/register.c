@@ -6,6 +6,17 @@ Character CHARACTER_REGISTRY[200] = {0};
 Plant PLANT_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
+
+
+// registry types temporary till we move into a dedicated register
+TileDefinition TILE_REGISTRY[6] = {
+  { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY},
+  { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP    },
+  { TILE_SAND,  false, 0.4f, 103, COLOR_CERULEAN_BERYL    },
+  { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON  },
+  { TILE_STONE, false, 0.9f, 105, COLOR_DUSTY_SAP          },
+  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
+};
 /// @brief parses line of the plant csv
 /// @param line 
 void ParsePlantRow(char* line) {

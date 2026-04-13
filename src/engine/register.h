@@ -20,6 +20,7 @@ extern ItemDefinition ITEM_REGISTRY[100];
 extern Dialog DIALOG_REGISTRY[500];
 extern Character CHARACTER_REGISTRY[200];
 extern Player* PLAYER;
+extern TileDefinition TILE_REGISTRY[6];
 // 3. The Master Functions
 void LoadItemRegistry();
 void LoadDialogRegistry();
