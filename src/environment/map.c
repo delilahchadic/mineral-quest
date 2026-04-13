@@ -375,7 +375,7 @@ void Apply_Friction(Map* map){
   }
 }
 
-void Update_Map(Map* map, Dialog_Manager* manager){
+void Update_Map(Map* map, DialogManager* manager){
    MapEntity* tmp = map->entities;
     while (tmp != NULL) {
       if(tmp->type== ENTITY_CHARACTER){

@@ -96,7 +96,7 @@ bool Check_Collision(Map* map, Vector2 nextPos);
 void Add_Entity(Map* map, MapEntity* entity);
 
 void Handle_Input(Map* map);
-void Update_Map(Map* map,Dialog_Manager* manager);
+void Update_Map(Map* map,DialogManager* manager);
 void Close_Map(Map* map);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map); 

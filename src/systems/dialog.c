@@ -1,6 +1,6 @@
 #include "systems/dialog.h"
 
-void Init_Dialog_Manager(Dialog_Manager* manager, int initialCapacity){
+void Init_Dialog_Manager(DialogManager* manager, int initialCapacity){
   manager->count =0;
   manager->capacity = initialCapacity;
   manager->active =false;
@@ -9,11 +9,11 @@ void Init_Dialog_Manager(Dialog_Manager* manager, int initialCapacity){
 };
 
 
-void Set_Active_Dialog(Dialog_Manager* manager,int dialogId){
+void Set_Active_Dialog(DialogManager* manager,int dialogId){
   manager->active_dialog = &DIALOG_REGISTRY[dialogId];
 }
 
-void Draw_Dialog(Dialog_Manager* manager){
+void Draw_Dialog(DialogManager* manager){
 
   if(!manager->active || manager->active_dialog == NULL){
     return;
@@ -35,7 +35,7 @@ void Draw_Dialog(Dialog_Manager* manager){
   
 }
 
-void Update_Dialog_Manager(Dialog_Manager* manager){
+void Update_Dialog_Manager(DialogManager* manager){
   if (manager->active && IsKeyPressed(KEY_SPACE)) {
     // For now, let's just close it. 
     // Later, this will call Advance_Dialogue to check for nextId

@@ -12,17 +12,17 @@
 #include "engine/register.h"
 
 
-typedef struct Dialog_Manager{
+typedef struct DialogManager{
   Dialog* active_dialog;
   int count;
   int capacity;
   bool active;
   int currentID;
-} Dialog_Manager;
+} DialogManager;
 
 
-void Init_Dialog_Manager(Dialog_Manager* manager, int initialCapacity);
-void Draw_Dialog(Dialog_Manager* manager);
-void Set_Active_Dialog(Dialog_Manager* manager, int id);
-void Update_Dialog_Manager(Dialog_Manager* manager);
+void Init_Dialog_Manager(DialogManager* manager, int initialCapacity);
+void Draw_Dialog(DialogManager* manager);
+void Set_Active_Dialog(DialogManager* manager, int id);
+void Update_Dialog_Manager(DialogManager* manager);
 #endif
