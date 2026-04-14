@@ -17,7 +17,7 @@ static void LoadMapEntityFile(const char* filename, Map* map){
     char* typeToken = strtok(line,",");
     char* xToken = strtok(NULL,",");
     char* yToken = strtok(NULL,",");
-    char* nameToken = strtok(NULL,",");
+    char* idToken = strtok(NULL,",");
     if(typeToken && xToken && yToken){
       MapEntity* m = malloc(sizeof(MapEntity)); 
       if (m == NULL) continue; // Safety check
@@ -25,16 +25,7 @@ static void LoadMapEntityFile(const char* filename, Map* map){
       m->jumpoffset = 0.0f;
       m->position = (Vector2) {(float)atoi(xToken), (float)atoi(yToken)};
       m->next = NULL;
-      if(m->type == ENTITY_CHARACTER){
-        m->data.character = &CHARACTER_REGISTRY[atoi(nameToken)];
-        m->sprite = &m->data.character->sprite;
-      }else if(m->type == ENTITY_PLANT){
-        m->data.plant = &PLANT_REGISTRY[atoi(nameToken)];
-        m->sprite = &m->data.plant->sprite;
-      }else{
-        strncpy(m->name, nameToken, sizeof(m->name) - 1);
-        m->name[sizeof(m->name) - 1] = '\0';
-      }      
+      m->id = atoi(idToken);
       Add_Entity(map,m);
     }
     
