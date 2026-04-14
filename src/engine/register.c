@@ -17,6 +17,8 @@ TileDefinition TILE_REGISTRY[6] = {
   { TILE_STONE, false, 0.9f, 105, COLOR_DUSTY_SAP          },
   { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
 };
+
+
 /// @brief parses line of the plant csv
 /// @param line 
 void ParsePlantRow(char* line) {
@@ -159,6 +161,38 @@ void InitRegistries(){
   
   PLAYER = &GLOBAL_PLAYER;
   GLOBAL_PLAYER = Get_Default_Player();
-  
+}
 
+char* GetName(EntityType type, int id){
+  switch (type)
+  {
+  case ENTITY_PLANT:
+    return PLANT_REGISTRY[id].species_name;
+    break;
+  case ENTITY_CHARACTER:
+    return CHARACTER_REGISTRY[id].name;
+  default:
+    return NULL;
+  }
+}
+
+Texture2D* GetSprite(EntityType type, int id){
+  switch (type){
+  case ENTITY_PLANT:
+    return &PLANT_REGISTRY[id].sprite;
+    break;
+  case ENTITY_CHARACTER:
+    return &CHARACTER_REGISTRY[id].sprite;
+  default:
+    return NULL;
+  }
+}
+
+int GetDialogID(EntityType type, int id){
+  switch (type){
+  case ENTITY_CHARACTER:
+    return CHARACTER_REGISTRY[id].dialogId;
+  default:
+    return -1;
+  }
 }

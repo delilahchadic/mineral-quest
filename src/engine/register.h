@@ -33,4 +33,8 @@ void ParseCharacterRow(char* line);
 void ParsePlantRow(char* line);
 void CloseCharacterRegistry();
 void InitRegistries();
+
+char* GetName(EntityType type, int id);
+Texture2D* GetSprite(EntityType type, int id);
+int GetDialogID(EntityType type, int id);
 #endif
