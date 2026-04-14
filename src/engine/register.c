@@ -47,7 +47,7 @@ void ParsePlantRow(char* line) {
     // get the species name
     strncpy(d->species_name, nameToken, sizeof(d->species_name) - 1);
     d->species_name[sizeof(d->species_name) - 1] = '\0'; 
-
+    d->default_trait_flags = NONE;
     //grab our size info
     d->frameheight = atoi(heightToken);
     d->framewidth = atoi(widthToken);
@@ -70,6 +70,7 @@ void ParseCharacterRow(char* line) {
     d->sprite = LoadTextureFromImage(image);
     UnloadImage(image);
     d->dialogId = atoi(dialogToken);
+    d->default_trait_flags = TALK;
     strncpy(d->name, nameToken, sizeof(d->name) - 1);
     d->name[sizeof(d->name) - 1] = '\0'; 
     
@@ -147,8 +148,8 @@ void LoadPlantRegistry(){
 
 void CloseCharacterRegistry(){
   for(int i =0; i<200;i++){
-    if(CHARACTER_REGISTRY[i].sprite.id >0){
-      Close_Character(&CHARACTER_REGISTRY[i]);
+    if(CHARACTER_REGISTRY[i].sprite.id > 0){
+      UnloadTexture(CHARACTER_REGISTRY[i].sprite);
     }
   }
 }
@@ -194,5 +195,17 @@ int GetDialogID(EntityType type, int id){
     return CHARACTER_REGISTRY[id].dialogId;
   default:
     return -1;
+  }
+}
+
+uint32_t GetDefaultTraitFlags(EntityType type, int id){
+  switch (type){
+    case ENTITY_PLANT:
+      return PLANT_REGISTRY[id].default_trait_flags;
+      break;
+    case ENTITY_CHARACTER:
+      return CHARACTER_REGISTRY[id].default_trait_flags;
+    default:
+      return NONE;
   }
 }

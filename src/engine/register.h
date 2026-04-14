@@ -1,7 +1,6 @@
 #ifndef REGISTER_H
 #define REGISTER_H
 #include "raylib.h"
-#include "systems/character.h"
 #include "common.h"
 #include "systems/player.h"
 #include <stdlib.h>
@@ -9,6 +8,7 @@
 #include <string.h>
 #include <stddef.h>
 #include "engine/palette.h"
+
 // 1. The Schemas (The "Blueprints")
 
 
@@ -37,4 +37,5 @@ void InitRegistries();
 char* GetName(EntityType type, int id);
 Texture2D* GetSprite(EntityType type, int id);
 int GetDialogID(EntityType type, int id);
+uint32_t GetDefaultTraitFlags(EntityType type, int id);
 #endif
