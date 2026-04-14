@@ -117,18 +117,12 @@ void DrawPlaySession(PlaySession* session){
 }
 
 void InitDialog(Map* map, DialogManager* manager){
-  MapEntity* tmp = map->entities;
-  while (tmp != NULL) {
-    if(tmp->type== ENTITY_CHARACTER){
-      Character* c = tmp->data.character;
-      if(Vector2Distance(map->player->position, tmp->position) <50.f){
-        if (IsKeyPressed(KEY_E) && !manager->active) {
-            // Tell the manager to look up the ID stored on the character
-            Set_Active_Dialog(manager, c->dialogId);
-            manager->active = true;
-        }
-      }
-    }
-        tmp = tmp->next;
-    }
+  // get characterid
+  // set dialg
+  int id = PollDialog(map);
+  if(id >=0){
+    Set_Active_Dialog(manager, id);
+    manager->active = true;
+  }
 }
+
