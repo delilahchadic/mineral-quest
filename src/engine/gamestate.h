@@ -6,7 +6,6 @@
 #include "systems/player.h"
 #include "environment/map.h"
 #include <math.h>
-#include "systems/character.h"
 #include "systems/dialog.h"
 #include <stdio.h>
 #include "palette.h"
