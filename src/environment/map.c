@@ -19,9 +19,6 @@ void Init_Player(Map* map){
   player->type = ENTITY_PLAYER;
   player->state = NORMAL_STATE;
   player->position = (Vector2){30,30};
-  player->sprite = &PLAYER->sprite;
-  strncpy(player->name, "player", sizeof(player->name) - 1);
-  player->name[sizeof(player->name) - 1] = '\0'; 
   Add_Entity(map,player);
   map->player = player;
   player->jumpoffset = 0.0f;
@@ -120,19 +117,14 @@ void Draw_MapEntity(MapEntity* entity,Map* map){
   Vector2 drawPos = { position.x - origin.x, position.y - origin.y };
 
   Rectangle r= {0,0,32,64};
-  DrawTextureRec(*entity->sprite,r,drawPos, WHITE );
+
+  Texture2D* sprite = (entity->type == ENTITY_PLAYER) ? &PLAYER->sprite : GetSprite(entity->type, entity->id);
+  DrawTextureRec(*sprite,r,drawPos, WHITE );
   // Draw a small gray ellipse at 'position' to ground the character
   DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
-  //draws their name
-  if(entity->type== ENTITY_CHARACTER){
-    Character* c = entity->data.character;
-    DrawText(c->name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
-  }else if(entity->type == ENTITY_PLANT){
-    Plant* c = entity->data.plant;
-    DrawText(c->species_name,drawPos.x,drawPos.y - 10, 10, COLOR_SUNKEN_INK);
-  } else{
-      DrawText(entity->name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
-  }
+  // //draws their name
+  char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
+  DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
   
 }
 
@@ -193,4 +185,16 @@ void Add_Entity(Map* map, MapEntity* entity){
   return;
 }
 
+int PollDialog(Map* map){
+  MapEntity* tmp = map->entities;
+  while (tmp != NULL) {
+    if(tmp->type== ENTITY_CHARACTER){
+      if(Vector2Distance(map->player->position, tmp->position) <50.f){
+        return GetDialogID(tmp->type, tmp->id);
+      }
+    }
+    tmp = tmp->next;
+  }
+  return -1;
+}
 
