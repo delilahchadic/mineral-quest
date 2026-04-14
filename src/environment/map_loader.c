@@ -26,6 +26,7 @@ static void LoadMapEntityFile(const char* filename, Map* map){
       m->position = (Vector2) {(float)atoi(xToken), (float)atoi(yToken)};
       m->next = NULL;
       m->id = atoi(idToken);
+      m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
       Add_Entity(map,m);
     }
     
