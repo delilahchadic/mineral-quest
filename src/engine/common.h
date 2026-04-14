@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
+#include <stdint.h>
 #include "raylib.h"
+
 
 typedef enum ItemType{
   ITEM_VHS_TAPE,
@@ -32,6 +34,7 @@ typedef struct Plant{
   int framewidth;
   int hitboxheight;
   int hitboxwidth;
+  uint32_t default_trait_flags;
 } Plant;
 
 typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD} TileType;
@@ -52,4 +55,17 @@ typedef enum EntityType{
     ENTITY_DECOR,
     ENTITY_PLAYER
 } EntityType;
+
+typedef enum TraitFlags{
+  NONE = 0,
+  TALK = 1 << 0
+} TraitFlags;
+
+typedef struct Character{
+  /* data */
+  char name[32];
+  Texture2D sprite;
+  int dialogId;
+  uint32_t default_trait_flags;
+} Character;
 #endif
