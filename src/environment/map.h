@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "engine/palette.h"
-#include "systems/character.h"
 #include "systems/player.h"
 #include "systems/dialog.h"
 #include "systems/input.h"
@@ -32,15 +32,15 @@ typedef enum {
 } State;
 
 typedef struct MapEntity {
-    // bool isPlayer;
-    EntityType type;      // Is this a person or a flower?
-    Vector2 position; // Pointer to the actual Character, Item, or Plant struct
-    struct MapEntity* next; 
-    int id;
-    State state;
-    Vector2 velocity;
-    float jumpoffset;
-    float verticalVelocity;
+  EntityType type;      // Is this a person or a flower?
+  Vector2 position; // Pointer to the actual Character, Item, or Plant struct
+  struct MapEntity* next; 
+  int id;
+  State state;
+  Vector2 velocity;
+  float jumpoffset;
+  float vertical_velocity;
+  uint32_t trait_flags;
 } MapEntity;
 
 typedef struct Tile{

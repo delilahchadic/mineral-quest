@@ -188,7 +188,7 @@ void Add_Entity(Map* map, MapEntity* entity){
 int PollDialog(Map* map){
   MapEntity* tmp = map->entities;
   while (tmp != NULL) {
-    if(tmp->type== ENTITY_CHARACTER){
+    if(tmp->trait_flags & TALK){
       if(Vector2Distance(map->player->position, tmp->position) <50.f){
         return GetDialogID(tmp->type, tmp->id);
       }
