@@ -9,6 +9,7 @@ bool UpdatePhysics(Map* map, Vector2 dir, bool jump){
 
 void UpdateVelocity(Map* map, Vector2 dir, bool jump){
   float dt = GetFrameTime();
+  if (dt > 0.1f) dt = 0.1f;
   if (jump){
     if(map->player->state != JUMPING_STATE){
       map->player->state = JUMPING_STATE;
