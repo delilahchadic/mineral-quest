@@ -21,21 +21,27 @@ extern Dialog DIALOG_REGISTRY[500];
 extern Character CHARACTER_REGISTRY[200];
 extern Player* PLAYER;
 extern TileDefinition TILE_REGISTRY[6];
+extern Texture2D SPRITE_OVERRIDE[10];
+
 // 3. The Master Functions
 void LoadItemRegistry();
 void LoadDialogRegistry();
 void LoadCharacterRegistry();
 void LoadPlantRegistry();
+void LoadSpriteOverrideRegistry();
 
 void ParseItemRow(char* line);
 void ParseDialogRow(char* line);
 void ParseCharacterRow(char* line);
 void ParsePlantRow(char* line);
+void ParseSpriteOverrideRow(char* line);
+
 void CloseCharacterRegistry();
 void InitRegistries();
 
 char* GetName(EntityType type, int id);
 Texture2D* GetSprite(EntityType type, int id);
+Texture2D* GetSpriteOverride(int id);
 int GetDialogID(EntityType type, int id);
 uint32_t GetDefaultTraitFlags(EntityType type, int id);
 #endif

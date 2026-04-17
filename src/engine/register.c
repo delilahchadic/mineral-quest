@@ -3,6 +3,7 @@
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Dialog DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
+Texture2D SPRITE_OVERRIDE[10] = {0};
 Plant PLANT_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
@@ -17,6 +18,18 @@ TileDefinition TILE_REGISTRY[6] = {
   { TILE_STONE, false, 0.9f, 105, COLOR_DUSTY_SAP          },
   { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT       }
 };
+
+void ParseSpriteOverrideRow(char* line){
+  char* idToken = strtok(line,",");
+  char* spriteToken = strtok(NULL,",");
+  if(idToken && spriteToken){
+    int id = atoi(idToken);
+    Texture2D* d =&SPRITE_OVERRIDE[id];
+    Image image = LoadImage(spriteToken);
+    *d = LoadTextureFromImage(image);
+    UnloadImage(image);
+  } 
+}
 
 
 /// @brief parses line of the plant csv
@@ -47,7 +60,7 @@ void ParsePlantRow(char* line) {
     // get the species name
     strncpy(d->species_name, nameToken, sizeof(d->species_name) - 1);
     d->species_name[sizeof(d->species_name) - 1] = '\0'; 
-    d->default_trait_flags = NONE;
+    d->default_trait_flags = TRAIT_NONE;
     //grab our size info
     d->frameheight = atoi(heightToken);
     d->framewidth = atoi(widthToken);
@@ -70,7 +83,7 @@ void ParseCharacterRow(char* line) {
     d->sprite = LoadTextureFromImage(image);
     UnloadImage(image);
     d->dialogId = atoi(dialogToken);
-    d->default_trait_flags = TALK;
+    d->default_trait_flags = TRAIT_TALK;
     strncpy(d->name, nameToken, sizeof(d->name) - 1);
     d->name[sizeof(d->name) - 1] = '\0'; 
     
@@ -146,6 +159,11 @@ void LoadPlantRegistry(){
   LoadRegistry("data/tables/plants.csv", ParsePlantRow);
 }
 
+void LoadSpriteOverrideRegistry(){
+  LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
+}
+
+
 void CloseCharacterRegistry(){
   for(int i =0; i<200;i++){
     if(CHARACTER_REGISTRY[i].sprite.id > 0){
@@ -159,7 +177,7 @@ void InitRegistries(){
   LoadDialogRegistry();
   LoadCharacterRegistry();
   LoadPlantRegistry();
-  
+  LoadSpriteOverrideRegistry();
   PLAYER = &GLOBAL_PLAYER;
   GLOBAL_PLAYER = Get_Default_Player();
 }
@@ -177,6 +195,10 @@ char* GetName(EntityType type, int id){
   }
 }
 
+Texture2D* GetSpriteOverride(int id){
+  return &SPRITE_OVERRIDE[id];
+}
+
 Texture2D* GetSprite(EntityType type, int id){
   switch (type){
   case ENTITY_PLANT:
@@ -184,6 +206,10 @@ Texture2D* GetSprite(EntityType type, int id){
     break;
   case ENTITY_CHARACTER:
     return &CHARACTER_REGISTRY[id].sprite;
+  case ENTITY_ITEM:
+    return GetSpriteOverride(0);
+  case ENTITY_PLAYER:
+    return &PLAYER->sprite;
   default:
     return NULL;
   }
@@ -205,7 +231,9 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id){
       break;
     case ENTITY_CHARACTER:
       return CHARACTER_REGISTRY[id].default_trait_flags;
+    case ENTITY_ITEM:
+      return TRAIT_GATHER;
     default:
-      return NONE;
+      return TRAIT_NONE;
   }
 }
