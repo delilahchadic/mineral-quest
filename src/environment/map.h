@@ -26,7 +26,7 @@ typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
 
 
 
-typedef enum {
+typedef enum State{
   NORMAL_STATE,
   JUMPING_STATE
 } State;
@@ -77,7 +77,7 @@ void Init_Player(Map* map);
 void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
-int PollDialog(Map* map);
+MapEntity*  PollTrait(Map* map, TraitFlags traits, float distance);
 
 
 
