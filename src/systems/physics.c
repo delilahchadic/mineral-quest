@@ -1,34 +1,31 @@
 #include "systems/physics.h"
+#include "systems/input.h"
 
-bool UpdatePhysics(Map* map, Vector2 dir, bool jump){
-  UpdateVelocity(map, dir, jump);
+bool UpdatePhysics(Map* map,const Input* input){
+  UpdateVelocity(map, input);
   ApplyGravity(map);
-  ApplyFriction(map);
+
   return ResolveMovement(map);
 }
 
-void UpdateVelocity(Map* map, Vector2 dir, bool jump){
+void UpdateVelocity(Map* map,const Input* input){
   float dt = GetFrameTime();
   if (dt > 0.1f) dt = 0.1f;
-  if (jump){
+  if (input->buttons_pressed & JUMP_PRESSED){
     if(map->player->state != JUMPING_STATE){
       map->player->state = JUMPING_STATE;
       map->player->vertical_velocity= 8.0f;
     }
   }
   
-  if (dir.x != 0 || dir.y != 0) {
+  if (input->buttons_pressed & MOVEMENT_PRESSED) {
     // This is the "proper" way to get 0.707 for diagonals
-    float length = (dir.x != 0 && dir.y != 0) ? 0.707f : 1.0f;
-    float move_speed = PLAYER->speed * length * dt;
-      // 1. Try X movement
-      // Vector2 nextX = map->player->position;
-    if(map->player->velocity.x < PLAYER->maxSpeed)
-      map->player->velocity.x += dir.x * move_speed;
-    
-    if(map->player->velocity.y < PLAYER->maxSpeed)
-      map->player->velocity.y += dir.y * move_speed;
-    
+    float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
+    map->player->velocity.x = input->dir.x * PLAYER->speed * length;
+    map->player->velocity.y = input->dir.y * PLAYER->speed * length;
+  } else{
+    map->player->velocity.x = 0;
+    map->player->velocity.y = 0; 
   }
 }
 
@@ -62,24 +59,20 @@ void ApplyGravity(Map* map) {
   }
 }
 
-void ApplyFriction(Map* map){
-   if(map->player->velocity.x != 0 || map->player->velocity.y != 0 ){
-    map->player->velocity.x *= 0.9f;
-    map->player->velocity.y *= 0.9f;
-  }
-}
-
 bool ResolveMovement(Map* map){
+
+  float dt = GetFrameTime();
+  if (dt > 0.1f) dt = 0.1f; // Keep your clamp!
   Vector2 nextX = map->player->position;
   bool moved = false;
-  nextX.x += map->player->velocity.x;
+  nextX.x += map->player->velocity.x * dt;
   if (!CheckCollision(map, nextX)) {
     map->player->position.x = nextX.x;
     moved = true;
   }
 
   Vector2 nextY = map->player->position;
-  nextY.y += map->player->velocity.y;
+  nextY.y += map->player->velocity.y * dt;
   if (!CheckCollision(map, nextY)) {
     map->player->position.y = nextY.y;
     moved = true;
