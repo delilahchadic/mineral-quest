@@ -57,8 +57,8 @@ typedef enum EntityType{
 } EntityType;
 
 typedef enum TraitFlags{
-  NONE = 0,
-  TALK = 1 << 0
+  TRAIT_NONE = 0,
+  TRAIT_TALK = 1 << 0
 } TraitFlags;
 
 typedef struct Character{
