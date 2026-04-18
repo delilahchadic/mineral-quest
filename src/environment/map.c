@@ -103,7 +103,7 @@ void Draw_Tile(Map* map, int x, int y){
       DrawLineV(t4, t1, Fade(BLACK, 0.1f));
 }
 
-void Draw_MapEntity(MapEntity* entity,Map* map){
+void  Draw_MapEntity(MapEntity* entity,Map* map){
   Vector2 position = GetWorldToIso(entity->position);
 
   int tx = (int)(entity->position.x / TILE_SIZE);
@@ -112,19 +112,30 @@ void Draw_MapEntity(MapEntity* entity,Map* map){
       float hOffset = map->grid[ty][tx].height * 8.0f;
       position.y -= (hOffset + entity->jumpoffset); // Lift the character up!
   }
+  Texture2D* sprite = GetSprite(entity->type, entity->id);
+  // Calculate vertical offset based on the actual (potentially scaled) height
+    float renderHeight = (entity->type == ENTITY_ITEM) ? (sprite->height * 0.5f) : (float)sprite->height;
+    float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
 
-  Vector2 origin = { 16, 64 }; 
-  Vector2 drawPos = { position.x - origin.x, position.y - origin.y };
+    // Center the sprite horizontally (width/2) and place bottom at isoPos.y
+    Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-  Rectangle r= {0,0,32,64};
+  
 
-  Texture2D* sprite = (entity->type == ENTITY_PLAYER) ? &PLAYER->sprite : GetSprite(entity->type, entity->id);
-  DrawTextureRec(*sprite,r,drawPos, WHITE );
-  // Draw a small gray ellipse at 'position' to ground the character
-  DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
-  // //draws their name
-  char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
-  DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+  
+  if(entity->type == ENTITY_ITEM ){
+    DrawTextureEx(*sprite,drawPos,0.0,0.5, WHITE );
+  }else{
+    // Rectangle r= (Rectangle){0,0,32,64};
+    DrawTextureV(*sprite,drawPos, WHITE );
+    // Draw a small gray ellipse at 'position' to ground the character
+
+    DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
+    // //draws their name
+    char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
+    DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+  }
+  
   
 }
 
@@ -170,14 +181,19 @@ void Remove_Entity(Map* map, MapEntity* entity){
 }
 
 void Add_Entity(Map* map, MapEntity* entity){
-  if(map->entities == NULL || (entity->position.x + entity->position.y) < map->entities->position.x + map->entities->position.y){
+
+  if(map->entities == NULL ||
+    (entity->position.x + entity->position.y) < 
+    map->entities->position.x + map->entities->position.y){
     entity->next = map->entities;
     map->entities = entity;
     return;
   }
 
   MapEntity* curr = map->entities;
-  while(curr->next != NULL && (curr->next->position.x + curr->next->position.y) < (entity->position.x + entity->position.y)){
+  while(curr->next != NULL && 
+    (curr->next->position.x + curr->next->position.y  < 
+  (entity->position.x + entity->position.y))) {
     curr = curr->next;
   }
   entity->next= curr->next; 
@@ -185,16 +201,16 @@ void Add_Entity(Map* map, MapEntity* entity){
   return;
 }
 
-int PollDialog(Map* map){
+MapEntity* PollTrait(Map* map, TraitFlags trait, float distance){
   MapEntity* tmp = map->entities;
   while (tmp != NULL) {
-    if(tmp->trait_flags & TALK){
-      if(Vector2Distance(map->player->position, tmp->position) <50.f){
-        return GetDialogID(tmp->type, tmp->id);
+    if(tmp->trait_flags & trait){
+      if(Vector2Distance(map->player->position, tmp->position) < distance){
+        return tmp;
       }
     }
     tmp = tmp->next;
   }
-  return -1;
+  return NULL;
 }
 
