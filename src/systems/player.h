@@ -6,9 +6,8 @@
 typedef struct player
 {
   /* data */
-    Inventory inventory;
-  float speed; 
-  float maxSpeed;
+  Inventory inventory;
+  float speed;   
   Texture2D sprite;     // How fast we move
 } Player;
 

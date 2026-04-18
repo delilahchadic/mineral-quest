@@ -9,8 +9,7 @@ Player Get_Default_Player(){
   player.inventory.itemIds[2]=3;
   player.inventory.itemIds[3]=4;
   player.inventory.count = 4;
-  player.speed = 50.0f;
-  player.maxSpeed = 500.0f;
+  player.speed = 250.0f;
   player.sprite = LoadTexture("sprite.png");
   return player;
 }
