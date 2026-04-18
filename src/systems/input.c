@@ -7,9 +7,20 @@ Input CaptureInput(){
   if (IsKeyDown(KEY_A)) i.dir.x -= 1;
   if (IsKeyDown(KEY_D)) i.dir.x += 1;
   if (IsKeyDown(KEY_S)) i.dir.y += 1;
-  i.jump = IsKeyDown(KEY_SPACE);
-  i.inventory = IsKeyPressed(KEY_I);
-  i.dialog = IsKeyPressed(KEY_E);
+
+  if(IsKeyPressed(KEY_I)){
+    i.buttons_pressed |= INVENTORY_PRESSED;
+  }
+  if(IsKeyPressed(KEY_E)){
+    i.buttons_pressed |= INTERACT_PRESSED;
+  } 
+  if(IsKeyDown(KEY_SPACE)){
+    i.buttons_pressed |= JUMP_PRESSED;
+  }
+  
+  if(i.dir.x != 0 || i.dir.y != 0){
+    i.buttons_pressed |= MOVEMENT_PRESSED;
+  }
 
   return i;
 }
