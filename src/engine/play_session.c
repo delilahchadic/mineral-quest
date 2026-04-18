@@ -13,12 +13,12 @@ void UpdatePlaySession(PlaySession* session){
       if(!session->manager.active){
         Input input = CaptureInput();
 
-        if(input.inventory){
+        if(input.buttons_pressed & INVENTORY_PRESSED){
           session->state = INVENTORY;
-        } else if(input.dialog){
+        } else if(input.buttons_pressed & INTERACT_PRESSED){
           InitDialog(&session->map, &session->manager);
         }else{
-          bool moved = UpdatePhysics(&session->map, input.dir, input.jump);
+          bool moved = UpdatePhysics(&session->map, &input);
           Update_Map(&session->map, moved);
         }
       }
@@ -102,6 +102,7 @@ void DrawPlaySession(PlaySession* session){
   switch (session->state)
   {
   case ADVENTURE:
+  
     Draw_Map(&session->map);    
     DrawText("The world awaits...", 20, 20, 20, COLOR_DUSTY_CORAL);
     if (session->manager.active) {
@@ -119,9 +120,10 @@ void DrawPlaySession(PlaySession* session){
 void InitDialog(Map* map, DialogManager* manager){
   // get characterid
   // set dialg
-  int id = PollDialog(map);
-  if(id >=0){
-    Set_Active_Dialog(manager, id);
+  MapEntity* p = PollTrait(map, TRAIT_TALK, 50.0f);
+  if(p){
+    int dialogID = GetDialogID(ENTITY_CHARACTER, p->id);
+    Set_Active_Dialog(manager, dialogID);
     manager->active = true;
   }
 }
