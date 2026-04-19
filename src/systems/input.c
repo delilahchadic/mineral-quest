@@ -8,6 +8,14 @@ Input CaptureInput(){
   if (IsKeyDown(KEY_D)) i.dir.x += 1;
   if (IsKeyDown(KEY_S)) i.dir.y += 1;
 
+  if(IsKeyPressed(KEY_W)){
+    i.buttons_pressed |= KEY_W_PRESSED;
+  }
+
+  if(IsKeyPressed(KEY_S)){
+    i.buttons_pressed |= KEY_S_PRESSED;
+  }
+  
   if(IsKeyPressed(KEY_I)){
     i.buttons_pressed |= INVENTORY_PRESSED;
   }
