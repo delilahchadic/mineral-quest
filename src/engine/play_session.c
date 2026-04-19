@@ -17,9 +17,14 @@ void UpdatePlaySession(PlaySession* session){
           FillMenu(&session->menu, &session->player.inventory.itemIds, session->player.inventory.count);
           session->state = INVENTORY;
         } else if(input.buttons_pressed & INTERACT_PRESSED){
-          PollChest(&session->player,&session->map);
-          InitDialog(&session->map, &session->manager);
-          if(session->manager.active) session->state = TALKING;
+          int item = PollChest(&session->player,&session->map);
+          if(item > 0){
+            session->state = ITEM;
+            sprintf(session->pendingItemName,"You got a %s !", GetName(ENTITY_ITEM, item));
+          }else{
+            InitDialog(&session->map, &session->manager);
+            if(session->manager.active) session->state = TALKING;
+          }
         }else{
           bool moved = UpdatePhysics(&session->map, &input);
           Update_Map(&session->map, moved);
@@ -34,6 +39,10 @@ void UpdatePlaySession(PlaySession* session){
       session->state = session->manager.active ? TALKING : ADVENTURE;
       AdjustCamera(&session->map,true);
       break;
+    case ITEM:
+      if(input.buttons_pressed & INTERACT_PRESSED){
+        session->state= ADVENTURE;
+      }
   }
 }
   //if dialog manager is active input is disabled
@@ -49,7 +58,10 @@ void DrawPlaySession(PlaySession* session){
   case TALKING:
     Draw_Map(&session->map);    
     DrawMessage(&session->manager);
-    
+    break;
+  case ITEM:
+    Draw_Map(&session->map);    
+    DrawDialog("you found a christmas present", session->pendingItemName);
   default:
     break;
   }
@@ -81,15 +93,16 @@ void InitDialog(Map* map, ScriptManager* manager){
   }
 }
 
-void PollChest(Player* player,Map* map){
+int PollChest(Player* player,Map* map){
   // get characterid
   // set dialg
   MapEntity* p = PollTrait(map, TRAIT_GATHER, 50.0f);
   if(p && p->type == ENTITY_ITEM){
     
     GiveItem(player, p->id);
-    TraceLog(LOG_INFO,"hello");
     Remove_Entity(map, p);
+    return p->id;
   }
+  return -1;
 }
 

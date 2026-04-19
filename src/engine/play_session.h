@@ -1,6 +1,7 @@
 #ifndef PlAY_SESSION_H
 #define PlAY_SESSION_H
 
+#include <stdio.h>
 #include "systems/player.h"
 #include "environment/map.h"
 #include "environment/map_loader.h"
@@ -8,7 +9,7 @@
 #include "systems/input.h"
 #include "systems/physics.h"
 
-typedef enum PlayState { ADVENTURE = 0, INVENTORY, TALKING } PlayState;
+typedef enum PlayState { ADVENTURE = 0, INVENTORY, TALKING, ITEM } PlayState;
 
 typedef struct PlaySession{
   Player player;
@@ -16,6 +17,7 @@ typedef struct PlaySession{
   ScriptManager manager;
   PlayState state;
   Menu menu;
+  char pendingItemName[100];
 } PlaySession;
 
 
@@ -25,5 +27,5 @@ void DrawPlaySession(PlaySession* session);
 void DrawInventory(Menu* menu);
 void UpdateInventory(PlaySession* session, Input* input);
 void InitDialog(Map* map, ScriptManager* manager);
-void PollChest(Player* player ,Map* map);
+int PollChest(Player* player ,Map* map);
 #endif
