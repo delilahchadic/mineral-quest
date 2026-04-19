@@ -179,8 +179,7 @@ void InitRegistries(){
   LoadPlantRegistry();
   LoadSpriteOverrideRegistry();
   PLAYER = &GLOBAL_PLAYER;
-  GLOBAL_PLAYER = Get_Default_Player();
-}
+  GLOBAL_PLAYER = Get_Default_Player();}
 
 char* GetName(EntityType type, int id){
   switch (type)
@@ -190,6 +189,18 @@ char* GetName(EntityType type, int id){
     break;
   case ENTITY_CHARACTER:
     return CHARACTER_REGISTRY[id].name;
+  case ENTITY_ITEM:
+    return ITEM_REGISTRY[id].name;
+  default:
+    return NULL;
+  }
+}
+
+char* GetDescription(EntityType type, int id){
+  switch (type)
+  {
+  case ENTITY_ITEM:
+    return ITEM_REGISTRY[id].description;
   default:
     return NULL;
   }
@@ -209,7 +220,7 @@ Texture2D* GetSprite(EntityType type, int id){
   case ENTITY_ITEM:
     return GetSpriteOverride(0);
   case ENTITY_PLAYER:
-    return &PLAYER->sprite;
+    return &GLOBAL_PLAYER.sprite;
   default:
     return NULL;
   }

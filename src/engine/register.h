@@ -40,6 +40,7 @@ void CloseCharacterRegistry();
 void InitRegistries();
 
 char* GetName(EntityType type, int id);
+char* GetDescription(EntityType type, int id);
 Texture2D* GetSprite(EntityType type, int id);
 Texture2D* GetSpriteOverride(int id);
 int GetDialogID(EntityType type, int id);
