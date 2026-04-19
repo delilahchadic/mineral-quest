@@ -19,7 +19,7 @@ OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 TARGET = $(BIN_DIR)/game
 
 # Default rule
-all: $(TARGET)
+all: clean $(TARGET)
 
 # Link
 $(TARGET): $(OBJ)
