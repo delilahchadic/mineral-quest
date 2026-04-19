@@ -242,6 +242,8 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id){
       break;
     case ENTITY_CHARACTER:
       return CHARACTER_REGISTRY[id].default_trait_flags;
+    case ENTITY_ITEM:
+      return TRAIT_GATHER;
     default:
       return TRAIT_NONE;
   }

@@ -25,4 +25,5 @@ void DrawPlaySession(PlaySession* session);
 void DrawInventory(Menu* menu);
 void UpdateInventory(PlaySession* session, Input* input);
 void InitDialog(Map* map, ScriptManager* manager);
+void PollChest(Player* player ,Map* map);
 #endif

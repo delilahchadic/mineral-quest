@@ -17,8 +17,9 @@ void UpdatePlaySession(PlaySession* session){
           FillMenu(&session->menu, &session->player.inventory.itemIds, session->player.inventory.count);
           session->state = INVENTORY;
         } else if(input.buttons_pressed & INTERACT_PRESSED){
+          PollChest(&session->player,&session->map);
           InitDialog(&session->map, &session->manager);
-          session->state = TALKING;
+          if(session->manager.active) session->state = TALKING;
         }else{
           bool moved = UpdatePhysics(&session->map, &input);
           Update_Map(&session->map, moved);
@@ -77,6 +78,18 @@ void InitDialog(Map* map, ScriptManager* manager){
     int dialogID = GetDialogID(ENTITY_CHARACTER, p->id);
     SetActiveMessage(manager, dialogID);
     manager->active = true;
+  }
+}
+
+void PollChest(Player* player,Map* map){
+  // get characterid
+  // set dialg
+  MapEntity* p = PollTrait(map, TRAIT_GATHER, 50.0f);
+  if(p && p->type == ENTITY_ITEM){
+    
+    GiveItem(player, p->id);
+    TraceLog(LOG_INFO,"hello");
+    Remove_Entity(map, p);
   }
 }
 

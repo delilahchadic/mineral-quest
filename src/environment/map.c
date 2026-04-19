@@ -176,6 +176,7 @@ void Remove_Entity(Map* map, MapEntity* entity){
   if(curr->next == entity){
     curr->next = entity->next;
     entity->next = NULL;
+    if(entity->type != ENTITY_PLAYER) free(entity);
     return;
   }
 }
@@ -196,6 +197,7 @@ void Add_Entity(Map* map, MapEntity* entity){
   (entity->position.x + entity->position.y))) {
     curr = curr->next;
   }
+
   entity->next= curr->next; 
   curr->next = entity;
   return;

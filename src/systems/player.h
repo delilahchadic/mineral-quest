@@ -13,6 +13,6 @@ typedef struct player
 
 Player Get_Default_Player();
 void Close_Player(Player* player);
-
+void GiveItem(Player* player,int id);
 
 #endif
