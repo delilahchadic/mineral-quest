@@ -10,7 +10,7 @@
 #include "raymath.h"
 #include "engine/palette.h"
 #include "systems/player.h"
-#include "systems/dialog.h"
+#include "systems/script_manager.h"
 #include "systems/input.h"
 #include "engine/register.h"
 #define TILE_SIZE 32

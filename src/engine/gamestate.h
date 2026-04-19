@@ -6,7 +6,7 @@
 #include "systems/player.h"
 #include "environment/map.h"
 #include <math.h>
-#include "systems/dialog.h"
+#include "systems/script_manager.h"
 #include <stdio.h>
 #include "palette.h"
 #include "engine/play_session.h"

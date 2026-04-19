@@ -17,7 +17,7 @@
 // 2. The Stores (The "Warehouses")
 extern Plant PLANT_REGISTRY[100];
 extern ItemDefinition ITEM_REGISTRY[100];
-extern Dialog DIALOG_REGISTRY[500];
+extern Message DIALOG_REGISTRY[500];
 extern Character CHARACTER_REGISTRY[200];
 extern Player* PLAYER;
 extern TileDefinition TILE_REGISTRY[6];

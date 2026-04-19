@@ -22,12 +22,12 @@ typedef struct ItemDefinition{
     ItemType type; // For that "Bebop" flair
 } ItemDefinition;
 
-typedef struct Dialog {
+typedef struct Message{
   char character_name[32];
   char text[256];
   int id;
   int nextid;
-} Dialog;
+} Message;
 
 typedef struct Plant{
   char species_name[32];

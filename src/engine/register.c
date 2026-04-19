@@ -1,7 +1,7 @@
 #include "engine/register.h"
 
 ItemDefinition ITEM_REGISTRY[100] = {0};
-Dialog DIALOG_REGISTRY[500] = {0};
+Message DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
 Texture2D SPRITE_OVERRIDE[10] = {0};
 Plant PLANT_REGISTRY[100] = {0};
@@ -115,7 +115,7 @@ void ParseDialogRow(char* line) {
   char* textToken = strtok(NULL,",");
   if(idToken && nameToken && nextidToken && textToken){
     int id = atoi(idToken);
-    Dialog* d =&DIALOG_REGISTRY[id];
+    Message* d =&DIALOG_REGISTRY[id];
     d->id = id;
     d->nextid = atoi(nextidToken);
 
