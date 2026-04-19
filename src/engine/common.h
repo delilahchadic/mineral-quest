@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include "raylib.h"
 
-
+extern const int SCREEN_WIDTH;
+extern const int SCREEN_HEIGHT;
+extern const int  TARGET_FPS;
 typedef enum ItemType{
   ITEM_VHS_TAPE,
   ITEM_TAROT_CARD,
