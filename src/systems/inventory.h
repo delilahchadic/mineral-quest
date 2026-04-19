@@ -7,7 +7,6 @@
 typedef struct Inventory{
   int itemIds[MAX_INVENTORY_SLOTS];
   int count;
-  int selected;
 } Inventory;
 
 void InitInventory(Inventory* inventory);
