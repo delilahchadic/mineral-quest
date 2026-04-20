@@ -1,5 +1,8 @@
 #include "engine/gamestate.h"
 #include "engine/palette.h"
+#include "engine/register.h"
+#include "engine/register_loader.h"
+
 int main(void) {
   //Begin Engine
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mineral Quest");
@@ -21,5 +24,6 @@ int main(void) {
     EndDrawing();
   }
   CloseGame(gamestate);
+  CloseRegistries();
   return 0;
 }
