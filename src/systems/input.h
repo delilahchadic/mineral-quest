@@ -14,6 +14,7 @@ typedef enum ButtonPressed{
   JUMP_PRESSED = 1 << 2,
   KEY_W_PRESSED = 1 <<3,
   KEY_S_PRESSED = 1 <<4,
+  ENTER_PRESSED = 1<<5,
   MOVEMENT_PRESSED = 1 <<7
 } ButtonPressed;
 
