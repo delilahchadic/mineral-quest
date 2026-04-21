@@ -16,7 +16,7 @@
 
 // The "Americana" Warm Tones (Faded, dusty, sun-bleached)
 #define COLOR_DUSTY_ROSE    (Color){ 194, 118, 128, 255 }
-#define COLOR_DUSTY_SALMON  (Color){ 214, 140, 121, 255 }
+#define COLOR_DUSTY_SALMON  (Color){ 214, 150, 131, 255 }
 #define COLOR_DUSTY_CORAL   (Color){ 205, 126, 107, 255 }
 #define COLOR_MUSTARD       (Color){ 203, 153, 50, 255 }
 
@@ -38,7 +38,7 @@
 #define COLOR_OFFICE_LEMON  (Color){ 210, 200, 80, 255 }
 // --- THE CERULEAN CORE ---
 // The anchor point: a classic, pigment-rich sky blue.
-#define COLOR_CERULEAN_CORE      (Color){ 42,  82,  190, 255 }
+#define COLOR_CERULEAN_CORE      (Color){ 42,  82,  190, 100 }
 // High Chroma: More "electric," good for highlighting interactive items.
 #define COLOR_CERULEAN_VIVID     (Color){ 0,   123, 167, 255 }
 // Low Chroma: Desaturated, like weathered paint or old pottery.
