@@ -4,19 +4,28 @@ void InitGame(Gamestate* gamestate){
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
+  FillSystemMenu(&gamestate->main_menu,(int[]){0},1, "Mineral Quest");
   InitPlaySession(&gamestate->session);
 }
 
 //routes to update based on gamestate
 void UpdateScene(Gamestate* gamestate){
+  Input input = CaptureInput();
   switch(gamestate->screen) {
     case LOGO:
       gamestate->framesCounter++;
       if (gamestate->framesCounter > 120) gamestate->screen = TITLE; // Switch after 2 seconds
       break;
     case TITLE:
-      if (IsKeyPressed(KEY_ENTER)) gamestate->screen = GAMEPLAY;
+      if (input.buttons_pressed & ENTER_PRESSED) gamestate->screen = MENU;
       break;
+    case MENU:{
+      int option_selected = UpdateSystemMenu(&gamestate->main_menu,&input);
+      if(option_selected >=0){
+        ExecuteCommand(option_selected, &gamestate->screen);
+      }
+      break;
+    }
     case GAMEPLAY:
       UpdatePlaySession(&gamestate->session);
       break;
@@ -50,6 +59,9 @@ void DrawScreen(Gamestate* gamestate){
       case TITLE:
         DrawText("Mineral Quest", 220, 150, 40, COLOR_SUNKEN_INK);
         DrawText("PRESS ENTER TO START", 280, 250, 20, COLOR_SUNKEN_INK);
+        break;
+      case MENU:
+        DrawSystemMenu(&gamestate->main_menu);
         break;
       case GAMEPLAY:
         DrawPlaySession(&gamestate->session);
