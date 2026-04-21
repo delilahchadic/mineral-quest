@@ -14,6 +14,8 @@ typedef enum ItemType{
   ITEM_MINERAL
 } ItemType;
 
+typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,MENU } GameScreen;
+
 typedef struct ItemDefinition{
     int id;
     char name[32];
