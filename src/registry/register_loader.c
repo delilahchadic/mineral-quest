@@ -1,4 +1,4 @@
-#include "engine/register_loader.h"
+#include "registry/register_loader.h"
 
 
 void InitRegistries(){
@@ -7,6 +7,8 @@ void InitRegistries(){
   LoadCharacterRegistry();
   LoadPlantRegistry();
   LoadSpriteOverrideRegistry();
+
+  LoadCommandRegistry();
   PLAYER = &GLOBAL_PLAYER;
   GLOBAL_PLAYER = Get_Default_Player();
 }
@@ -37,6 +39,20 @@ void CloseSpriteOverrideRegistry(){
   for(int i =0; i<10;i++){
     UnloadTexture(SPRITE_OVERRIDE[i]);
   }
+}
+
+void ParseCommandRegistryRow(char* line){
+  char* idToken = strtok(line,",");
+  char* labelToken = strtok(NULL,",");
+  char* descriptionToken = strtok(NULL,",");
+  if(idToken && labelToken && descriptionToken){
+    int id = atoi(idToken);
+    Command* d =&COMMAND_REGISTRY[id];
+    strncpy(d->label, labelToken, sizeof(d->label) - 1);
+    d->label[sizeof(d->label) - 1] = '\0'; 
+    strncpy(d->description, descriptionToken, sizeof(d->description) - 1);
+    d->description[sizeof(d->description) - 1] = '\0';
+  } 
 }
 
 void ParseSpriteOverrideRow(char* line){
@@ -181,4 +197,8 @@ void LoadPlantRegistry(){
 
 void LoadSpriteOverrideRegistry(){
   LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
+}
+
+void LoadCommandRegistry(){
+  LoadRegistry("data/tables/system_actions.csv", ParseCommandRegistryRow);
 }

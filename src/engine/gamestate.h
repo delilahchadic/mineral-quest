@@ -10,16 +10,18 @@
 #include <stdio.h>
 #include "palette.h"
 #include "engine/play_session.h"
-#include "register.h"
-#include "environment/map.h"
+#include "registry/register.h"
+#include "systems/input.h"
+#include "ui/menu.h"
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define TARGET_FPS 60
 
-typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY } GameScreen;
+
 typedef struct Gamestate{
   GameScreen screen;
   int framesCounter;
+  SystemMenu main_menu;
   PlaySession session;
 } Gamestate;
 

@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include "engine/palette.h"
 #include "engine/common.h"
-#include "engine/register.h"
+#include "registry/register.h"
 #include "ui/dialog_box.h"
 #include "systems/input.h"
 

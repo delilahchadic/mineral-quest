@@ -1,7 +1,7 @@
 #include "engine/gamestate.h"
 #include "engine/palette.h"
-#include "engine/register.h"
-#include "engine/register_loader.h"
+#include "registry/register.h"
+#include "registry/register_loader.h"
 
 int main(void) {
   //Begin Engine

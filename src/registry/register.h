@@ -1,7 +1,7 @@
 #ifndef REGISTER_H
 #define REGISTER_H
 #include "raylib.h"
-#include "common.h"
+#include "engine/common.h"
 #include "systems/player.h"
 #include <stdlib.h>
 #include <stdio.h>

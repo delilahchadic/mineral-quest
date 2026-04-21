@@ -2,7 +2,7 @@
 #define PHYSICS_H
 #include "raylib.h"
 #include "environment/map.h"
-#include "engine/register.h"
+#include "registry/register.h"
 
 bool UpdatePhysics(Map* map, const Input* input);
 void UpdateVelocity(Map* map, const Input* input);

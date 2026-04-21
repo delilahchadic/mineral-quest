@@ -2,7 +2,7 @@
 #define MAP_LOADER_H
 #include <stdint.h>
 #include "environment/map.h"
-#include "engine/register.h"
+#include "registry/register.h"
 void LoadMap(const char* levelname, Map* map);
 
 #endif

@@ -12,7 +12,7 @@
 #include "systems/player.h"
 #include "systems/script_manager.h"
 #include "systems/input.h"
-#include "engine/register.h"
+#include "registry/register.h"
 #define TILE_SIZE 32
 
 #define MAP_WIDTH 100
