@@ -200,5 +200,5 @@ void LoadSpriteOverrideRegistry(){
 }
 
 void LoadCommandRegistry(){
-  LoadRegistry("data/tables/system_actions.csv", ParseCommandRegistryRow);
+  LoadRegistry("data/tables/commands.csv", ParseCommandRegistryRow);
 }
