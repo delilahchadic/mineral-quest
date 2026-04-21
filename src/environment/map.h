@@ -66,8 +66,8 @@ void Update_Map(Map* map, bool moved);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map);
 
-
-
+void DrawWaterTile(Vector2 t1,Vector2 t2,Vector2 t3,Vector2 t4,int x, int y);
+void DrawSimpleSparkle(Vector2 pos, Color color, float size);
 
 void Close_Map(Map* map);
 void Add_Entity(Map* map, MapEntity* entity);

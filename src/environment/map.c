@@ -66,41 +66,43 @@ void Draw_Map(Map* map) {
 
 void Draw_Tile(Map* map, int x, int y){
   float h = map->grid[y][x].height * 8.0f;
-      Color base = TILE_REGISTRY[map->grid[y][x].type].color;
+  Color base = TILE_REGISTRY[map->grid[y][x].type].color;
+  bool blocking = TILE_REGISTRY[map->grid[y][x].type].is_blocking;
+  // Calculate 4 ground corners
+  Vector2 g1 = GetWorldToIso((Vector2){ x * TILE_SIZE, y * TILE_SIZE });
+  Vector2 g2 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, y * TILE_SIZE });
+  Vector2 g3 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE });
+  Vector2 g4 = GetWorldToIso((Vector2){ x * TILE_SIZE, (y + 1) * TILE_SIZE });
 
-      // Calculate 4 ground corners
-      Vector2 g1 = GetWorldToIso((Vector2){ x * TILE_SIZE, y * TILE_SIZE });
-      Vector2 g2 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, y * TILE_SIZE });
-      Vector2 g3 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE });
-      Vector2 g4 = GetWorldToIso((Vector2){ x * TILE_SIZE, (y + 1) * TILE_SIZE });
+  // Calculate 4 top corners (lifted by h)
+  Vector2 t1 = { g1.x, g1.y - h };
+  Vector2 t2 = { g2.x, g2.y - h };
+  Vector2 t3 = { g3.x, g3.y - h };
+  Vector2 t4 = { g4.x, g4.y - h };
 
-      // Calculate 4 top corners (lifted by h)
-      Vector2 t1 = { g1.x, g1.y - h };
-      Vector2 t2 = { g2.x, g2.y - h };
-      Vector2 t3 = { g3.x, g3.y - h };
-      Vector2 t4 = { g4.x, g4.y - h };
-
-      // Draw Walls (The 'sides' of the block)
-      if (h > 0) {
-        // Right Side (Darker)
-        Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
-        Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
-        //  right side
-        DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
-        // back side
-        DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
-        //front side
-        DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
-        
-      }
-
-      // Draw Top Face
-      DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, base);
-      // Grid Outlines
-      DrawLineV(t1, t2, Fade(BLACK, 0.1f));
-      DrawLineV(t2, t3, Fade(BLACK, 0.1f));
-      DrawLineV(t3, t4, Fade(BLACK, 0.1f));
-      DrawLineV(t4, t1, Fade(BLACK, 0.1f));
+  // Draw Walls (The 'sides' of the block)
+  if (h > 0 && !blocking){
+    // Right Side (Darker)
+    Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
+    Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
+    //  right side
+    DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+    // back side
+    DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
+    //front side
+    DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
+  }
+  
+  if (map->grid[y][x].type == TILE_WATER) {
+    DrawWaterTile(t1,t2,t3,t4,x,y);
+  }else{
+    DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, base);
+    DrawLineV(t1, t2, Fade(BLACK, 0.1f));
+    DrawLineV(t2, t3, Fade(BLACK, 0.1f));
+    DrawLineV(t3, t4, Fade(BLACK, 0.1f));
+    DrawLineV(t4, t1, Fade(BLACK, 0.1f));
+  }
+  
 }
 
 void  Draw_MapEntity(MapEntity* entity,Map* map){
@@ -135,8 +137,50 @@ void  Draw_MapEntity(MapEntity* entity,Map* map){
     char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
     DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
   }
-  
-  
+   
+}
+
+void DrawWaterTile(Vector2 t1, Vector2 t2, Vector2 t3, Vector2 t4, int x, int y) {
+    // 1. Base Water (unchanged, but noted: Indanthrone Blue looks great here)
+    float pulse = sinf(GetTime()) * 30.0f;
+    Color waterColor = COLOR_CERULEAN_CORE;
+    waterColor.a = 150 + (unsigned char)pulse;
+    DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, waterColor);
+
+    // 2. The Sparkle Logic
+    float tileSeed = (float)(x * 12.9898f + y * 78.233f); 
+    float sparkleTime = sinf(GetTime() * 2.5f + tileSeed); // Slightly faster pulse
+
+    if (sparkleTime > 0.97f) { 
+        // Use fmodf for smoother, overflow-safe randomness
+        float offsetX = fmodf(tileSeed * 43758.5453f, (float)TILE_SIZE);
+        float offsetY = fmodf(tileSeed * 12345.6789f, (float)TILE_SIZE / 2.0f); 
+      
+        Vector2 sparklePos = { t1.x + offsetX - (TILE_SIZE/2), t1.y + offsetY };
+        float sizePulse = (sinf(GetTime() * 8.0f + tileSeed) + 1.0f) * 1.5f + 1.0f;
+
+        BeginBlendMode(BLEND_ADDITIVE);
+            // Using a slightly warmer glow color (like COLOR_CELADON) 
+            // makes the Indanthrone core pop even harder.
+            DrawSimpleSparkle(sparklePos, COLOR_INDANTHRONE_BLUE, sizePulse);
+            DrawCircleV(sparklePos, sizePulse * 0.3f, WHITE); 
+        EndBlendMode();
+    }
+}
+
+void DrawSimpleSparkle(Vector2 pos, Color color, float size) {
+    // Bloom & Glow
+    DrawCircleV(pos, size * 2.5f, Fade(color, 0.1f));
+    DrawCircleV(pos, size, Fade(color, 0.4f));
+
+    float thickness = size * 0.25f; 
+    // Vertical line (full size)
+    DrawLineEx((Vector2){pos.x, pos.y - size}, (Vector2){pos.x, pos.y + size}, thickness, color);
+    // Horizontal line (slightly shorter for that "anamorphic" lens look)
+    DrawLineEx((Vector2){pos.x - (size * 0.8f), pos.y}, (Vector2){pos.x + (size * 0.8f), pos.y}, thickness, color);
+
+    // The "Hot" Center
+    DrawCircleV(pos, size * 0.4f, WHITE);
 }
 
 void Update_Map(Map* map, bool moved){
