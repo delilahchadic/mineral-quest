@@ -6,11 +6,10 @@ void(*callbacks[100]) (void*) = {
   [0] = AdventureMode
 };
 
-
 // Used in Main menu to set the gsme state to bein game
 void AdventureMode(void* context){
-  int* state = (int*)context;
-  *state = 2;
+  Gamestate* state = (Gamestate*)context;
+  state->screen = GAMEPLAY;
 }
 
 char* GetCommandLabel(int id){

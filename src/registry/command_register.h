@@ -2,6 +2,7 @@
 #define COMMAND_REGISTER_H
 
 #include <assert.h>
+#include "defs/types_engine.h"
 
 typedef struct Command{
   char label[32];

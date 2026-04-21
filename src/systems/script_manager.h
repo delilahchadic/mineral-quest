@@ -11,19 +11,12 @@
 #include "engine/common.h"
 #include "registry/register.h"
 #include "ui/dialog_box.h"
-#include "systems/input.h"
 
-typedef struct ScriptManager{
-  Message* active_messsage;
-  int count;
-  int capacity;
-  bool active;
-  int currentID;
-} ScriptManager;
-
+#include "defs/types_systems.h"
 
 void InitScriptManager(ScriptManager* manager, int initialCapacity);
 void DrawMessage(ScriptManager* manager);
 void SetActiveMessage(ScriptManager* manager, int id);
 void UpdateScriptManager(ScriptManager* manager, Input* input);
+
 #endif

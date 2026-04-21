@@ -1,0 +1,51 @@
+
+#ifndef TYPES_ENV
+#define TYPES_ENV
+#include "raylib.h"
+#include "defs/types_entities.h"
+#define MAP_WIDTH 100
+#define MAP_HEIGHT 100
+// Physical dimensions in pixels
+#define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
+#define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
+
+
+typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
+
+
+
+typedef enum State{
+  NORMAL_STATE,
+  JUMPING_STATE
+} State;
+
+typedef struct MapEntity {
+  EntityType type;      // Is this a person or a flower?
+  Vector2 position; // Pointer to the actual Character, Item, or Plant struct
+  struct MapEntity* next; 
+  int id;
+  State state;
+  Vector2 velocity;
+  float jumpoffset;
+  float vertical_velocity;
+  uint32_t trait_flags;
+} MapEntity;
+
+typedef struct Tile{
+  int height;
+  TileType type;
+} Tile;
+
+typedef struct Map{
+  Tile grid[MAP_WIDTH][MAP_HEIGHT];
+  int pixel_width;
+  int pixel_height;
+  int rows;
+  int columns;
+  char name[32];
+  Camera2D camera;
+  MapEntity* entities;
+  MapEntity* player; 
+  int lastTileHeight;
+}Map;
+#endif

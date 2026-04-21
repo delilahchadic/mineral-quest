@@ -2,6 +2,7 @@
 #define REGISTER_H
 #include "raylib.h"
 #include "engine/common.h"
+#include "defs/types_entities.h"
 #include "systems/player.h"
 #include <stdlib.h>
 #include <stdio.h>
