@@ -83,7 +83,7 @@
 #define COLOR_QUIN_GOLD        (Color){ 178, 125,  38, 255 } // Glowing PO49/PY150 blend
 #define COLOR_AMBER            (Color){ 255, 191,   0, 255 } 
 #define COLOR_SAFFRON          (Color){ 244, 196,  48, 255 } 
-#define COLOR_YELLOW_OCHRE     (Color){ 203, 153,  50, 255 } // Golden-earth PY42
+// #define COLOR_YELLOW_OCHRE     (Color){ 203, 153,  50, 255 } // Golden-earth PY42
 #define COLOR_BURNT_SIENNA     (Color){ 140,  71,  44, 255 } // Warm brown PBr7
 #define COLOR_CADMIUM_YELLOW   (Color){ 255, 246,   0, 255 } // Punchy, opaque yellow
 #define COLOR_NICKEL_TITANITE  (Color){ 238, 230, 150, 255 } // Pale, cool "Lemon Sorbet"
@@ -107,4 +107,13 @@
 #define COLOR_MOONGLOW         (Color){  111, 103, 138, 255 } // Daniel Smith's famous granulating violet-grey
 #define COLOR_AUREOLIN         (Color){  255, 238,   0, 255 } // The essential transparent cool yellow
 #define COLOR_INDANTHRONE_BLUE (Color){   19,  35,  77, 255 }
+
+// Traditional Pigment Palette
+#define COLOR_YELLOW_OCHRE     (Color){ 204, 158,  78, 255 } // Earthy, mustard-gold
+#define COLOR_BUFF_TITANIUM    (Color){ 235, 222, 194, 255 } // Pale, unbleached stone cream
+#define COLOR_CHROME_YELLOW    (Color){ 255, 183,   0, 255 } // Dense, opaque lead-style yellow
+
+// The "North Star" Sand Mix
+// (A high-value blend leaning heavily toward Buff Titanium to keep it light)
+#define COLOR_PALE_SAND        (Color){ 228, 214, 182, 255 }
 #endif
