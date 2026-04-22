@@ -4,7 +4,8 @@ void InitGame(Gamestate* gamestate){
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0; 
-  FillSystemMenu(&gamestate->main_menu,(int[]){0},1, "Mineral Quest");
+  FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
+  InitEditSession(&gamestate->edit_session);
   InitPlaySession(&gamestate->session);
 }
 
@@ -22,12 +23,17 @@ void UpdateScene(Gamestate* gamestate){
     case MENU:{
       int option_selected = UpdateSystemMenu(&gamestate->main_menu,&input);
       if(option_selected >=0){
-        ExecuteCommand(option_selected, &gamestate->screen);
+        ExecuteCommand(option_selected, gamestate);
       }
       break;
     }
     case GAMEPLAY:
       UpdatePlaySession(&gamestate->session);
+      break;
+    case EDIT_SCREEN:
+      if(!UpdateEditSession(&gamestate->edit_session, &input)){
+        gamestate->screen = MENU;
+      }
       break;
   }
 }
@@ -65,6 +71,9 @@ void DrawScreen(Gamestate* gamestate){
         break;
       case GAMEPLAY:
         DrawPlaySession(&gamestate->session);
+        break;
+      case EDIT_SCREEN:
+        DrawEditSession(&gamestate->edit_session);
         break;
     }
 }
