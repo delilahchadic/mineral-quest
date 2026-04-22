@@ -13,8 +13,14 @@ typedef struct Command{
 extern Command COMMAND_REGISTRY[100]; 
 void(*callbacks[100]) (void* context);
 
+//System Menu callbacks
 void AdventureMode(void* context);
+void EditMode(void* context);
+void EditModeNew(void* context);
+
+
 char* GetCommandLabel(int id);
 void ExecuteCommand(int id, void* context);
 char* GetCommandDescription(int id);
+
 #endif

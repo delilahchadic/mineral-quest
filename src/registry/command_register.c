@@ -3,13 +3,25 @@
 Command COMMAND_REGISTRY[100] = {0};
 
 void(*callbacks[100]) (void*) = {
-  [0] = AdventureMode
+  [0] = AdventureMode,
+  [1] = EditMode,
+  [3] = EditModeNew
 };
 
 // Used in Main menu to set the gsme state to bein game
 void AdventureMode(void* context){
   Gamestate* state = (Gamestate*)context;
   state->screen = GAMEPLAY;
+}
+
+void EditMode(void* context){
+  Gamestate* state = (Gamestate*)context;
+  state->screen = EDIT_SCREEN;
+}
+
+void EditModeNew(void* context){
+  EditSession* session = (EditSession*)context;
+  session->state = EDITOR_PROMPT;
 }
 
 char* GetCommandLabel(int id){
@@ -21,6 +33,5 @@ char* GetCommandDescription(int id){
 }
 
 void ExecuteCommand(int id, void* context){
-  // assert((id >= 0 && id < 100) && COMMAND_REGISTRY[id].callback != NULL && "invalid command id");
   callbacks[id](context);
 }
