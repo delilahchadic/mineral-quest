@@ -3,8 +3,8 @@
 #define TYPES_ENV
 #include "raylib.h"
 #include "defs/types_entities.h"
-#define MAP_WIDTH 100
-#define MAP_HEIGHT 100
+#define MAP_WIDTH 256
+#define MAP_HEIGHT 256
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)

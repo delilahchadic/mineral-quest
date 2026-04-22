@@ -14,6 +14,28 @@ void InitMap(Map* map){
   map->camera.zoom = 1.0f;
 }
 
+void InitNewMap(Map* map,char* name,int columns, int rows){\
+  memset(map, 0, sizeof(Map));
+  snprintf(map->name, sizeof(map->name),"%s", name);
+  map->name[sizeof(map->name) - 1] = '\0'; 
+  map->rows = rows;
+  map->columns = columns;
+  for(int i =0;i<map->rows;i++){
+    for(int j =0;j<map->columns;j++){
+      map->grid[i][j].height = 0;
+      map->grid[i][j].type = TILE_GRASS;
+    }
+  }
+
+  map->pixel_width = map->columns * TILE_SIZE;
+  map->pixel_height = map->rows * TILE_SIZE;
+  map->camera.target = (Vector2){0,0};
+  map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
+  map->camera.rotation = 0.0f;
+  map->camera.zoom = 1.0f;
+
+}
+
 void Init_Player(Map* map){
   MapEntity* player = malloc(sizeof(MapEntity)); 
   player->type = ENTITY_PLAYER;
