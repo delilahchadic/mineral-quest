@@ -19,6 +19,16 @@ typedef struct Menu{
   EntityType type;
 }Menu;
 
+typedef struct EditorForm{
+  char name[32];
+  int letterCount;
+  char width_str[5];
+  int width_count;
+  char height_str[5];
+  int height_count;
+  int active_field;
+}EditorForm;
+
 void FillMenu(Menu* menu, int(*list)[MAX_SLOTS], int count);
 void DrawMenu(Menu* menu);
 bool UpdateMenu(Menu* menu, Input* input);
