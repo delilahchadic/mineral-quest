@@ -29,6 +29,10 @@ Input CaptureInput(){
   if(IsKeyPressed(KEY_ENTER)){
     i.buttons_pressed |= ENTER_PRESSED;
   }
+
+  if(IsKeyPressed(KEY_BACKSPACE)){
+    i.buttons_pressed |= BACKSPACE_PRESSED;
+  }
   
   if(i.dir.x != 0 || i.dir.y != 0){
     i.buttons_pressed |= MOVEMENT_PRESSED;
