@@ -8,7 +8,7 @@ void InitMap(Map* map){
   map->lastTileHeight = -1;
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
-  map->camera.target = GetWorldToIso(map->player->position);
+  map->camera.target = map->player->position;
   map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
   map->camera.rotation = 0.0f;
   map->camera.zoom = 1.0f;
