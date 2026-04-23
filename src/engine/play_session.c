@@ -3,6 +3,12 @@
 void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
+
+  session->camera.target = (Vector2){0,0};
+  session->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
+  session->camera.rotation = 0.0f;
+  session->camera.zoom = 1.0f;
+
   LoadMap("highway",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
@@ -28,8 +34,12 @@ void UpdatePlaySession(PlaySession* session){
         }else{
           bool moved = UpdatePhysics(&session->map, &input);
           Update_Map(&session->map, moved);
+          float smoothness = 0.1f;
+          Vector2 isoPos = GetWorldToIso(session->map.player->position);
+          session->camera.target.x += (isoPos.x - session->camera.target.x) * smoothness;
+          session->camera.target.y += (isoPos.y - session->camera.target.y) * smoothness;
         }
-      AdjustCamera(&session->map, false);
+      AdjustCamera(session, false);
       break;
     case INVENTORY:
       UpdateInventory(session, &input);
@@ -37,7 +47,7 @@ void UpdatePlaySession(PlaySession* session){
     case TALKING:
       UpdateScriptManager(&session->manager, &input);
       session->state = session->manager.active ? TALKING : ADVENTURE;
-      AdjustCamera(&session->map,true);
+      AdjustCamera(session,true);
       break;
     case ITEM:
       if(input.buttons_pressed & INTERACT_PRESSED){
@@ -47,26 +57,17 @@ void UpdatePlaySession(PlaySession* session){
 }
   //if dialog manager is active input is disabled
 void DrawPlaySession(PlaySession* session){
-  switch (session->state)
-  {
-  case ADVENTURE:
-    Draw_Map(&session->map);    
-    break;
-  case INVENTORY:
+
+  if(session->state == INVENTORY){
     DrawInventory(&session->menu);
-    break;
-  case TALKING:
-    Draw_Map(&session->map);    
-    DrawMessage(&session->manager);
-    break;
-  case ITEM:
-    Draw_Map(&session->map);    
-    DrawDialog("you found a christmas present", session->pendingItemName);
-  default:
-    break;
+  }else{
+    Draw_Map(&session->map,&session->camera); 
+    if(session->state == TALKING){
+      DrawMessage(&session->manager);
+    }else if(session->state == ITEM){
+      DrawDialog("you found a christmas present", session->pendingItemName);
+    }
   }
-  
-    
 }
 
 
@@ -76,6 +77,14 @@ void UpdateInventory(PlaySession* session, Input* input){
   if(!UpdateMenu(&session->menu, input)){
     session->state = ADVENTURE;
   }  
+}
+
+void AdjustCamera(PlaySession* session, bool dialog){
+  if(dialog){
+    session->camera.zoom += (1.2f - session->camera.zoom) * 0.05f;
+  }else{
+    session->camera.zoom += (1.0f - session->camera.zoom) * 0.05f;
+  }
 }
 
 void DrawInventory(Menu* menu) {

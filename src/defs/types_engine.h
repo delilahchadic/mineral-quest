@@ -19,10 +19,12 @@ typedef struct PlaySession{
   PlayState state;
   Menu menu;
   char pendingItemName[100];
+  Camera2D camera;
 } PlaySession;
 
 typedef struct EditSession{
   Map map;
+  Camera2D camera;
   SystemMenu menu;
   EditorForm form;
   EditState state;

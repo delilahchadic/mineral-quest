@@ -8,13 +8,9 @@ void InitMap(Map* map){
   map->lastTileHeight = -1;
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
-  map->camera.target = map->player->position;
-  map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
-  map->camera.rotation = 0.0f;
-  map->camera.zoom = 1.0f;
 }
 
-void InitNewMap(Map* map,char* name,int columns, int rows){\
+void InitNewMap(Map* map,char* name,int columns, int rows){
   memset(map, 0, sizeof(Map));
   snprintf(map->name, sizeof(map->name),"%s", name);
   map->name[sizeof(map->name) - 1] = '\0'; 
@@ -29,11 +25,7 @@ void InitNewMap(Map* map,char* name,int columns, int rows){\
 
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
-  map->camera.target = (Vector2){0,0};
-  map->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
-  map->camera.rotation = 0.0f;
-  map->camera.zoom = 1.0f;
-
+  
 }
 
 void Init_Player(Map* map){
@@ -68,19 +60,61 @@ Vector2 GetWorldToIso(Vector2 worldPos) {
   return iso;
 }
 
-void Draw_Map(Map* map) {
-  BeginMode2D(map->camera);
-    for (int y = 0; y < map->rows; y++) {
-      for (int x = 0; x < map->columns; x++) {
+// This function takes your "Normal" coordinates and returns "Isometric" screen pixels
+Vector2 GetIsoWorldToGrid(Vector2 worldPos) {
+    Vector2 grid;
+    float halfW = TILE_SIZE / 1.0f;
+    float halfH = TILE_SIZE / 2.0f;
+    
+    // The "Inverse" Isometric Formula:
+    // This turns the 'Diamond' pixels back into 'Square' indices
+    grid.x = (worldPos.x / halfW + worldPos.y / halfH) / 2.0f;
+    grid.y = (worldPos.y / halfH - worldPos.x / halfW) / 2.0f;
+    
+    return grid;
+}
+
+void Draw_Map(Map* map, Camera2D* camera) {
+  BeginMode2D(*camera);
+    Vector2 tl_corner = GetScreenToWorld2D((Vector2){0,0}, *camera);
+    Vector2 tr_corner = GetScreenToWorld2D((Vector2){SCREEN_WIDTH,0}, *camera);
+    Vector2 bl_corner = GetScreenToWorld2D((Vector2){0,SCREEN_HEIGHT}, *camera);
+    Vector2 br_corner = GetScreenToWorld2D((Vector2){SCREEN_WIDTH,SCREEN_HEIGHT}, *camera);
+
+    Vector2 g1 = GetIsoWorldToGrid(tl_corner);
+    Vector2 g2 = GetIsoWorldToGrid(tr_corner);
+    Vector2 g3 = GetIsoWorldToGrid(bl_corner);
+    Vector2 g4 = GetIsoWorldToGrid(br_corner);
+    float min_x = fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) -2;
+    float max_x = fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x))+2;
+
+    float min_y = fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y))-2;
+    float max_y = fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y))+2;
+
+    min_x = min_x < 0 ? 0: min_x;
+    min_y = min_y < 0 ? 0: min_y;
+    max_x = max_x > map->columns ? map->columns: max_x;
+    max_y = max_y > map->rows ? map->rows: max_y;
+
+    for (int y = min_y; y <= max_y; y++) {
+      for (int x = min_x; x <= max_x; x++) {
         Draw_Tile(map,x,y);
       }
     }
 
     MapEntity* curr = map->entities;
-      while(curr != NULL) {
+    while(curr != NULL) {
+      float gx = curr->position.x / TILE_SIZE;
+    float gy = curr->position.y / TILE_SIZE;
+
+    // 2. Compare against your calculated min/max bounds
+    // We use a small buffer (+1/-1) so sprites don't pop out at the very edge
+    if (gx >= min_x - 1 && gx <= max_x + 1 && 
+        gy >= min_y - 1 && gy <= max_y + 1) {
         Draw_MapEntity(curr, map);
-        curr = curr->next;
-      }
+    }
+    curr = curr->next;
+    }
 
     EndMode2D();
   
@@ -210,21 +244,9 @@ void Update_Map(Map* map, bool moved){
     Remove_Entity(map,map->player);
     Add_Entity(map, map->player);
   }
-
-  float smoothness = 0.1f;
-  Vector2 playerIsoPosition = GetWorldToIso(map->player->position);
-  map->camera.target.x += (playerIsoPosition.x - map->camera.target.x) * smoothness;
-  map->camera.target.y += (playerIsoPosition.y - map->camera.target.y) * smoothness;
-
 }
 
-void AdjustCamera(Map* map, bool dialog){
-  if(dialog){
-    map->camera.zoom += (1.2f - map->camera.zoom) * 0.05f;
-  }else{
-    map->camera.zoom += (1.0f - map->camera.zoom) * 0.05f;
-  }
-}
+
 
 void Remove_Entity(Map* map, MapEntity* entity){
   if(map==NULL || entity == NULL) return;

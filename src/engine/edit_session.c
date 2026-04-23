@@ -7,6 +7,11 @@ void InitEditSession(EditSession* session){
   session->form = (EditorForm){0};
   session->form.active_field = 0;
   FillSystemMenu(&session->menu, (int[]){3,2},2, "Edit Mode");
+
+  session->camera.target = (Vector2){0,0};
+  session->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
+  session->camera.rotation = 0.0f;
+  session->camera.zoom = 1.0f;
 }
 
 bool UpdateEditSession(EditSession* session, Input* input){
@@ -22,6 +27,7 @@ bool UpdateEditSession(EditSession* session, Input* input){
     UpdateEditForm(session,input);
     break;
   case EDITOR:
+    UpdateEditorCamera(session,input);
     break;
   default:
     break;
@@ -126,7 +132,7 @@ void DrawEditSession(EditSession* session){
   switch (session->state)
   {
   case EDITOR:
-    Draw_Map(&session->map);
+    Draw_Map(&session->map, &session->camera);
     break;
   case EDITOR_MENU:
     DrawSystemMenu(&session->menu);
@@ -182,4 +188,16 @@ void DrawEditForm(EditSession* session){
     DrawText(text, margin+10, descBoxY +40, 18, COLOR_SUNKEN_INK);
   }
 
+  }
+
+  void UpdateEditorCamera(EditSession* session,Input *input){
+    float dt = GetFrameTime();
+    if (dt > 0.1f) dt = 0.1f;
+
+    if (input->buttons_pressed & MOVEMENT_PRESSED) {
+      // This is the "proper" way to get 0.707 for diagonals
+      float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
+      session->camera.target.x += input->dir.x * length * 400.0f * dt;
+      session->camera.target.y += input->dir.y * length * 400.0f * dt;
+    } 
   }

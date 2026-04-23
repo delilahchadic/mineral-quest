@@ -42,8 +42,7 @@ typedef struct Map{
   int pixel_height;
   int rows;
   int columns;
-  char name[32];
-  Camera2D camera;
+  char name[32];  
   MapEntity* entities;
   MapEntity* player; 
   int lastTileHeight;

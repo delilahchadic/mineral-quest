@@ -11,7 +11,7 @@ bool UpdateEditSession(EditSession* session, Input* input);
 void UpdateEditForm(EditSession* session, Input* input);
 void DrawEditSession(EditSession* session);
 void DrawEditForm(EditSession* session);
-
+void UpdateEditorCamera(EditSession* session,Input *input);
 void ProcessMapName(EditSession* session);
 void ProcessMapWidth(EditSession* session);
 void ProcessMapHeight(EditSession* session);

@@ -17,5 +17,6 @@ void DrawInventory(Menu* menu);
 void UpdateInventory(PlaySession* session, Input* input);
 void InitDialog(Map* map, ScriptManager* manager);
 int PollChest(Player* player, Map* map);
+void AdjustCamera(PlaySession* session, bool dialog);
 
 #endif
