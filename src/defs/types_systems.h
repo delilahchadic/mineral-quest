@@ -6,6 +6,7 @@
 #define MAX_SLOTS 20
 typedef struct Input{
   Vector2 dir;
+  Vector2 mouse;
   uint32_t buttons_pressed;
 } Input;
 
@@ -23,7 +24,9 @@ typedef enum ButtonPressed{
   KEY_S_PRESSED = 1 <<4,
   ENTER_PRESSED = 1<<5,
   BACKSPACE_PRESSED = 1 <<6,
-  MOVEMENT_PRESSED = 1 <<15
+  SHIFT_PRESSED = 1 << 7,
+  MOVEMENT_PRESSED = 1 <<15,
+  LEFT_MOUSE_CLICKED = 1 <<16
 } ButtonPressed;
 
 typedef struct ScriptManager{
@@ -38,7 +41,7 @@ typedef struct player
 {
   /* data */
   Inventory inventory;
-  float speed;   
+  float speed;
   Texture2D sprite;     // How fast we move
 } Player;
 
