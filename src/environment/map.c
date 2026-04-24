@@ -13,7 +13,7 @@ void InitMap(Map* map){
 void InitNewMap(Map* map,char* name,int columns, int rows){
   memset(map, 0, sizeof(Map));
   snprintf(map->name, sizeof(map->name),"%s", name);
-  map->name[sizeof(map->name) - 1] = '\0'; 
+  map->name[sizeof(map->name) - 1] = '\0';
   map->rows = rows;
   map->columns = columns;
   for(int i =0;i<map->rows;i++){
@@ -25,11 +25,10 @@ void InitNewMap(Map* map,char* name,int columns, int rows){
 
   map->pixel_width = map->columns * TILE_SIZE;
   map->pixel_height = map->rows * TILE_SIZE;
-  
 }
 
 void Init_Player(Map* map){
-  MapEntity* player = malloc(sizeof(MapEntity)); 
+  MapEntity* player = malloc(sizeof(MapEntity));
   player->type = ENTITY_PLAYER;
   player->state = NORMAL_STATE;
   player->position = (Vector2){30,30};
@@ -65,13 +64,20 @@ Vector2 GetIsoWorldToGrid(Vector2 worldPos) {
     Vector2 grid;
     float halfW = TILE_SIZE / 1.0f;
     float halfH = TILE_SIZE / 2.0f;
-    
+
     // The "Inverse" Isometric Formula:
     // This turns the 'Diamond' pixels back into 'Square' indices
     grid.x = (worldPos.x / halfW + worldPos.y / halfH) / 2.0f;
     grid.y = (worldPos.y / halfH - worldPos.x / halfW) / 2.0f;
-    
+
     return grid;
+}
+
+Vector2 GetGridToIsoWorld(int x, int y) {
+    float worldX = (x - y) * (TILE_SIZE / 2.0f);
+    float worldY = (x + y) * (TILE_SIZE / 2.0f);
+
+    return (Vector2){ worldX, worldY };
 }
 
 void Draw_Map(Map* map, Camera2D* camera) {
@@ -96,8 +102,8 @@ void Draw_Map(Map* map, Camera2D* camera) {
     max_x = max_x > map->columns ? map->columns: max_x;
     max_y = max_y > map->rows ? map->rows: max_y;
 
-    for (int y = min_y; y <= max_y; y++) {
-      for (int x = min_x; x <= max_x; x++) {
+    for (int y = min_y; y < max_y; y++) {
+      for (int x = min_x; x < max_x; x++) {
         Draw_Tile(map,x,y);
       }
     }
@@ -109,7 +115,7 @@ void Draw_Map(Map* map, Camera2D* camera) {
 
     // 2. Compare against your calculated min/max bounds
     // We use a small buffer (+1/-1) so sprites don't pop out at the very edge
-    if (gx >= min_x - 1 && gx <= max_x + 1 && 
+    if (gx >= min_x - 1 && gx <= max_x + 1 &&
         gy >= min_y - 1 && gy <= max_y + 1) {
         Draw_MapEntity(curr, map);
     }
@@ -117,7 +123,7 @@ void Draw_Map(Map* map, Camera2D* camera) {
     }
 
     EndMode2D();
-  
+
 }
 
 void Draw_Tile(Map* map, int x, int y){
@@ -148,7 +154,7 @@ void Draw_Tile(Map* map, int x, int y){
     //front side
     DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
   }
-  
+
   if (map->grid[y][x].type == TILE_WATER) {
     DrawWaterTile(t1,t2,t3,t4,x,y);
   }else{
@@ -158,7 +164,7 @@ void Draw_Tile(Map* map, int x, int y){
     DrawLineV(t3, t4, Fade(BLACK, 0.1f));
     DrawLineV(t4, t1, Fade(BLACK, 0.1f));
   }
-  
+
 }
 
 void  Draw_MapEntity(MapEntity* entity,Map* map){
@@ -178,9 +184,9 @@ void  Draw_MapEntity(MapEntity* entity,Map* map){
     // Center the sprite horizontally (width/2) and place bottom at isoPos.y
     Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-  
 
-  
+
+
   if(entity->type == ENTITY_ITEM ){
     DrawTextureEx(*sprite,drawPos,0.0,0.5, WHITE );
   }else{
@@ -193,33 +199,33 @@ void  Draw_MapEntity(MapEntity* entity,Map* map){
     char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
     DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
   }
-   
+
 }
 
 void DrawWaterTile(Vector2 t1, Vector2 t2, Vector2 t3, Vector2 t4, int x, int y) {
     // 1. Base Water (unchanged, but noted: Indanthrone Blue looks great here)
     float pulse = sinf(GetTime()) * 30.0f;
-    Color waterColor = COLOR_CERULEAN_CORE;
+    Color waterColor = COLOR_BEAVIS_SHIRT;
     waterColor.a = 150 + (unsigned char)pulse;
     DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, waterColor);
 
     // 2. The Sparkle Logic
-    float tileSeed = (float)(x * 12.9898f + y * 78.233f); 
+    float tileSeed = (float)(x * 12.9898f + y * 78.233f);
     float sparkleTime = sinf(GetTime() * 2.5f + tileSeed); // Slightly faster pulse
 
-    if (sparkleTime > 0.97f) { 
+    if (sparkleTime > 0.97f) {
         // Use fmodf for smoother, overflow-safe randomness
         float offsetX = fmodf(tileSeed * 43758.5453f, (float)TILE_SIZE);
-        float offsetY = fmodf(tileSeed * 12345.6789f, (float)TILE_SIZE / 2.0f); 
-      
+        float offsetY = fmodf(tileSeed * 12345.6789f, (float)TILE_SIZE / 2.0f);
+
         Vector2 sparklePos = { t1.x + offsetX - (TILE_SIZE/2), t1.y + offsetY };
         float sizePulse = (sinf(GetTime() * 8.0f + tileSeed) + 1.0f) * 1.5f + 1.0f;
 
         BeginBlendMode(BLEND_ADDITIVE);
-            // Using a slightly warmer glow color (like COLOR_CELADON) 
+            // Using a slightly warmer glow color (like COLOR_CELADON)
             // makes the Indanthrone core pop even harder.
             DrawSimpleSparkle(sparklePos, COLOR_INDANTHRONE_BLUE, sizePulse);
-            DrawCircleV(sparklePos, sizePulse * 0.3f, WHITE); 
+            DrawCircleV(sparklePos, sizePulse * 0.3f, WHITE);
         EndBlendMode();
     }
 }
@@ -229,7 +235,7 @@ void DrawSimpleSparkle(Vector2 pos, Color color, float size) {
     DrawCircleV(pos, size * 2.5f, Fade(color, 0.1f));
     DrawCircleV(pos, size, Fade(color, 0.4f));
 
-    float thickness = size * 0.25f; 
+    float thickness = size * 0.25f;
     // Vertical line (full size)
     DrawLineEx((Vector2){pos.x, pos.y - size}, (Vector2){pos.x, pos.y + size}, thickness, color);
     // Horizontal line (slightly shorter for that "anamorphic" lens look)
@@ -272,7 +278,7 @@ void Remove_Entity(Map* map, MapEntity* entity){
 void Add_Entity(Map* map, MapEntity* entity){
 
   if(map->entities == NULL ||
-    (entity->position.x + entity->position.y) < 
+    (entity->position.x + entity->position.y) <
     map->entities->position.x + map->entities->position.y){
     entity->next = map->entities;
     map->entities = entity;
@@ -280,13 +286,13 @@ void Add_Entity(Map* map, MapEntity* entity){
   }
 
   MapEntity* curr = map->entities;
-  while(curr->next != NULL && 
-    (curr->next->position.x + curr->next->position.y  < 
+  while(curr->next != NULL &&
+    (curr->next->position.x + curr->next->position.y  <
   (entity->position.x + entity->position.y))) {
     curr = curr->next;
   }
 
-  entity->next= curr->next; 
+  entity->next= curr->next;
   curr->next = entity;
   return;
 }
@@ -303,4 +309,3 @@ MapEntity* PollTrait(Map* map, TraitFlags trait, float distance){
   }
   return NULL;
 }
-

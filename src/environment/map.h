@@ -38,11 +38,13 @@ void DrawSimpleSparkle(Vector2 pos, Color color, float size);
 void Close_Map(Map* map);
 void Add_Entity(Map* map, MapEntity* entity);
 void Remove_Entity(Map* map, MapEntity* entity);
-void Init_Player(Map* map); 
+void Init_Player(Map* map);
 
 // void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
+Vector2 GetIsoWorldToGrid(Vector2 worldPos);
+Vector2 GetGridToIsoWorld(int x, int y);
 MapEntity*  PollTrait(Map* map, TraitFlags traits, float distance);
 
 #endif
