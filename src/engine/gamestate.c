@@ -3,7 +3,7 @@
 void InitGame(Gamestate* gamestate){
   // System Setup
   gamestate->screen= LOGO;
-  gamestate->framesCounter = 0; 
+  gamestate->framesCounter = 0;
   FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
   InitEditSession(&gamestate->edit_session);
   InitPlaySession(&gamestate->session);
@@ -43,8 +43,8 @@ void DrawScreen(Gamestate* gamestate){
       case LOGO:{
             // 1. Define the colors in the order you want them to appear
           Color barPalette[] = {
-              COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE, 
-              COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON, 
+              COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE,
+              COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON,
               COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
           };
           int colorCount = 8;
@@ -55,11 +55,11 @@ void DrawScreen(Gamestate* gamestate){
               DrawRectangle(i * barWidth, 0, barWidth,SCREEN_HEIGHT, barPalette[i]);
           }
 
-            // 3. 
+            // 3.
             // Draw a dark semi-transparent bar behind the text for readability
             DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
             DrawText("ARCHAEOLOGY", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 - 20, 30, COLOR_PULP_PAPER);
-            
+
             break;
       }
       case TITLE:
@@ -81,6 +81,7 @@ void DrawScreen(Gamestate* gamestate){
 void CloseGame(Gamestate* gamestate){
   Close_Player(PLAYER);
   Close_Map(&gamestate->session.map);
+  CloseEditor(&gamestate->edit_session);
   free(gamestate);
   CloseWindow();
 }

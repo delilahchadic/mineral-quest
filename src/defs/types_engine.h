@@ -5,7 +5,9 @@
 #include "defs/types_ui.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "defs/types_core.h"
 #include "defs/types_systems.h"
+#include "raylib.h"
 
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,MENU, EDIT_SCREEN } GameScreen;
 
@@ -28,6 +30,8 @@ typedef struct EditSession{
   SystemMenu menu;
   EditorForm form;
   EditState state;
+  SelectionBuffer buffer;
+  Vector2 last_selected_tile;
 } EditSession;
 
 typedef struct Gamestate{
