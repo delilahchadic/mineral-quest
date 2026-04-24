@@ -2,7 +2,7 @@
 CC = gcc
 # Added -Isrc so you can include headers like #include "core/common.h"
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude -Isrc
-LDFLAGS = -lraylib 
+LDFLAGS = -lraylib
 
 # Directories
 SRC_DIR = src
@@ -38,5 +38,10 @@ run: all
 # Clean build files
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+# Inside your Makefile
+bear:
+	make clean
+	bear -- make
 
 .PHONY: all clean run
