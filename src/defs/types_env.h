@@ -1,8 +1,10 @@
 
 #ifndef TYPES_ENV
 #define TYPES_ENV
+#include <stdint.h>
 #include "raylib.h"
 #include "defs/types_entities.h"
+
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
 // Physical dimensions in pixels
@@ -12,8 +14,6 @@
 
 typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
 
-
-
 typedef enum State{
   NORMAL_STATE,
   JUMPING_STATE
@@ -22,7 +22,7 @@ typedef enum State{
 typedef struct MapEntity {
   EntityType type;      // Is this a person or a flower?
   Vector2 position; // Pointer to the actual Character, Item, or Plant struct
-  struct MapEntity* next; 
+  struct MapEntity* next;
   int id;
   State state;
   Vector2 velocity;
@@ -42,9 +42,9 @@ typedef struct Map{
   int pixel_height;
   int rows;
   int columns;
-  char name[32];  
+  char name[32];
   MapEntity* entities;
-  MapEntity* player; 
+  MapEntity* player;
   int lastTileHeight;
 }Map;
 #endif
