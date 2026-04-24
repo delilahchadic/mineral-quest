@@ -48,7 +48,7 @@ void DrawScreen(Gamestate* gamestate){
               COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
           };
           int colorCount = 8;
-          float barWidth = SCREEN_WIDTH / colorCount;
+          float barWidth = (float)SCREEN_WIDTH / colorCount;
 
             // 2. Draw the vertical bars
           for (int i = 0; i < colorCount; i++) {
