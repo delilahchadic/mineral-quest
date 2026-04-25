@@ -3,6 +3,8 @@
 
 #include "defs/types_systems.h"
 
+typedef enum EditFormActiveField {FIELD_NAME = 0, FIELD_WIDTH, FIELD_HEIGHT, FIELD_CONFIRM}EditFormActiveField;
+
 typedef struct SystemMenu{
   char name[32];
   int ids[MAX_SLOTS];
@@ -25,7 +27,7 @@ typedef struct EditorForm{
   int width_count;
   char height_str[3];
   int height_count;
-  int active_field;
+  EditFormActiveField active_field;
 }EditorForm;
 
 void FillMenu(Menu* menu, int(*list)[MAX_SLOTS], int count);
