@@ -33,7 +33,6 @@ typedef struct EditSession{
   SelectionBuffer buffer;
   Vector2 last_selected_tile;
   Vector2 dragStart;
-  Vector2 dragEnd;
   bool isDragging;
 } EditSession;
 
