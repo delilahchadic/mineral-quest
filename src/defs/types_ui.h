@@ -21,9 +21,9 @@ typedef struct Menu{
 typedef struct EditorForm{
   char name[32];
   int letterCount;
-  char width_str[5];
+  char width_str[3];
   int width_count;
-  char height_str[5];
+  char height_str[3];
   int height_count;
   int active_field;
 }EditorForm;
