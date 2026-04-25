@@ -44,6 +44,7 @@ typedef struct TileDefinition{
     float friction;     // 1.0 = Normal, 0.2 = Ice/Oil, 1.5 = Deep Sand
     int footstep_sfx;
     Color color;// sound??
+    char* label;
 } TileDefinition;
 
 typedef enum EntityType{
