@@ -212,7 +212,7 @@ void DrawWaterTile(Vector2 t1, Vector2 t2, Vector2 t3, Vector2 t4, int x, int y)
         float offsetX = fmodf(tileSeed * 43758.5453f, (float)TILE_SIZE);
         float offsetY = fmodf(tileSeed * 12345.6789f, (float)TILE_SIZE / 2.0f);
 
-        Vector2 sparklePos = { t1.x + offsetX - (TILE_SIZE/2), t1.y + offsetY };
+        Vector2 sparklePos = { t1.x + offsetX - (int)(TILE_SIZE/2), t1.y + offsetY };
         float sizePulse = (sinf(GetTime() * 8.0f + tileSeed) + 1.0f) * 1.5f + 1.0f;
 
         BeginBlendMode(BLEND_ADDITIVE);
