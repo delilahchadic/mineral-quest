@@ -32,6 +32,8 @@ typedef struct EditSession{
   EditState state;
   SelectionBuffer buffer;
   Vector2 last_selected_tile;
+  Vector2 dragStart;
+  bool isDragging;
 } EditSession;
 
 typedef struct Gamestate{

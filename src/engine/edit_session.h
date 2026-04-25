@@ -23,4 +23,6 @@ void UpdateSelectionBuffer(EditSession* session,Input *input);
 void ProcessMapName(EditSession* session);
 void ProcessMapWidth(EditSession* session);
 void ProcessMapHeight(EditSession* session);
+void SelectGridLine(EditSession* session, Vector2 curr);
+void SelectRectangle(EditSession* session, Vector2 curr,bool fill);
 #endif
