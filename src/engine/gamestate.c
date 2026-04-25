@@ -58,13 +58,13 @@ void DrawScreen(Gamestate* gamestate){
             // 3.
             // Draw a dark semi-transparent bar behind the text for readability
             DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
-            DrawText("ARCHAEOLOGY", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 - 20, 30, COLOR_PULP_PAPER);
+            DrawText("ARCHAEOLOGY", SCREEN_WIDTH/4, SCREEN_HEIGHT/2, 30, COLOR_PULP_PAPER);
 
             break;
       }
       case TITLE:
-        DrawText("Mineral Quest", 220, 150, 40, COLOR_SUNKEN_INK);
-        DrawText("PRESS ENTER TO START", 280, 250, 20, COLOR_SUNKEN_INK);
+        DrawText("Mineral Quest", SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 40, COLOR_SUNKEN_INK);
+        DrawText("PRESS ENTER TO START",( SCREEN_WIDTH/2) , (SCREEN_HEIGHT/2) + 50, 20, COLOR_SUNKEN_INK);
         break;
       case MENU:
         DrawSystemMenu(&gamestate->main_menu);

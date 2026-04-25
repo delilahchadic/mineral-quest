@@ -15,10 +15,7 @@
 #include "systems/input.h"
 #include "ui/menu.h"
 #include "defs/types_engine.h"
-
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
-#define TARGET_FPS 60
+#include "defs/constants.h"
 
 void InitGame(Gamestate* gamestate);
 void UpdateScene(Gamestate *gamestate);
