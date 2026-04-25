@@ -1,7 +1,4 @@
 #include "map.h"
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
-#define TARGET_FPS 60
 
 void InitMap(Map* map){
   Init_Player(map);
@@ -183,9 +180,6 @@ void  Draw_MapEntity(MapEntity* entity,Map* map){
 
     // Center the sprite horizontally (width/2) and place bottom at isoPos.y
     Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
-
-
-
 
   if(entity->type == ENTITY_ITEM ){
     DrawTextureEx(*sprite,drawPos,0.0,0.5, WHITE );

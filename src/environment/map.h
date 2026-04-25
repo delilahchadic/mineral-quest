@@ -16,6 +16,7 @@
 #include "systems/script_manager.h"
 #include "systems/input.h"
 #include "registry/register.h"
+#include "defs/constants.h"
 #define TILE_SIZE 32
 
 #define MAP_WIDTH 256
