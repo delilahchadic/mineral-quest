@@ -1,4 +1,5 @@
 #include "systems/input.h"
+#include "defs/types_systems.h"
 #include "raylib.h"
 
 Input CaptureInput(){
@@ -27,12 +28,29 @@ Input CaptureInput(){
     i.buttons_pressed |= JUMP_PRESSED;
   }
 
+  if(IsKeyDown(KEY_LEFT_SHIFT)){
+    i.buttons_pressed |= SHIFT_PRESSED;
+  }
+
   if(IsKeyPressed(KEY_ENTER)){
     i.buttons_pressed |= ENTER_PRESSED;
   }
 
+  if(IsKeyDown(KEY_LEFT_SUPER)){
+      i.buttons_pressed |= CONTROL_PRESSED;
+  }
+
   if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
       i.buttons_pressed |= LEFT_MOUSE_CLICKED;
+  }
+
+  if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)){
+      i.buttons_pressed |= LEFT_MOUSE_DOWN;
+
+  }
+
+  if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)){
+      i.buttons_pressed |= LEFT_MOUSE_RELEASED;
 
   }
   if(IsKeyPressed(KEY_BACKSPACE)){

@@ -3,7 +3,8 @@
 #include "raylib.h"
 #include <stdint.h>
 #include "defs/types_entities.h"
-#define MAX_SLOTS 20
+#include "defs/constants.h"
+
 typedef struct Input{
   Vector2 dir;
   Vector2 mouse;
@@ -25,8 +26,11 @@ typedef enum ButtonPressed{
   ENTER_PRESSED = 1<<5,
   BACKSPACE_PRESSED = 1 <<6,
   SHIFT_PRESSED = 1 << 7,
+  CONTROL_PRESSED = 1 <<8,
   MOVEMENT_PRESSED = 1 <<15,
-  LEFT_MOUSE_CLICKED = 1 <<16
+  LEFT_MOUSE_CLICKED = 1 <<16,
+  LEFT_MOUSE_DOWN = 1 <<17,
+  LEFT_MOUSE_RELEASED = 1 <<18,
 } ButtonPressed;
 
 typedef struct ScriptManager{
@@ -37,9 +41,7 @@ typedef struct ScriptManager{
   int currentID;
 } ScriptManager;
 
-typedef struct player
-{
-  /* data */
+typedef struct player{
   Inventory inventory;
   float speed;
   Texture2D sprite;     // How fast we move
