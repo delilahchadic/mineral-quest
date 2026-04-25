@@ -1,6 +1,8 @@
 #ifndef TYPES_ENTITIES
 #define TYPES_ENTITIES
-// #include "defs/
+#include "stdint.h"
+#include "raylib.h"
+
 typedef enum ItemType{
   ITEM_VHS_TAPE,
   ITEM_TAROT_CARD,
@@ -9,14 +11,11 @@ typedef enum ItemType{
   ITEM_MINERAL
 } ItemType;
 
-
-
 typedef struct ItemDefinition{
     int id;
     char name[32];
     char description[128];
-    // Co lor rarityColor;
-    ItemType type; // For that "Bebop" flair
+    ItemType type;
 } ItemDefinition;
 
 typedef struct Message{

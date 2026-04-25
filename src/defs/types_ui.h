@@ -1,8 +1,7 @@
 #ifndef TYPES_UI
 #define TYPES_UI
-#include "engine/common.h"
+
 #include "defs/types_systems.h"
-#define MAX_SLOTS 20
 
 typedef struct SystemMenu{
   char name[32];

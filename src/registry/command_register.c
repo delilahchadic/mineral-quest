@@ -1,5 +1,5 @@
 #include "registry/command_register.h"
-#include "engine/common.h"
+
 Command COMMAND_REGISTRY[100] = {0};
 
 void(*callbacks[100]) (void*) = {
