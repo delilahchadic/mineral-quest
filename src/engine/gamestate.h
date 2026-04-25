@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "palette.h"
 #include "engine/play_session.h"
-#include "engine/edit_session.h"
+#include "editor/edit_session.h"
 #include "registry/register.h"
 #include "systems/input.h"
 #include "ui/menu.h"

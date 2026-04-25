@@ -4,6 +4,7 @@
 #include "defs/types_systems.h"
 
 typedef enum EditFormActiveField {FIELD_NAME = 0, FIELD_WIDTH, FIELD_HEIGHT, FIELD_CONFIRM}EditFormActiveField;
+typedef enum TileEditorActiveTool{TILE_PALETTE = 0, HEIGHT_ADJSUTER, ENTITY_DRAWER}TileEditorActiveTool;
 
 typedef struct SystemMenu{
   char name[32];

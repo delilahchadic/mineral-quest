@@ -1,5 +1,5 @@
 #include "engine/gamestate.h"
-
+#include "editor/edit_ui.h"
 void InitGame(Gamestate* gamestate){
   // System Setup
   gamestate->screen= LOGO;

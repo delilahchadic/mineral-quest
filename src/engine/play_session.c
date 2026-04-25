@@ -1,14 +1,10 @@
 #include "engine/play_session.h"
+#include "core/camera_tools.h"
 
 void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
-
-  session->camera.target = (Vector2){0,0};
-  session->camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };// Center of the 800x450 screen
-  session->camera.rotation = 0.0f;
-  session->camera.zoom = 1.0f;
-
+  CenterCameraOn(&session->camera,(Vector2){0,0}, 3.0f);
   LoadMap("highway",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
@@ -61,7 +57,7 @@ void DrawPlaySession(PlaySession* session){
   if(session->state == INVENTORY){
     DrawInventory(&session->menu);
   }else{
-    Draw_Map(&session->map,&session->camera); 
+    Draw_Map(&session->map,&session->camera);
     if(session->state == TALKING){
       DrawMessage(&session->manager);
     }else if(session->state == ITEM){
@@ -72,18 +68,18 @@ void DrawPlaySession(PlaySession* session){
 
 
 /// @brief manages input while game is in inventory mode
-/// @param gamestate 
+/// @param gamestate
 void UpdateInventory(PlaySession* session, Input* input){
   if(!UpdateMenu(&session->menu, input)){
     session->state = ADVENTURE;
-  }  
+  }
 }
 
 void AdjustCamera(PlaySession* session, bool dialog){
   if(dialog){
-    session->camera.zoom += (1.2f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (3.2f - session->camera.zoom) * 0.05f;
   }else{
-    session->camera.zoom += (1.0f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (3.0f - session->camera.zoom) * 0.05f;
   }
 }
 
@@ -107,11 +103,10 @@ int PollChest(Player* player,Map* map){
   // set dialg
   MapEntity* p = PollTrait(map, TRAIT_GATHER, 50.0f);
   if(p && p->type == ENTITY_ITEM){
-    
+
     GiveItem(player, p->id);
     Remove_Entity(map, p);
     return p->id;
   }
   return -1;
 }
-
