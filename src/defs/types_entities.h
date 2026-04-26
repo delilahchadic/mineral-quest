@@ -35,7 +35,7 @@ typedef struct Plant{
   uint32_t default_trait_flags;
 } Plant;
 
-typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD} TileType;
+typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD, TILE_TERRA_PALE,TILE_SILT} TileType;
 
 
 typedef struct TileDefinition{
