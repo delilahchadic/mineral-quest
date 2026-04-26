@@ -45,6 +45,7 @@ void Init_Player(Map* map);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
 Vector2 GetIsoWorldToGrid(Vector2 worldPos);
+Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos);
 Vector2 GetGridToIsoWorld(int x, int y);
 MapEntity*  PollTrait(Map* map, TraitFlags traits, float distance);
 

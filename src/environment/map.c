@@ -77,6 +77,38 @@ Vector2 GetGridToIsoWorld(int x, int y) {
     return (Vector2){ worldX, worldY };
 }
 
+Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
+    // 1. Define your max height (matches your grid limits)
+    // If your max height is 10, start there.
+    const int MAX_HEIGHT = 200;
+    const float HEIGHT_STEP = 8.0f; // From your Draw_Tile: height * 8.0f
+
+    for (int h = MAX_HEIGHT; h >= 0; h--) {
+        // 2. Offset the Y coordinate to 'drop' the screen click
+        // to the level of the current height slice.
+        float pixelOffset = h * HEIGHT_STEP;
+        Vector2 testPos = { screenWorldPos.x, screenWorldPos.y + pixelOffset };
+
+        // 3. Use your existing math to find what grid cell that corresponds to
+        Vector2 grid = GetIsoWorldToGrid(testPos);
+
+        int ix = (int)grid.x;
+        int iy = (int)grid.y;
+
+        // 4. Validate the grid index
+        if (ix >= 0 && ix < map->columns && iy >= 0 && iy < map->rows) {
+            // 5. Check: Is the tile at this grid coordinate actually at this height?
+            // We check >= because you might be clicking the "side" of a tall block.
+            if (map->grid[iy][ix].height >= h) {
+                return (Vector2){ (float)ix, (float)iy };
+            }
+        }
+    }
+
+    // Fallback: If nothing was hit, return the flat ground (height 0)
+    return GetIsoWorldToGrid(screenWorldPos);
+}
+
 void Draw_Map(Map* map, Camera2D* camera) {
   BeginMode2D(*camera);
     Vector2 tl_corner = GetScreenToWorld2D((Vector2){0,0}, *camera);
