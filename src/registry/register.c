@@ -10,11 +10,11 @@ Player* PLAYER;
 
 TileDefinition TILE_REGISTRY[6] = {
   { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
-  { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"    },
-  { TILE_SAND,  false, 0.4f, 103, COLOR_PALE_SAND,"Salmon"    },
-  { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON,"Dirt"  },
-  { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"         },
-  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"     }
+  { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
+  { TILE_SAND,  false, 0.4f, 103, COLOR_PALE_SAND,"Sand"},
+  { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON,"Dirt"},
+  { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"},
+  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"}
 };
 
 char* GetName(EntityType type, int id){

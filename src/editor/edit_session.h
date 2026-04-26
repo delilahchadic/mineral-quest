@@ -9,5 +9,6 @@ void InitEditSession(EditSession* session);
 bool UpdateEditSession(EditSession* session, Input* input);
 void CloseEditor(EditSession* session);
 void InitEditSessionMouseTracking(EditSession* session);
-
+void SetSelectionTileType(EditSession* session);
+void AdjustSelectionHeight(EditSession* session);
 #endif

@@ -30,6 +30,7 @@ typedef struct EditSession{
   SystemMenu menu;
   EditorForm form;
   EditState state;
+  TileEditor editor;
   SelectionBuffer buffer;
   Vector2 last_selected_tile;
   Vector2 dragStart;
