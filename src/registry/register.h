@@ -17,7 +17,7 @@ extern Message DIALOG_REGISTRY[500];
 
 extern Player GLOBAL_PLAYER;
 extern Player* PLAYER;
-extern TileDefinition TILE_REGISTRY[6];
+extern TileDefinition TILE_REGISTRY[8];
 extern Texture2D SPRITE_OVERRIDE[10];
 
 // 3. Get Functions

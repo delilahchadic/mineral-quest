@@ -1,4 +1,6 @@
 #include "registry/register.h"
+#include "defs/types_engine.h"
+#include "defs/types_entities.h"
 
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Message DIALOG_REGISTRY[500] = {0};
@@ -8,13 +10,15 @@ Plant PLANT_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
 
-TileDefinition TILE_REGISTRY[6] = {
+TileDefinition TILE_REGISTRY[8] = {
   { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
   { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
   { TILE_SAND,  false, 0.4f, 103, COLOR_PALE_SAND,"Sand"},
   { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON,"Dirt"},
   { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"},
-  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"}
+  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"},
+  {TILE_TERRA_PALE,false,1.0f,107,COLOR_TERRA_PALE, "Terra Pale"},
+  {TILE_SILT, false, 1.0f, 108, COLOR_OCHRE_SILT,"Ochre Silt"}
 };
 
 char* GetName(EntityType type, int id){
