@@ -91,7 +91,7 @@ void DrawTilePalette(TileEditor* editor) {
     int startY = 100;
     DrawText("Tile Palette", startX, startY, 30, COLOR_DUSTY_CORAL);
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 8; i++) {
 
         Rectangle slot = { startX + (i * 50), startY + 60, 40, 40 };
         DrawRectangleRec(slot, TILE_REGISTRY[i].color);
@@ -112,7 +112,7 @@ bool UpdateTilePalette(TileEditor* tile_editor, Input* input){
     // DrawDialog(char *name, char *text)
     int startX = s + 40;
     int startY = 100;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 8; i++) {
 
         Rectangle slot = { startX + (i * 50), startY + 60, 40, 40 };
         if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
