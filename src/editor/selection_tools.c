@@ -4,7 +4,7 @@
 void UpdateSelectionBuffer(EditSession* session,Input *input){
     if((input->buttons_pressed & LEFT_MOUSE_CLICKED)){
         Vector2 world_mouse = GetScreenToWorld2D(input->mouse, session->camera);
-        Vector2 selection = GetIsoWorldToGrid(world_mouse);
+        Vector2 selection = GetIsoWorldToGridWithHeight(&session->map,world_mouse);
 
         if(input->buttons_pressed & CONTROL_PRESSED){
             SetTileSelected(&session->buffer, selection.x, selection.y, !IsTileSelected(&session->buffer, selection.x, selection.y));
@@ -23,7 +23,7 @@ void UpdateSelectionBuffer(EditSession* session,Input *input){
 
     if(input->buttons_pressed & LEFT_MOUSE_DOWN){
         Vector2 world_mouse = GetScreenToWorld2D(input->mouse, session->camera);
-        Vector2 selection = GetIsoWorldToGrid(world_mouse);
+        Vector2 selection = GetIsoWorldToGridWithHeight(&session->map,world_mouse);
         if(Vector2Distance(session->dragStart, input->mouse) > DRAG_THRESHOLD)
             session->isDragging = true;
         if(session->isDragging){
@@ -41,7 +41,7 @@ void UpdateSelectionBuffer(EditSession* session,Input *input){
 
     if(session->isDragging && input->buttons_pressed & LEFT_MOUSE_RELEASED){
         Vector2 world_mouse = GetScreenToWorld2D(input->mouse, session->camera);
-        Vector2 selection = GetIsoWorldToGrid(world_mouse);
+        Vector2 selection = GetIsoWorldToGridWithHeight(&session->map,world_mouse);
         if(! (input->buttons_pressed & CONTROL_PRESSED)){
             ClearSelection(&session->buffer);
         }
