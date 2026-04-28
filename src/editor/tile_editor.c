@@ -1,4 +1,6 @@
 #include "editor/tile_editor.h"
+
+#include "defs/types_core.h"
 #include "defs/types_systems.h"
 #include "defs/types_ui.h"
 #include "editor/edit_ui.h"
@@ -7,7 +9,7 @@
 #include "registry/register.h"
 #include "ui/dialog_box.h"
 
-UIResponse UpdateTileEditor(TileEditor* tile_editor, Input* input){
+bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input){
     if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
         int s = (int)(SCREEN_WIDTH  * 0.66f);
 
@@ -26,28 +28,20 @@ UIResponse UpdateTileEditor(TileEditor* tile_editor, Input* input){
     }
     switch (tile_editor->tool) {
         case TILE_PALETTE:
-            if(UpdateTilePalette(tile_editor,input)){
-                return UI_ACTION_EXECUTE;
-            }
+            UpdateTilePalette(tile_editor, map, buffer, input);
             break;
         case HEIGHT_ADJUSTER:
-            if(UpdateHeightAdjuster(tile_editor,input)){
-                return UI_ACTION_EXECUTE;
-            }
+            UpdateHeightAdjuster(tile_editor, map, buffer, input);
             break;
         case ENTITY_DRAWER:
-            UpdateEntityDrawer(tile_editor,input);
+            UpdateEntityDrawer(tile_editor, map, buffer, input);
+            break;
     }
 
     int s = (int)(SCREEN_WIDTH  * 0.66f);
     Rectangle r = (Rectangle){s,20,(s/2),(SCREEN_HEIGHT *2 /3)};
 
-    // if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
-        if(CheckCollisionPointRec(input->mouse, r)){
-            return UI_ACTION_CLICK;
-        }
-    // }
-    return UI_ACTION_NONE;
+    return(CheckCollisionPointRec(input->mouse, r));
 }
 
 void DrawTileEditor(TileEditor* tile_editor){
@@ -107,9 +101,20 @@ void DrawTilePalette(TileEditor* editor) {
     DrawText("Execute", startX+10, startY+215, 14, COLOR_PULP_PAPER);
 }
 
-bool UpdateTilePalette(TileEditor* tile_editor, Input* input){
+void SetSelectionTileType(Map* map, SelectionBuffer* buffer, int selected_tile_type){
+    for (int y = 0; y < map->rows; y++) {
+        for (int x = 0; x < map->columns; x++) {
+
+            // Only draw if the bit is 1
+            if (IsTileSelected(buffer, x, y)) {
+                map->grid[y][x].type = selected_tile_type;
+            }
+        }
+    }
+}
+
+bool UpdateTilePalette(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input){
     int s = (int)(SCREEN_WIDTH  * 0.66f);
-    // DrawDialog(char *name, char *text)
     int startX = s + 40;
     int startY = 100;
     for (int i = 0; i < 8; i++) {
@@ -125,6 +130,7 @@ bool UpdateTilePalette(TileEditor* tile_editor, Input* input){
     Rectangle execute_button = (Rectangle){startX, startY+200, 100, 40};
     if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
         if(CheckCollisionPointRec(input->mouse, execute_button)){
+            SetSelectionTileType(map, buffer, tile_editor->selected_tile_type);
             return true;
         }
     }
@@ -132,7 +138,20 @@ bool UpdateTilePalette(TileEditor* tile_editor, Input* input){
     return false;
 
 }
-bool UpdateHeightAdjuster(TileEditor* tile_editor, Input* input){
+
+void AdjustSelectionHeight(Map* map, SelectionBuffer* buffer, int height_delta){
+    for (int y = 0; y < map->rows; y++) {
+        for (int x = 0; x < map->columns; x++) {
+
+            // Only draw if the bit is 1
+            if (IsTileSelected(buffer, x, y)) {
+                map->grid[y][x].height += height_delta;
+            }
+        }
+    }
+}
+
+bool UpdateHeightAdjuster(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input){
     int s = (int)(SCREEN_WIDTH  * 0.66f);
     // DrawDialog(char *name, char *text)
     int startX = s + 40;
@@ -149,10 +168,13 @@ bool UpdateHeightAdjuster(TileEditor* tile_editor, Input* input){
         if(CheckCollisionPointRec(input->mouse, plus_1)) tile_editor->height_delta = +1;
         if(CheckCollisionPointRec(input->mouse, plus_5)) tile_editor->height_delta = +5;
     }
+    if(tile_editor->height_delta !=0){
+        AdjustSelectionHeight(map,buffer, tile_editor->height_delta);
+    }
     return tile_editor->height_delta !=0;
 }
 
-void UpdateEntityDrawer(TileEditor* tile_editor, Input* input){
+void UpdateEntityDrawer(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input){
 
 }
 

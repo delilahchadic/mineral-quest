@@ -55,18 +55,10 @@ bool UpdateEditSession(EditSession* session, Input* input){
     }
     break;
     case EDITOR:{
-        UIResponse response = UpdateTileEditor(&session->editor, input);
-        if(response == UI_ACTION_NONE){
+        if(!UpdateTileEditor(&session->editor, &session->map, &session->buffer, input)){
             UpdateSelectionBuffer(session,input);
         }
         UpdateEditorCamera(session,input);
-        if(response == UI_ACTION_EXECUTE){
-            if(session->editor.tool == TILE_PALETTE){
-                SetSelectionTileType(session);
-            }else if(session->editor.tool == HEIGHT_ADJUSTER){
-                AdjustSelectionHeight(session);
-            }
-        }
     }
 
     break;
@@ -74,30 +66,6 @@ bool UpdateEditSession(EditSession* session, Input* input){
     break;
   }
   return true;
-}
-
-void SetSelectionTileType(EditSession* session){
-    for (int y = 0; y < session->map.rows; y++) {
-        for (int x = 0; x < session->map.columns; x++) {
-
-            // Only draw if the bit is 1
-            if (IsTileSelected(&session->buffer, x, y)) {
-                session->map.grid[y][x].type = session->editor.selected_tile_type;
-            }
-        }
-    }
-}
-
-void AdjustSelectionHeight(EditSession* session){
-    for (int y = 0; y < session->map.rows; y++) {
-        for (int x = 0; x < session->map.columns; x++) {
-
-            // Only draw if the bit is 1
-            if (IsTileSelected(&session->buffer, x, y)) {
-                session->map.grid[y][x].height += session->editor.height_delta;
-            }
-        }
-    }
 }
 
 void CloseEditor(EditSession* session){
