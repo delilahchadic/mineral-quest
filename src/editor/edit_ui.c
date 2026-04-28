@@ -31,8 +31,6 @@ void UpdateEditorCamera(EditSession* session,Input *input){
         float currentSpeed = 1000.0f * speedMultiplier;
     if (input->buttons_pressed & MOVEMENT_PRESSED) {
       float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
-      // session->camera.rotation += input->dir.y * length * 400.0f * dt;
-      // session->camera.rotation += input->dir.x * length * 400.0f * dt;
       session->camera.target.x += input->dir.x * length * currentSpeed * dt;
       session->camera.target.y += input->dir.y * length * currentSpeed * dt;
     }
