@@ -9,7 +9,7 @@ Texture2D SPRITE_OVERRIDE[10] = {0};
 Plant PLANT_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
-
+static int item_count = 0;
 TileDefinition TILE_REGISTRY[8] = {
   { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
   { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
@@ -87,4 +87,12 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id){
     default:
       return TRAIT_NONE;
   }
+}
+
+void SetItemCount(int count){
+    item_count = count;
+}
+
+int GetItemCount(){
+    return item_count;
 }

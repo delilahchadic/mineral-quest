@@ -1,3 +1,4 @@
+#include "defs/types_env.h"
 #include "environment/map.h"
 
 static void LoadMapEntityFile(const char* filename, Map* map){
@@ -19,17 +20,17 @@ static void LoadMapEntityFile(const char* filename, Map* map){
     char* yToken = strtok(NULL,",");
     char* idToken = strtok(NULL,",");
     if(typeToken && xToken && yToken){
-      MapEntity* m = malloc(sizeof(MapEntity)); 
+      MapEntity* m = malloc(sizeof(MapEntity));
       if (m == NULL) continue; // Safety check
       m->type = (EntityType) atoi(typeToken);
       m->jumpoffset = 0.0f;
-      m->position = (Vector2) {(float)atoi(xToken), (float)atoi(yToken)};
+      m->position = (Vector2) {atof(xToken), atof(yToken)};
       m->next = NULL;
       m->id = atoi(idToken);
       m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
       Add_Entity(map,m);
     }
-    
+
   }
     fclose(file);
 }
@@ -47,12 +48,12 @@ static void LoadMapGridFile(const char* filename, Map* map){
   char* rowToken = strtok(line,",");
   char* colToken = strtok(NULL,",");
   char* nameToken = strtok(NULL,",");
-  
+
   if(rowToken && colToken){
     map->rows = atoi(rowToken);
     map->columns = atoi(colToken);
     strncpy(map->name, nameToken, sizeof(map->name) - 1);
-    map->name[sizeof(map->name) - 1] = '\0'; 
+    map->name[sizeof(map->name) - 1] = '\0';
   }
   int row =0;
   int col =0;
@@ -65,7 +66,7 @@ static void LoadMapGridFile(const char* filename, Map* map){
     for (col = 0;col<map->columns;col++){
       if (colToken != NULL)
       {map->grid[row][col].type = atoi(colToken);
-      colToken = strtok(NULL,",");} 
+      colToken = strtok(NULL,",");}
     }
     row++;
   }
@@ -82,9 +83,9 @@ static void LoadMapGridFile(const char* filename, Map* map){
       {map->grid[row][col].height = atoi(colToken);
       colToken = strtok(NULL,",");
     }
-      
+
     }
-    
+
     row++;
   }
     fclose(file);
@@ -92,7 +93,7 @@ static void LoadMapGridFile(const char* filename, Map* map){
 
 void LoadMap(const char* mapName, Map* map){
   memset(map, 0, sizeof(Map));
-  
+
   char gridPath[256];
   char entsPath[256];
 
@@ -101,4 +102,63 @@ void LoadMap(const char* mapName, Map* map){
   snprintf(entsPath, sizeof(entsPath), "data/maps/%s.ents", mapName);
   LoadMapGridFile(gridPath, map);
   LoadMapEntityFile(entsPath, map);
+}
+
+void SaveMapGridFile(const char* filename, Map* map){
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        TraceLog(LOG_ERROR, "Failed to open %s", filename);
+        return;
+    }
+    TraceLog(LOG_INFO,"File Loaded - %s", filename);
+
+    fprintf(file,"%d,%d,%s\n", map->rows, map->columns, map->name);
+    for(int i=0;i< map->rows;i++){
+        for(int j=0;j<map->columns;j++){
+            fprintf(file, "%d", map->grid[i][j].type);
+            if(j<map->columns -1) fprintf(file, ",");
+        }
+        fprintf(file, "\n");
+    }
+
+    fprintf(file, "\n");
+
+    for(int i=0;i< map->rows;i++){
+    for(int j=0;j<map->columns;j++){
+        fprintf(file, "%d", map->grid[i][j].height);
+        if(j<map->columns - 1) fprintf(file, ",");
+    }
+    fprintf(file, "\n");
+    }
+
+    fclose(file);
+}
+
+void SaveMapEntityFile(const char* filename, Map* map){
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        TraceLog(LOG_ERROR, "Failed to open %s", filename);
+        return;
+    }
+    TraceLog(LOG_INFO,"File Loaded - %s", filename);
+
+    fprintf(file,"type,positionx,positiony,id\n");
+    MapEntity* curr = map->entities;
+    while(curr != NULL){
+        fprintf(file, "%d,%f,%f,%d\n", curr->type, curr->position.x, curr->position.y, curr->id);
+        curr = curr->next;
+    }
+
+    fclose(file);
+}
+
+void SaveMap(Map* map){
+    char gridPath[256];
+    char entsPath[256];
+
+    // Construct paths automatically: "highway" -> "data/maps/highway.map"
+    snprintf(gridPath, sizeof(gridPath), "data/maps/%s.map", map->name);
+    snprintf(entsPath, sizeof(entsPath), "data/maps/%s.ents", map->name);
+    SaveMapGridFile(gridPath, map);
+    SaveMapEntityFile(entsPath, map);
 }

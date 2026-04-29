@@ -5,5 +5,5 @@
 #include "defs/types_env.h"
 #include "registry/register.h"
 void LoadMap(const char* levelname, Map* map);
-
+void SaveMap(Map* map);
 #endif

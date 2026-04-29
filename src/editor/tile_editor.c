@@ -2,6 +2,7 @@
 
 #include "defs/types_core.h"
 #include "defs/types_systems.h"
+#include "environment/map_loader.h"
 #include "defs/types_ui.h"
 #include "editor/edit_ui.h"
 #include "engine/palette.h"
@@ -20,10 +21,16 @@ bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer
         Rectangle tile_palette_button = (Rectangle){tool_selector_x, tool_selector_y, 100, 40};
         Rectangle height_adjuster_button = (Rectangle){tool_selector_x + 120, tool_selector_y, 120, 40};
         Rectangle entity_drawer_button = (Rectangle){tool_selector_x + 240, tool_selector_y, 120, 40};
+
+        Rectangle save_button = (Rectangle){tool_selector_x, (SCREEN_HEIGHT * 1/2), 120, 40};
         if(CheckCollisionPointRec(input->mouse, tile_palette_button)){
             tile_editor->tool = TILE_PALETTE;
         }else if(CheckCollisionPointRec(input->mouse, height_adjuster_button)){
             tile_editor->tool = HEIGHT_ADJUSTER;
+        }else if(CheckCollisionPointRec(input->mouse, entity_drawer_button)){
+            tile_editor->tool = ENTITY_DRAWER;
+        }else if(CheckCollisionPointRec(input->mouse, save_button)){
+            SaveMap(map);
         }
     }
     switch (tile_editor->tool) {
@@ -76,6 +83,11 @@ void DrawTileEditor(TileEditor* tile_editor){
         case ENTITY_DRAWER:
             DrawEntityDrawer();
     }
+
+    Rectangle save_button = (Rectangle){tool_selector_x, (SCREEN_HEIGHT * 1/2), 120, 40};
+    DrawRectangleRec(save_button, COLOR_PULP_PAPER);
+    DrawRectangleLinesEx(save_button,1.0f, COLOR_SUNKEN_INK);
+    DrawText("Save", save_button.x+10, save_button.y+15, 14, COLOR_GREEN_GOLD);
 }
 
 void DrawTilePalette(TileEditor* editor) {
@@ -161,12 +173,14 @@ bool UpdateHeightAdjuster(TileEditor* tile_editor, Map* map, SelectionBuffer* bu
     Rectangle plus_1 = (Rectangle) {startX+200, startY + 50, 60, 40};
     Rectangle plus_5 = (Rectangle){startX+300, startY+50, 60,40};
 
+    bool setZero = false;
     tile_editor->height_delta =0;
     if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
         if(CheckCollisionPointRec(input->mouse, minus_5)) tile_editor->height_delta = -5;
         if(CheckCollisionPointRec(input->mouse, minus_1)) tile_editor->height_delta = -1;
         if(CheckCollisionPointRec(input->mouse, plus_1)) tile_editor->height_delta = +1;
         if(CheckCollisionPointRec(input->mouse, plus_5)) tile_editor->height_delta = +5;
+
     }
     if(tile_editor->height_delta !=0){
         AdjustSelectionHeight(map,buffer, tile_editor->height_delta);
@@ -201,13 +215,12 @@ void DrawHeightAdjuster(){
     DrawRectangleRec(plus_5, COLOR_VIRIDIAN);
     DrawRectangleLinesEx(plus_5, 1.0f, COLOR_SUNKEN_INK);
     DrawText("+5", plus_5.x+10, plus_5.y+15, 16, COLOR_PULP_PAPER);
-
-
-    // Rectangle execute_button = (Rectangle){startX, startY+200, 100, 40};
-    // DrawRectangleRec(execute_button, COLOR_DUSTY_SALMON);
-    // DrawRectangleLinesEx(execute_button, 1.0f, COLOR_SUNKEN_INK);
-    // DrawText("Execute", startX+10, startY+215, 14, COLOR_PULP_PAPER);
 }
-void DrawEntityDrawer(){
 
+void DrawEntityDrawer(){
+    int s = (int)(SCREEN_WIDTH  * 0.66f);
+    // DrawDialog(char *name, char *text)
+    int startX = s + 40;
+    int startY = 100;
+    DrawText(TextFormat("%d", GetItemCount()), startX, startY, 20, COLOR_NICKEL_TITANITE);
 }

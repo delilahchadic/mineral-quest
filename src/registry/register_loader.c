@@ -1,8 +1,9 @@
 #include "registry/register_loader.h"
+#include "registry/register.h"
 
 
 void InitRegistries(){
-  LoadItemRegistry();
+  SetItemCount(LoadItemRegistry());
   LoadDialogRegistry();
   LoadCharacterRegistry();
   LoadPlantRegistry();
@@ -49,10 +50,10 @@ void ParseCommandRegistryRow(char* line){
     int id = atoi(idToken);
     Command* d =&COMMAND_REGISTRY[id];
     strncpy(d->label, labelToken, sizeof(d->label) - 1);
-    d->label[sizeof(d->label) - 1] = '\0'; 
+    d->label[sizeof(d->label) - 1] = '\0';
     strncpy(d->description, descriptionToken, sizeof(d->description) - 1);
     d->description[sizeof(d->description) - 1] = '\0';
-  } 
+  }
 }
 
 void ParseSpriteOverrideRow(char* line){
@@ -64,12 +65,12 @@ void ParseSpriteOverrideRow(char* line){
     Image image = LoadImage(spriteToken);
     *d = LoadTextureFromImage(image);
     UnloadImage(image);
-  } 
+  }
 }
 
 
 /// @brief parses line of the plant csv
-/// @param line 
+/// @param line
 void ParsePlantRow(char* line) {
   // Plant ID
   char* idToken = strtok(line,",");
@@ -95,19 +96,19 @@ void ParsePlantRow(char* line) {
     d->sprite = LoadTexture(spriteToken);
     // get the species name
     strncpy(d->species_name, nameToken, sizeof(d->species_name) - 1);
-    d->species_name[sizeof(d->species_name) - 1] = '\0'; 
+    d->species_name[sizeof(d->species_name) - 1] = '\0';
     d->default_trait_flags = TRAIT_NONE;
     //grab our size info
     d->frameheight = atoi(heightToken);
     d->framewidth = atoi(widthToken);
     d->hitboxheight = atoi(hitheightToken);
     d->hitboxwidth = atoi(hitwidthToken);
-  }     
+  }
 }
 
 void ParseCharacterRow(char* line) {
   char* idToken = strtok(line,",");
- 
+
   char* nameToken = strtok(NULL,",");
   char* dialogToken = strtok(NULL,",");
   char* textToken = strtok(NULL,",");
@@ -121,9 +122,9 @@ void ParseCharacterRow(char* line) {
     d->dialogId = atoi(dialogToken);
     d->default_trait_flags = TRAIT_TALK;
     strncpy(d->name, nameToken, sizeof(d->name) - 1);
-    d->name[sizeof(d->name) - 1] = '\0'; 
-    
-  }     
+    d->name[sizeof(d->name) - 1] = '\0';
+
+  }
 }
 
 void ParseItemRow(char* line) {
@@ -156,18 +157,19 @@ void ParseDialogRow(char* line) {
     d->nextid = atoi(nextidToken);
 
     strncpy(d->character_name, nameToken, sizeof(d->character_name) - 1);
-    d->character_name[sizeof(d->character_name) - 1] = '\0'; 
-    
+    d->character_name[sizeof(d->character_name) - 1] = '\0';
+
     strncpy(d->text, textToken, sizeof(d->text) - 1);
     d->text[sizeof(d->text) - 1] = '\0';
-  }     
+  }
 }
 
-void LoadRegistry(const char* filename, void (*parser)(char*)){
+int LoadRegistry(const char* filename, void (*parser)(char*)){
+    int count =0;
   FILE* file = fopen(filename, "r");
   if (!file) {
     TraceLog(LOG_ERROR, "Failed to open %s", filename);
-    return;
+    return -1;
   }
   TraceLog(LOG_INFO,"File Loaded - %s", filename);
   char line[1024];
@@ -175,13 +177,15 @@ void LoadRegistry(const char* filename, void (*parser)(char*)){
   while (fgets(line, sizeof(line), file)) {
     line[strcspn(line, "\n")] = 0;
     parser(line);
+    count++;
   }
 
   fclose(file);
+  return count;
 }
 // reads item csv and is the keystore for all items
-void LoadItemRegistry(){
-  LoadRegistry("data/tables/item.csv",ParseItemRow);
+int LoadItemRegistry(){
+  return LoadRegistry("data/tables/item.csv",ParseItemRow);
 }
 
 void LoadDialogRegistry() {

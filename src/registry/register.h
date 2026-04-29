@@ -27,4 +27,7 @@ Texture2D* GetSprite(EntityType type, int id);
 Texture2D* GetSpriteOverride(int id);
 int GetDialogID(EntityType type, int id);
 uint32_t GetDefaultTraitFlags(EntityType type, int id);
+
+void SetItemCount(int count);
+int GetItemCount();
 #endif

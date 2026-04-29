@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void LoadItemRegistry();
+int LoadItemRegistry();
 void LoadDialogRegistry();
 void LoadCharacterRegistry();
 void LoadPlantRegistry();
