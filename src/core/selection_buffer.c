@@ -10,6 +10,7 @@ void InitSelection(SelectionBuffer* sb, int w, int h) {
 }
 
 void SetTileSelected(SelectionBuffer* sb, int x, int y, bool selected) {
+    if (x < 0 || x >= sb->width || y < 0 || y >= sb->height) return;
     int index = y * sb->width + x;
     int chunk = index / 32;
     int bit = index % 32;
@@ -22,6 +23,7 @@ void SetTileSelected(SelectionBuffer* sb, int x, int y, bool selected) {
 }
 
 bool IsTileSelected(SelectionBuffer* sb, int x, int y) {
+    if (x < 0 || x >= sb->width || y < 0 || y >= sb->height) return false;
     int index = y * sb->width + x;
     int chunk = index / 32;
     int bit = index % 32;
