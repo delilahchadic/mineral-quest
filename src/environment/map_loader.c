@@ -48,7 +48,7 @@ static void LoadMapGridFile(const char* filename, Map* map){
   char* rowToken = strtok(line,",");
   char* colToken = strtok(NULL,",");
   char* nameToken = strtok(NULL,",");
-
+  nameToken[strcspn(nameToken, "\n")] = 0;
   if(rowToken && colToken){
     map->rows = atoi(rowToken);
     map->columns = atoi(colToken);
