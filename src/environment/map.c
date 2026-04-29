@@ -150,20 +150,6 @@ void Draw_Map(Map* map, Camera2D* camera) {
         }
     }
 
-    // MapEntity* curr = map->entities;
-    // while(curr != NULL) {
-    //   float gx = curr->position.x / TILE_SIZE;
-    // float gy = curr->position.y / TILE_SIZE;
-
-    // // 2. Compare against your calculated min/max bounds
-    // // We use a small buffer (+1/-1) so sprites don't pop out at the very edge
-    // if (gx >= min_x - 1 && gx <= max_x + 1 &&
-    //     gy >= min_y - 1 && gy <= max_y + 1) {
-    //     Draw_MapEntity(curr, map);
-    // }
-    // curr = curr->next;
-    // }
-
     EndMode2D();
 
 }
