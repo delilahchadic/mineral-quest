@@ -3,3 +3,4 @@ id, label, description
 1,Edit Mode, Access the level editor studio.
 2,Rewind, Return to the previous screen.
 3,New Map, Create a new level
+4,Load Map, Load an existing level
