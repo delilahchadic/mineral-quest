@@ -120,11 +120,11 @@ void Draw_Map(Map* map, Camera2D* camera) {
     Vector2 g2 = GetIsoWorldToGrid(tr_corner);
     Vector2 g3 = GetIsoWorldToGrid(bl_corner);
     Vector2 g4 = GetIsoWorldToGrid(br_corner);
-    float min_x = fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) -2;
-    float max_x = fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x))+2;
+    float min_x = fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) -15;
+    float max_x = fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x))+15;
 
-    float min_y = fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y))-2;
-    float max_y = fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y))+2;
+    float min_y = fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y))-15;
+    float max_y = fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y))+15;
 
     min_x = min_x < 0 ? 0: min_x;
     min_y = min_y < 0 ? 0: min_y;
@@ -132,24 +132,37 @@ void Draw_Map(Map* map, Camera2D* camera) {
     max_y = max_y > map->rows ? map->rows: max_y;
 
     for (int y = min_y; y < max_y; y++) {
-      for (int x = min_x; x < max_x; x++) {
-        Draw_Tile(map,x,y);
-      }
+        for (int x = min_x; x < max_x; x++) {
+            // 1. Draw the tile at this specific coordinate
+            Draw_Tile(map, x, y);
+
+            // 2. Immediately check if there are any entities at this EXACT tile
+            MapEntity* curr = map->entities;
+            while(curr != NULL) {
+                int entX = (int)(curr->position.x / TILE_SIZE);
+                int entY = (int)(curr->position.y / TILE_SIZE);
+
+                if (entX == x && entY == y) {
+                    Draw_MapEntity(curr, map);
+                }
+                curr = curr->next;
+            }
+        }
     }
 
-    MapEntity* curr = map->entities;
-    while(curr != NULL) {
-      float gx = curr->position.x / TILE_SIZE;
-    float gy = curr->position.y / TILE_SIZE;
+    // MapEntity* curr = map->entities;
+    // while(curr != NULL) {
+    //   float gx = curr->position.x / TILE_SIZE;
+    // float gy = curr->position.y / TILE_SIZE;
 
-    // 2. Compare against your calculated min/max bounds
-    // We use a small buffer (+1/-1) so sprites don't pop out at the very edge
-    if (gx >= min_x - 1 && gx <= max_x + 1 &&
-        gy >= min_y - 1 && gy <= max_y + 1) {
-        Draw_MapEntity(curr, map);
-    }
-    curr = curr->next;
-    }
+    // // 2. Compare against your calculated min/max bounds
+    // // We use a small buffer (+1/-1) so sprites don't pop out at the very edge
+    // if (gx >= min_x - 1 && gx <= max_x + 1 &&
+    //     gy >= min_y - 1 && gy <= max_y + 1) {
+    //     Draw_MapEntity(curr, map);
+    // }
+    // curr = curr->next;
+    // }
 
     EndMode2D();
 
