@@ -4,10 +4,11 @@
 void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
-  CenterCameraOn(&session->camera,(Vector2){0,0}, 3.0f);
-  LoadMap("highway",&session->map);
+
+  LoadMap("rr",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
+  CenterCameraOn(&session->camera,session->map.player->position, 2.0f, &session->map);
 }
 
 void UpdatePlaySession(PlaySession* session){
@@ -31,7 +32,24 @@ void UpdatePlaySession(PlaySession* session){
           bool moved = UpdatePhysics(&session->map, &input);
           Update_Map(&session->map, moved);
           float smoothness = 0.1f;
+          // 1. Get the base isometric position
           Vector2 isoPos = GetWorldToIso(session->map.player->position);
+
+          // 2. Find what tile the player is on to get the height
+          int gridX = (int)(session->map.player->position.x / TILE_SIZE);
+          int gridY = (int)(session->map.player->position.y / TILE_SIZE);
+
+          // Clamp them so you don't crash at map edges
+          if(gridX < 0) gridX = 0;
+          if(gridX >= session->map.columns) gridX = session->map.columns - 1;
+          float tileHeight = session->map.grid[gridY][gridX].height;
+
+          // 3. Offset the camera Y by the height (assuming 8 or 16 pixels per height unit)
+          // We subtract because "up" on the screen is negative Y
+          float visualOffset = tileHeight * 8.0f;
+          isoPos.y -= visualOffset;
+
+          // 4. Smoothly follow the adjusted position
           session->camera.target.x += (isoPos.x - session->camera.target.x) * smoothness;
           session->camera.target.y += (isoPos.y - session->camera.target.y) * smoothness;
         }

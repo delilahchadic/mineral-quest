@@ -28,7 +28,7 @@ void InitEditSession(EditSession* session){
 
   session->form.active_field = FIELD_NAME;
   FillSystemMenu(&session->menu, (int[]){3,2},2, "Edit Mode");
-  CenterCameraOn(&session->camera,(Vector2){0,0}, 0.75f);
+  CenterCameraOn(&session->camera,(Vector2){0,0}, 0.75f, &session->map );
   InitEditSessionMouseTracking(session);
 }
 
