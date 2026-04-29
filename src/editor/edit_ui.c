@@ -1,25 +1,33 @@
 #include "editor/edit_ui.h"
 
+#include <dirent.h>
+#include "defs/types_engine.h"
 #include "editor/edit_form.h"
 #include "editor/tile_editor.h"
+#include "engine/palette.h"
 #include "raylib.h"
 #include "ui/ui_helpers.h"
+#include "editor/edit_loader.h"
 
 void DrawEditSession(EditSession* session){
-  switch (session->state){
-  case EDITOR:
-    Draw_Map(&session->map, &session->camera);
-    DrawSelectionOverlay(&session->buffer,&session->map,session->camera);
-    DrawTileEditor(&session->editor);
-    break;
-  case EDITOR_MENU:
-    DrawSystemMenu(&session->menu);
-    break;
-  case EDITOR_PROMPT:
-    DrawEditForm(&session->form);
-    break;
-  default:
-    break;
+
+    switch (session->state){
+        case EDITOR:
+            Draw_Map(&session->map, &session->camera);
+            DrawSelectionOverlay(&session->buffer,&session->map,session->camera);
+            DrawTileEditor(&session->editor);
+            DrawText(session->map.name, SCREEN_WIDTH/2.0f, SCREEN_HEIGHT / 13.0f,30,COLOR_DUSTY_ROSE);
+            break;
+        case EDITOR_MENU:
+            DrawSystemMenu(&session->menu);
+            break;
+        case EDITOR_PROMPT:
+            DrawEditForm(&session->form);
+            break;
+        case LOAD_PROMPT:
+            DrawLoadForm(session);
+        default:
+            break;
   }
 }
 

@@ -10,9 +10,8 @@
 #include "raylib.h"
 
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,MENU, EDIT_SCREEN } GameScreen;
-
 typedef enum PlayState { ADVENTURE = 0, INVENTORY, TALKING, ITEM } PlayState;
-typedef enum EditState {EDITOR_MENU = 0, EDITOR, EDITOR_PROMPT}EditState;
+typedef enum EditState {EDITOR_MENU = 0, EDITOR, EDITOR_PROMPT, LOAD_PROMPT}EditState;
 
 typedef struct PlaySession{
   Player player;
@@ -23,6 +22,13 @@ typedef struct PlaySession{
   char pendingItemName[100];
   Camera2D camera;
 } PlaySession;
+
+typedef struct EditLoader{
+    char names[20][64];
+    Rectangle buttons[20];
+    int file_count;
+    int current_file;
+}EditLoader;
 
 typedef struct EditSession{
   Map map;
@@ -35,6 +41,7 @@ typedef struct EditSession{
   Vector2 last_selected_tile;
   Vector2 dragStart;
   bool isDragging;
+  EditLoader loaded_files;
 } EditSession;
 
 typedef struct Gamestate{
