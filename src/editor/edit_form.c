@@ -53,12 +53,12 @@ void DrawEditForm(EditorForm* form){
   // // 2. Title - The "Ink" look
   DrawText("New Map", margin, 40, 30, COLOR_DUSTY_ROSE);
   DrawRectangle(50, 80, uiWidth, 2, COLOR_SUNKEN_INK); // A simple line
-  DrawText("Name:", SCREEN_WIDTH/4, 180, 20, COLOR_CERULEAN);
-  DrawText(form->name, SCREEN_WIDTH/2, 180, 20, COLOR_CERULEAN);
-  DrawText("Width:", SCREEN_WIDTH/4, 210, 20, COLOR_CERULEAN);
-  DrawText(form->width_str, SCREEN_WIDTH/2, 210, 20, COLOR_CERULEAN);
-  DrawText("Height:", SCREEN_WIDTH/4, 240, 20, COLOR_CERULEAN);
-  DrawText(form->height_str, SCREEN_WIDTH/2, 240, 20, COLOR_CERULEAN);
+  DrawText("Name:", SCREEN_WIDTH/4, 180, 20, COLOR_CERULEAN_CORE);
+  DrawText(form->name, SCREEN_WIDTH/2, 180, 20, COLOR_CERULEAN_CORE);
+  DrawText("Width:", SCREEN_WIDTH/4, 210, 20, COLOR_CERULEAN_CORE);
+  DrawText(form->width_str, SCREEN_WIDTH/2, 210, 20, COLOR_CERULEAN_CORE);
+  DrawText("Height:", SCREEN_WIDTH/4, 240, 20, COLOR_CERULEAN_CORE);
+  DrawText(form->height_str, SCREEN_WIDTH/2, 240, 20, COLOR_CERULEAN_CORE);
 
   // 4. Description Box (Bottom)
   char* text;

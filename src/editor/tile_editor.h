@@ -8,14 +8,10 @@
 #include <stdbool.h>
 
 
-void DrawEntityDrawer();
-void DrawHeightAdjuster();
+// void DrawEntityDrawer();
 void DrawTileEditor(TileEditor* tile_editor);
-void DrawTilePalette(TileEditor* editor);
-
-bool UpdateTilePalette(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
-bool UpdateHeightAdjuster(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
-void UpdateEntityDrawer(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
+void InitTileEditor(TileEditor* tile_editor);
+// void UpdateEntityDrawer(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
 bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
 
 #endif

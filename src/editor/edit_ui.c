@@ -6,8 +6,27 @@
 #include "editor/tile_editor.h"
 #include "engine/palette.h"
 #include "raylib.h"
+#include "registry/register.h"
 #include "ui/ui_helpers.h"
 #include "editor/edit_loader.h"
+
+void DrawCurrentPanel(EditSession* session){
+    DrawRectangleRec(session->current_tile_panel, COLOR_PULP_PAPER);
+    DrawRectangleLinesEx(session->current_tile_panel, 1.0f, COLOR_SUNKEN_INK);
+    DrawText("Current Tile", session->current_tile_panel.x+10, session->current_tile_panel.y+15, 15.0f, COLOR_SUNKEN_INK);
+    if(session->last_selected_tile.x >= 0){
+        DrawText(TILE_REGISTRY[ (session->map.grid[(int)session->last_selected_tile.y][(int)session->last_selected_tile.x].type)].label, session->current_tile_panel.x+10, session->current_tile_panel.y+30, 15.0f, COLOR_SUNKEN_INK);
+        char curr_pos[10];
+        char height[10];
+        sprintf(height, "%d",session->map.grid[(int)session->last_selected_tile.y][(int)session->last_selected_tile.x].height );
+        sprintf(curr_pos, "%d , %d",(int)session->last_selected_tile.x, (int)session->last_selected_tile.y  );
+        DrawText(curr_pos, session->current_tile_panel.x+10, session->current_tile_panel.y+45, 15.0f, COLOR_SUNKEN_INK);
+        DrawText(height, session->current_tile_panel.x+10, session->current_tile_panel.y+60, 15.0f, COLOR_SUNKEN_INK);
+        Rectangle r = {session->current_tile_panel.x+80,session->current_tile_panel.y+45,40,40};
+        DrawRectangleRec(r, TILE_REGISTRY[ (session->map.grid[(int)session->last_selected_tile.y][(int)session->last_selected_tile.x].type)].color);
+        DrawRectangleLinesEx(session->current_tile_panel, 1.0f, COLOR_SUNKEN_INK);
+    }
+}
 
 void DrawEditSession(EditSession* session){
 
@@ -17,6 +36,7 @@ void DrawEditSession(EditSession* session){
             DrawSelectionOverlay(&session->buffer,&session->map,session->camera);
             DrawTileEditor(&session->editor);
             DrawText(session->map.name, SCREEN_WIDTH/2.0f, SCREEN_HEIGHT / 13.0f,30,COLOR_DUSTY_ROSE);
+            DrawCurrentPanel(session);
             break;
         case EDITOR_MENU:
             DrawSystemMenu(&session->menu);
@@ -29,6 +49,7 @@ void DrawEditSession(EditSession* session){
         default:
             break;
   }
+
 }
 
 void UpdateEditorCamera(EditSession* session,Input *input){

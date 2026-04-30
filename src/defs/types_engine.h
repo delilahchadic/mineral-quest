@@ -37,6 +37,7 @@ typedef struct EditSession{
   EditorForm form;
   EditState state;
   TileEditor editor;
+  Rectangle current_tile_panel;
   SelectionBuffer buffer;
   Vector2 last_selected_tile;
   Vector2 dragStart;

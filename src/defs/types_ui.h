@@ -3,6 +3,7 @@
 
 #include "defs/types_entities.h"
 #include "defs/types_systems.h"
+#include "raylib.h"
 
 typedef enum EditFormActiveField {FIELD_NAME = 0, FIELD_WIDTH, FIELD_HEIGHT, FIELD_CONFIRM}EditFormActiveField;
 typedef enum TileEditorActiveTool{TILE_PALETTE = 0, HEIGHT_ADJUSTER, ENTITY_DRAWER}TileEditorActiveTool;
@@ -32,12 +33,31 @@ typedef struct EditorForm{
   EditFormActiveField active_field;
 }EditorForm;
 
-typedef struct TileEditor{
-    TileEditorActiveTool tool;
+typedef struct TilePalette{
+    Rectangle tile_type_buttons[20];
+    Rectangle execute_button;
     int selected_tile_type;
-    EntityType selected_entity_type;
-    int selected_entity_id;
-    int height_delta;
+    Color colors[20];
+} TilePalette;
+
+typedef struct HeightAdjuster{
+    Rectangle minus_5;
+    Rectangle minus_1;
+    Rectangle plus_1;
+    Rectangle plus_5;
+}HeightAdjuster;
+
+
+typedef struct TileEditor{
+    Rectangle panel;
+    TileEditorActiveTool tool;
+    Rectangle save_button;
+    Rectangle tile_palette_button;
+    Rectangle height_adjuster_button;
+    Rectangle entity_drawer_button;
+
+    TilePalette palette;
+    HeightAdjuster adjuster;
 }TileEditor;
 
 

@@ -31,9 +31,12 @@ void InitEditSession(EditSession* session){
   session->editor = (TileEditor){0};
   LoadFiles(session);
   session->form.active_field = FIELD_NAME;
+  int s = (int)(SCREEN_WIDTH  * 0.66f);
+  session->current_tile_panel = (Rectangle){s,(SCREEN_HEIGHT *2 /3) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
   FillSystemMenu(&session->menu, (int[]){3,4,2},3, "Edit Mode");
   CenterCameraOn(&session->camera,(Vector2){0,0}, 0.75f, &session->map );
   InitEditSessionMouseTracking(session);
+  InitTileEditor(&session->editor);
 }
 
 void InitEditSessionMouseTracking(EditSession* session){

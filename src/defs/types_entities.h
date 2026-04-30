@@ -35,8 +35,11 @@ typedef struct Plant{
   uint32_t default_trait_flags;
 } Plant;
 
-typedef enum { TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE, TILE_ROAD, TILE_TERRA_PALE,TILE_SILT} TileType;
-
+typedef enum {
+    TILE_WATER,TILE_GRASS ,TILE_SAND, TILE_DIRT,TILE_STONE,
+    TILE_ROAD, TILE_TERRA_PALE,TILE_SILT,TILE_MOON_STONE,TILE_PURPLE_OCHRE,
+    TILE_BUFF_TITANIUM,TILE_POTTERS_PINK,TILE_ROSE,TILE_CELADON,TILE_MAY_GREEN,
+    TILE_INDANTHRONE,TILE_SAGE, TILE_CHROME_YELLOW,TILE_19,TILE_20} TileType;
 
 typedef struct TileDefinition{
     int id;             // 0 = Sand, 1 = Asphalt, 2 = Magnetic Pit
@@ -62,7 +65,6 @@ typedef enum TraitFlags{
 } TraitFlags;
 
 typedef struct Character{
-  /* data */
   char name[32];
   Texture2D sprite;
   int dialogId;
