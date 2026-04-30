@@ -6,6 +6,7 @@
 #include "engine/palette.h"
 void DrawSelectionOverlay(SelectionBuffer* buffer, Map* map, Camera2D camera);
 void ProcessTextInput(char* buffer, int* count, int maxLen, bool numbersOnly);
+void DrawButton(Rectangle button, char* label, Color buttonColor, Color textColor);
 void DrawCoolHighlight(Vector2 top, Color baseColor);
 void DrawTileHighlight(Vector2 top, Color color);
 #endif

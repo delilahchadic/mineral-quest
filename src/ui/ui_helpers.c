@@ -2,6 +2,7 @@
 #include "defs/constants.h"
 #include "environment/map.h"
 #include "core/selection_buffer.h"
+#include "raylib.h"
 
 void ProcessTextInput(char* buffer, int* count, int maxLen, bool numbersOnly) {
     int key = GetCharPressed();
@@ -33,6 +34,12 @@ void ProcessTextInput(char* buffer, int* count, int maxLen, bool numbersOnly) {
     }
 }
 
+void DrawButton(Rectangle button, char* label, Color buttonColor, Color textColor){
+    DrawRectangleRec(button, buttonColor);
+    DrawRectangleLinesEx(button,1.0f, COLOR_SUNKEN_INK);
+    DrawText(label, button.x+10, button.y+15, 14, textColor);
+}
+
 void DrawTileHighlight(Vector2 top, Color color) {
     float hw = TILE_SIZE / 1.0f;
     float hh = TILE_SIZE / 2.0f;
@@ -43,10 +50,6 @@ void DrawTileHighlight(Vector2 top, Color color) {
 
     // Draw the "Floor" of the highlight
     DrawTriangleFan((Vector2[]){ top, left, bottom, right }, 4, color);
-
-    // DRAW A SECOND "HOT" CENTER (This is the cheap glow trick)
-    // A tiny white triangle at the very top makes it look like a light source
-    // DrawTriangle(top, (Vector2){top.x - 5, top.y + 5}, (Vector2){top.x + 5, top.y + 5}, Fade(WHITE, 0.5f));
 }
 
 void DrawCoolHighlight(Vector2 top, Color baseColor) {
