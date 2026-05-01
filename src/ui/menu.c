@@ -9,7 +9,7 @@ void FillMenu(Menu* menu, int(*itemIds)[MAX_SLOTS], int count){
 void FillSystemMenu(SystemMenu* menu, int ids[], int count, char* name){
   memcpy(&menu->ids, ids, sizeof(int) * count);
   strncpy(menu->name, name, sizeof(menu->name) - 1);
-    menu->name[sizeof(menu->name) - 1] = '\0';
+  menu->name[sizeof(menu->name) - 1] = '\0';
   menu->count = count;
   menu->selected = count > 0 ? 0 : -1;
 }
@@ -94,7 +94,6 @@ void DrawMenu(Menu* menu){
       DrawText("ITEM LORE:", margin + 10, descBoxY +10, 15, COLOR_DUSTY_ROSE);
       DrawText(GetDescription(menu->type, selectedId), margin+10, descBoxY +40, 18, COLOR_SUNKEN_INK);
     }
-
   }else {
     // 3. What to show when the bag is empty
     DrawText("YOUR LOGBOOK IS EMPTY...", 70, 120, 20, Fade(COLOR_SUNKEN_INK, 0.4f));
