@@ -14,10 +14,10 @@ void UpdateVelocity(Map* map,const Input* input){
   if (input->buttons_pressed & JUMP_PRESSED){
     if(map->player->state != JUMPING_STATE){
       map->player->state = JUMPING_STATE;
-      map->player->vertical_velocity= 8.0f;
+      map->player->vertical_velocity= 280.0f;
     }
   }
-  
+
   if (input->buttons_pressed & MOVEMENT_PRESSED) {
     // This is the "proper" way to get 0.707 for diagonals
     float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
@@ -25,7 +25,7 @@ void UpdateVelocity(Map* map,const Input* input){
     map->player->velocity.y = input->dir.y * PLAYER->speed * length;
   } else{
     map->player->velocity.x = 0;
-    map->player->velocity.y = 0; 
+    map->player->velocity.y = 0;
   }
 }
 
@@ -34,7 +34,7 @@ void ApplyGravity(Map* map) {
   int ty = (int)(map->player->position.y / TILE_SIZE);
   if (tx < 0 || tx >= map->columns || ty < 0 || ty >= map->rows) return;
 
-  // If we move to a lower tile, the "jumpoffset" needs to increase 
+  // If we move to a lower tile, the "jumpoffset" needs to increase
   // to keep us at the same visual height while we start falling.
   int current_tile_height = map->grid[ty][tx].height;
 
@@ -45,10 +45,18 @@ void ApplyGravity(Map* map) {
   }
   map->lastTileHeight = current_tile_height;
 
-  // Standard Gravity Logic
+  // Constants for gravity
+  const float GRAVITY_STRENGTH = 600.0f; // Adjust this to feel right
+
   if (map->player->state == JUMPING_STATE || map->player->jumpoffset > 0.0f) {
-      map->player->vertical_velocity -= 1.0f; 
-      map->player->jumpoffset += map->player->vertical_velocity;
+      float dt = GetFrameTime();
+      if (dt > 0.1f) dt = 0.1f;
+
+      // 1. Gravity drains velocity (Scaled by time)
+      map->player->vertical_velocity -= GRAVITY_STRENGTH  * dt; // Multiply strength
+
+      // 2. Velocity moves position (Scaled by time)
+      map->player->jumpoffset += map->player->vertical_velocity * dt;
   }
 
   // Hit the floor
@@ -85,11 +93,14 @@ bool CheckCollision(Map* map, Vector2 nextPos) {
     // 1. Get the tile coordinates for the CURRENT position
     int cur_x = (int)(map->player->position.x / TILE_SIZE);
     int cur_y = (int)(map->player->position.y / TILE_SIZE);
-    
+
     // Safety check
     if (cur_x < 0 || cur_x >= map->columns || cur_y < 0 || cur_y >= map->rows) return true;
 
     // IMPORTANT: Calculate current world height (Tile + Jump)
+    // float currentWorldHeight = (float)map->grid[cur_y][cur_x].height + (map->player->jumpoffset / 8.0f);
+    // // OLD: currentWorldHeight was based on the tile under the player center
+    // NEW: currentWorldHeight is the actual altitude of the player's feet
     float currentWorldHeight = (float)map->grid[cur_y][cur_x].height + (map->player->jumpoffset / 8.0f);
 
     // Collision Box
@@ -109,8 +120,8 @@ bool CheckCollision(Map* map, Vector2 nextPos) {
             bool is_blocking = TILE_REGISTRY[map->grid[checkY[j]][checkX[i]].type].is_blocking;
 
             // Use 1.1f to allow for tiny float errors when stepping up 1 unit
-            if (is_blocking || targetHeight > (currentWorldHeight + 1.1f)) {
-                return true; 
+            if (is_blocking || targetHeight > (currentWorldHeight + 1.5f)) {
+                return true;
             }
         }
     }

@@ -17,6 +17,7 @@ void InitNewMap(Map* map,char* name,int columns, int rows){
     for(int j =0;j<map->columns;j++){
       map->grid[i][j].height = 0;
       map->grid[i][j].type = TILE_GRASS;
+      map->grid[i][j].isoPos = GetWorldToIso((Vector2){ j * TILE_SIZE, i * TILE_SIZE });
     }
   }
 
@@ -80,7 +81,7 @@ Vector2 GetGridToIsoWorld(int x, int y) {
 Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
     // 1. Define your max height (matches your grid limits)
     // If your max height is 10, start there.
-    const int MAX_HEIGHT = 200;
+    const int MAX_HEIGHT = 120;
     const float HEIGHT_STEP = 8.0f; // From your Draw_Tile: height * 8.0f
 
     for (int h = MAX_HEIGHT; h >= 0; h--) {
@@ -126,29 +127,55 @@ void Draw_Map(Map* map, Camera2D* camera) {
     float min_y = fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y))-15;
     float max_y = fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y))+15;
 
-    min_x = min_x < 0 ? 0: min_x;
-    min_y = min_y < 0 ? 0: min_y;
-    max_x = max_x > map->columns ? map->columns: max_x;
-    max_y = max_y > map->rows ? map->rows: max_y;
+    const float HEIGHT_CULL_BUFFER = 150.0f;
 
-    for (int y = min_y; y < max_y; y++) {
-        for (int x = min_x; x < max_x; x++) {
-            // 1. Draw the tile at this specific coordinate
-            Draw_Tile(map, x, y);
+    min_x -= 20; // Extra horizontal padding for safety
+    max_x += 20;
+    min_y -= 20;
+    max_y += HEIGHT_CULL_BUFFER; // Search deep into the 'South' grid rows
 
-            // 2. Immediately check if there are any entities at this EXACT tile
-            MapEntity* curr = map->entities;
-            while(curr != NULL) {
-                int entX = (int)(curr->position.x / TILE_SIZE);
-                int entY = (int)(curr->position.y / TILE_SIZE);
+    // 3. Clamp to valid map indices
+    min_x = (min_x < 0) ? 0 : min_x;
+    min_y = (min_y < 0) ? 0 : min_y;
+    max_x = (max_x > map->columns) ? map->columns : max_x;
+    max_y = (max_y > map->rows) ? map->rows : max_y;
 
-                if (entX == x && entY == y) {
-                    Draw_MapEntity(curr, map);
-                }
-                curr = curr->next;
+    // 1. Create an array of "Mailboxes" (one for every row in the map)
+        // We initialize them to NULL (empty).
+        MapEntity* buckets[map->rows];
+        for (int i = 0; i < map->rows; i++) buckets[i] = NULL;
+
+        // 2. FILL THE BUCKETS
+        // Go through every entity ONCE.
+        MapEntity* e = map->entities;
+        while (e != NULL) {
+            int ty = (int)(e->position.y / TILE_SIZE);
+            if (ty >= 0 && ty < map->rows) {
+                // Put this entity at the front of the list for this specific row
+                e->next_in_bucket = buckets[ty];
+                buckets[ty] = e;
             }
+            e = e->next;
         }
-    }
+        // 3. DRAW EVERYTHING
+            // Use your existing culling (min_y to max_y)
+            for (int y = min_y; y < max_y; y++) {
+                // Draw the tiles for this row first
+                for (int x = min_x; x < max_x; x++) {
+                    Draw_Tile(map, x, y);
+                }
+
+                // Now draw all entities that were put in this row's bucket
+                MapEntity* curr = buckets[y];
+                while (curr != NULL) {
+                    // Extra check: Only draw if the entity's X is also on screen
+                    int tx = (int)(curr->position.x / TILE_SIZE);
+                    if (tx >= min_x && tx < max_x) {
+                        Draw_MapEntity(curr, map);
+                    }
+                    curr = curr->next_in_bucket;
+                }
+            }
 
     EndMode2D();
 
@@ -159,11 +186,15 @@ void Draw_Tile(Map* map, int x, int y){
   Color base = TILE_REGISTRY[map->grid[y][x].type].color;
   bool blocking = TILE_REGISTRY[map->grid[y][x].type].is_blocking;
   // Calculate 4 ground corners
-  Vector2 g1 = GetWorldToIso((Vector2){ x * TILE_SIZE, y * TILE_SIZE });
-  Vector2 g2 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, y * TILE_SIZE });
-  Vector2 g3 = GetWorldToIso((Vector2){ (x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE });
-  Vector2 g4 = GetWorldToIso((Vector2){ x * TILE_SIZE, (y + 1) * TILE_SIZE });
+  Vector2 g1 = map->grid[y][x].isoPos;
 
+    // 2. Correct derivation based on your specific GetWorldToIso formula
+    // Note: We use TILE_SIZE directly because (worldPos.x - worldPos.y)
+    // with a TILE_SIZE of 32 results in a 32-pixel horizontal shift.
+
+    Vector2 g2 = { g1.x + TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) }; // EAST
+    Vector2 g4 = { g1.x - TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) }; // WEST
+    Vector2 g3 = { g1.x,             g1.y + TILE_SIZE };
   // Calculate 4 top corners (lifted by h)
   Vector2 t1 = { g1.x, g1.y - h };
   Vector2 t2 = { g2.x, g2.y - h };
@@ -176,9 +207,16 @@ void Draw_Tile(Map* map, int x, int y){
     Color sideL = { (unsigned char)(base.r*0.8), (unsigned char)(base.g*0.8), (unsigned char)(base.b*0.8), 255 };
     Color sideR = { (unsigned char)(base.r*0.6), (unsigned char)(base.g*0.6), (unsigned char)(base.b*0.6), 255 };
     //  right side
-    DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+    // DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+
+    if (x + 1 < map->columns && map->grid[y][x+1].height < map->grid[y][x].height) {
+        DrawTriangleFan((Vector2[]){ t3, g3, g2, t2}, 4, sideL);
+    }
+    if (y + 1 < map->rows && map->grid[y+1][x].height < map->grid[y][x].height) {
+        DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
+    }
     // back side
-    DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
+    // DrawTriangleFan((Vector2[]){ t1, g1, g2, t2 }, 4, sideL);
     //front side
     DrawTriangleFan((Vector2[]){ t4, g4, g3, t3}, 4, sideR);
   }
@@ -270,15 +308,6 @@ void DrawSimpleSparkle(Vector2 pos, Color color, float size) {
     DrawCircleV(pos, size * 0.4f, WHITE);
 }
 
-void Update_Map(Map* map, bool moved){
-  if(moved){
-    Remove_Entity(map,map->player);
-    Add_Entity(map, map->player);
-  }
-}
-
-
-
 void Remove_Entity(Map* map, MapEntity* entity){
   if(map==NULL || entity == NULL) return;
 
@@ -301,24 +330,8 @@ void Remove_Entity(Map* map, MapEntity* entity){
 }
 
 void Add_Entity(Map* map, MapEntity* entity){
-
-  if(map->entities == NULL ||
-    (entity->position.x + entity->position.y) <
-    map->entities->position.x + map->entities->position.y){
-    entity->next = map->entities;
-    map->entities = entity;
-    return;
-  }
-
-  MapEntity* curr = map->entities;
-  while(curr->next != NULL &&
-    (curr->next->position.x + curr->next->position.y  <
-  (entity->position.x + entity->position.y))) {
-    curr = curr->next;
-  }
-
-  entity->next= curr->next;
-  curr->next = entity;
+  entity->next = map->entities;
+  map->entities = entity;
   return;
 }
 

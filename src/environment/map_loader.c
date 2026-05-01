@@ -88,6 +88,13 @@ static void LoadMapGridFile(const char* filename, Map* map){
 
     row++;
   }
+
+  for(int i =0;i<map->rows;i++){
+    for(int j =0;j<map->columns;j++){
+        map->grid[i][j].isoPos = GetWorldToIso((Vector2){ j * TILE_SIZE, i * TILE_SIZE });
+    }
+  }
+
     fclose(file);
 }
 

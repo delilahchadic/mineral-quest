@@ -11,7 +11,6 @@
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
 
-
 typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
 
 typedef enum State{
@@ -29,11 +28,13 @@ typedef struct MapEntity {
   float jumpoffset;
   float vertical_velocity;
   uint32_t trait_flags;
+  struct MapEntity* next_in_bucket;
 } MapEntity;
 
 typedef struct Tile{
   int height;
   TileType type;
+  Vector2 isoPos;
 } Tile;
 
 typedef struct Map{

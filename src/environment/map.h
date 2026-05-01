@@ -28,7 +28,6 @@
 
 void InitNewMap(Map* map,char* name,int rows, int columns);
 void InitMap(Map* map);
-void Update_Map(Map* map, bool moved);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map, Camera2D* camera);
 

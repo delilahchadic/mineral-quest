@@ -5,10 +5,10 @@ void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
 
-  LoadMap("rose garden",&session->map);
+  LoadMap("highway 101",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
-  CenterCameraOn(&session->camera,session->map.player->position, 1.5f, &session->map);
+  CenterCameraOn(&session->camera,session->map.player->position,2.0f, &session->map);
 }
 
 void UpdatePlaySession(PlaySession* session){
@@ -29,29 +29,52 @@ void UpdatePlaySession(PlaySession* session){
             if(session->manager.active) session->state = TALKING;
           }
         }else{
-          bool moved = UpdatePhysics(&session->map, &input);
-          Update_Map(&session->map, moved);
-          float smoothness = 0.1f;
-          // 1. Get the base isometric position
-          Vector2 isoPos = GetWorldToIso(session->map.player->position);
+          // bool moved = UpdatePhysics(&session->map, &input);
+          // Update_Map(&session->map, moved);
+          // // Inside UpdatePlaySession, replace the camera logic:
+          float dt = GetFrameTime();
+          float lerpSpeed = 10.0f; // Adjust this: higher = snappier, lower = smoother
+          // 1. Resolve ALL physics first
+          UpdatePhysics(&session->map, &input);
+          // 2. NOW calculate camera based on the FINAL position for this frame
+          Vector2 targetIsoPos = GetWorldToIso(session->map.player->position);
 
-          // 2. Find what tile the player is on to get the height
           int gridX = (int)(session->map.player->position.x / TILE_SIZE);
           int gridY = (int)(session->map.player->position.y / TILE_SIZE);
+          gridX = Clamp(gridX, 0, session->map.columns - 1);
+          gridY = Clamp(gridY, 0, session->map.rows - 1);
 
-          // Clamp them so you don't crash at map edges
-          if(gridX < 0) gridX = 0;
-          if(gridX >= session->map.columns) gridX = session->map.columns - 1;
-          float tileHeight = session->map.grid[gridY][gridX].height;
+          // USE A LERP FOR THE HEIGHT TOO
+          // If you snap the height, the camera "pops" when crossing tiles.
+          // static float smoothTileHeight = 0.0f;
+          // float targetTileHeight = session->map.grid[gridY][gridX].height * 8.0f;
+          // smoothTileHeight += (targetTileHeight - smoothTileHeight) * (1.0f - expf(-5.0f * dt));
 
-          // 3. Offset the camera Y by the height (assuming 8 or 16 pixels per height unit)
-          // We subtract because "up" on the screen is negative Y
-          float visualOffset = tileHeight * 8.0f;
-          isoPos.y -= visualOffset;
+          static float smoothTileHeight = -1.0f; // Initialize to an impossible value
+          float targetTileHeight = session->map.grid[gridY][gridX].height * 8.0f;
 
-          // 4. Smoothly follow the adjusted position
-          session->camera.target.x += (isoPos.x - session->camera.target.x) * smoothness;
-          session->camera.target.y += (isoPos.y - session->camera.target.y) * smoothness;
+          // If this is the first run, snap immediately to avoid the "elevator" effect
+          if (smoothTileHeight < 0) {
+              smoothTileHeight = targetTileHeight;
+          } else {
+              // Otherwise, lerp smoothly as we walk/jump
+              smoothTileHeight += (targetTileHeight - smoothTileHeight) * (1.0f - expf(-5.0f * dt));
+          }
+
+          // float totalOffset = smoothTileHeight + session->map.player->jumpoffset;
+          float totalOffset = smoothTileHeight + session->map.player->jumpoffset;
+          targetIsoPos.y -= totalOffset;
+
+          // 3. Final Camera Lerp
+          float dist = Vector2Distance(session->camera.target, targetIsoPos);
+
+          if (dist > 2.0f) { // Only move if more than 2 pixels away
+              float blend = 1.0f - expf(-lerpSpeed * dt);
+              session->camera.target.x += (targetIsoPos.x - session->camera.target.x) * blend;
+              session->camera.target.y += (targetIsoPos.y - session->camera.target.y) * blend;
+          } else {
+              session->camera.target = targetIsoPos; // Snap the last tiny bit
+          }
         }
       AdjustCamera(session, false);
       break;
@@ -95,9 +118,9 @@ void UpdateInventory(PlaySession* session, Input* input){
 
 void AdjustCamera(PlaySession* session, bool dialog){
   if(dialog){
-    session->camera.zoom += (3.2f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (2.2f - session->camera.zoom) * 0.05f;
   }else{
-    session->camera.zoom += (3.0f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (2.0f - session->camera.zoom) * 0.05f;
   }
 }
 
