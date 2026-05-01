@@ -69,13 +69,13 @@ void UpdateEditorCamera(EditSession* session,Input *input){
         if(session->camera.zoom <= 0.5){
             session->camera.zoom -= 0.05;
         }else{
-            session->camera.zoom -= 0.5;
+            session->camera.zoom -= 0.25;
         }
 
     }
 
     if(IsKeyPressed(KEY_UP)){
-        session->camera.zoom += 0.5;
+        session->camera.zoom += 0.25;
 
     }
   }
