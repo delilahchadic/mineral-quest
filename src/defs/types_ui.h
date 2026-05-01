@@ -47,6 +47,19 @@ typedef struct HeightAdjuster{
     Rectangle plus_5;
 }HeightAdjuster;
 
+typedef struct EntityDrawer{
+    EntityType current_type;
+    int current_page;
+    int entities_per_page;
+    Rectangle prev_page_button;
+    Rectangle next_page_button;
+    int selected_id;
+    Rectangle buttons[10];
+    Rectangle plant_button;
+    Rectangle character_button;
+    Rectangle item_button;
+    int ids[10];
+}EntityDrawer;
 
 typedef struct TileEditor{
     Rectangle panel;
@@ -55,9 +68,9 @@ typedef struct TileEditor{
     Rectangle tile_palette_button;
     Rectangle height_adjuster_button;
     Rectangle entity_drawer_button;
-
     TilePalette palette;
     HeightAdjuster adjuster;
+    EntityDrawer drawer;
 }TileEditor;
 
 

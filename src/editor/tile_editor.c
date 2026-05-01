@@ -5,6 +5,7 @@
 #include "defs/types_systems.h"
 #include "environment/map_loader.h"
 #include "defs/types_ui.h"
+#include "editor/entity_drawer.h"
 #include "editor/height_adjuster.h"
 #include "editor/tile_palette.h"
 #include "editor/edit_ui.h"
@@ -29,9 +30,10 @@ void InitTileEditor(TileEditor* tile_editor){
     tile_editor->entity_drawer_button = (Rectangle){tool_selector_x + 240, tool_selector_y, 120, 40};
     InitTilePalette(&tile_editor->palette, startX, startY);
     InitHeightAdjuster(&tile_editor->adjuster, startX, startY);
+    InitEnitityDrawer(&tile_editor->drawer, startX, startY);
 }
 
-bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input){
+bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input, Camera2D* camera){
     if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
         if(CheckCollisionPointRec(input->mouse, tile_editor->tile_palette_button)){
             tile_editor->tool = TILE_PALETTE;
@@ -51,6 +53,8 @@ bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer
             UpdateHeightAdjuster(&tile_editor->adjuster, map, buffer, input);
             break;
         case ENTITY_DRAWER:
+            UpdateEnitityDrawer(&tile_editor->drawer, map, input,camera);
+            return true;
             break;
     }
 
@@ -61,9 +65,6 @@ void DrawTileEditor(TileEditor* tile_editor){
 
     DrawRectangleRec(tile_editor->panel, COLOR_PULP_PAPER);
     DrawRectangleLinesEx(tile_editor->panel, 1.0f, COLOR_SUNKEN_INK);
-
-
-
 
     DrawButton(tile_editor->tile_palette_button,"Tile Palette",COLOR_PULP_PAPER, COLOR_DUSTY_CORAL);
     DrawButton(tile_editor->height_adjuster_button,"Height Adjuster",COLOR_PULP_PAPER, COLOR_DUSTY_SALMON);
@@ -77,6 +78,7 @@ void DrawTileEditor(TileEditor* tile_editor){
             DrawHeightAdjuster(&tile_editor->adjuster);
             break;
         case ENTITY_DRAWER:
+            DrawEnitityDrawer(&tile_editor->drawer);
             break;
     }
 

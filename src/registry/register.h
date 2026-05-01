@@ -28,6 +28,10 @@ Texture2D* GetSpriteOverride(int id);
 int GetDialogID(EntityType type, int id);
 uint32_t GetDefaultTraitFlags(EntityType type, int id);
 
+int GetEntityTypeCount(EntityType type);
+void SetEntityTypeCount(EntityType type, int count);
 void SetItemCount(int count);
-int GetItemCount();
+void SetPlantCount(int count);
+void SetCharacterCount(int count);
+int GetCharacterCount();
 #endif

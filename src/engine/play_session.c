@@ -5,7 +5,7 @@ void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
 
-  LoadMap("tt",&session->map);
+  LoadMap("rose garden",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
   CenterCameraOn(&session->camera,session->map.player->position, 1.5f, &session->map);

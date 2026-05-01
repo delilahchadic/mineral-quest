@@ -1,12 +1,12 @@
 #include "registry/register_loader.h"
+#include "defs/types_entities.h"
 #include "registry/register.h"
 
 
 void InitRegistries(){
-  SetItemCount(LoadItemRegistry());
-  LoadDialogRegistry();
-  LoadCharacterRegistry();
-  LoadPlantRegistry();
+  SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
+  SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
+  SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
   LoadSpriteOverrideRegistry();
 
   LoadCommandRegistry();
@@ -192,11 +192,11 @@ void LoadDialogRegistry() {
   LoadRegistry("data/tables/dialog.csv", ParseDialogRow);
 }
 
-void LoadCharacterRegistry(){
-  LoadRegistry("data/tables/characters.csv", ParseCharacterRow);
+int LoadCharacterRegistry(){
+  return LoadRegistry("data/tables/characters.csv", ParseCharacterRow);
 }
-void LoadPlantRegistry(){
-  LoadRegistry("data/tables/plants.csv", ParsePlantRow);
+int LoadPlantRegistry(){
+  return LoadRegistry("data/tables/plants.csv", ParsePlantRow);
 }
 
 void LoadSpriteOverrideRegistry(){

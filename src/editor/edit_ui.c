@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include "defs/types_engine.h"
+#include "defs/types_ui.h"
 #include "editor/edit_form.h"
 #include "editor/tile_editor.h"
 #include "engine/palette.h"
@@ -36,7 +37,7 @@ void DrawEditSession(EditSession* session){
             DrawSelectionOverlay(&session->buffer,&session->map,session->camera);
             DrawTileEditor(&session->editor);
             DrawText(session->map.name, SCREEN_WIDTH/2.0f, SCREEN_HEIGHT / 13.0f,30,COLOR_DUSTY_ROSE);
-            DrawCurrentPanel(session);
+            if(session->editor.tool != ENTITY_DRAWER) DrawCurrentPanel(session);
             break;
         case EDITOR_MENU:
             DrawSystemMenu(&session->menu);

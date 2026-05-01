@@ -12,6 +12,6 @@
 void DrawTileEditor(TileEditor* tile_editor);
 void InitTileEditor(TileEditor* tile_editor);
 // void UpdateEntityDrawer(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
-bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input);
+bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input, Camera2D* camera);
 
 #endif

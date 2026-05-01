@@ -8,8 +8,8 @@
 
 int LoadItemRegistry();
 void LoadDialogRegistry();
-void LoadCharacterRegistry();
-void LoadPlantRegistry();
+int LoadCharacterRegistry();
+int LoadPlantRegistry();
 void LoadSpriteOverrideRegistry();
 
 void LoadCommandRegistry();

@@ -11,6 +11,10 @@ Plant PLANT_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
 static int item_count = 0;
+static int plant_count = 0;
+static int charcter_count = 0;
+// static int item_count = 0;
+
 TileDefinition TILE_REGISTRY[20] = {
   { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
   { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
@@ -106,6 +110,35 @@ void SetItemCount(int count){
     item_count = count;
 }
 
-int GetItemCount(){
-    return item_count;
+void SetPlantCount(int count){
+    item_count = count;
+}
+
+void SetCharacterCount(int count){
+    item_count = count;
+}
+
+int GetEntityTypeCount(EntityType type){
+    switch (type) {
+        case ENTITY_PLANT: return plant_count;
+        case ENTITY_ITEM: return item_count;
+        case ENTITY_CHARACTER: return charcter_count;
+        case ENTITY_PLAYER: return 1;
+        default: return -1;
+    }
+}
+
+void SetEntityTypeCount(EntityType type, int count){
+    switch (type) {
+        case ENTITY_PLANT:
+            plant_count = count;
+            return;
+        case ENTITY_ITEM:
+            item_count = count;
+            return;
+        case ENTITY_CHARACTER:
+            charcter_count = count;
+            return;
+        default: return;
+    }
 }
