@@ -7,6 +7,7 @@ void InitRegistries(){
   SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
   SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
   SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
+  LoadDialogRegistry();
   LoadSpriteOverrideRegistry();
 
   LoadCommandRegistry();
