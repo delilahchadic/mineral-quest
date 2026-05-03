@@ -28,6 +28,13 @@ static void LoadMapEntityFile(const char* filename, Map* map){
       m->next = NULL;
       m->id = atoi(idToken);
       m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
+
+      int tx = (int)(m->position.x / TILE_SIZE);
+      int ty = (int)(m->position.y / TILE_SIZE);
+
+          // Set the altitude to the floor height immediately
+        float startFloor = map->grid[ty][tx].height * 8.0f;
+        m->altitude = startFloor;
       Add_Entity(map,m);
     }
 

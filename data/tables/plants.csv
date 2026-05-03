@@ -1,2 +1,3 @@
 id,name,sprite,width,height,hit_box_height,hit_box_width
 0,rose,data/sprites/rosebush.png,32,64,19,9
+1,cactus,data/sprites/cactus.png,32,64,19,9

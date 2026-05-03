@@ -1,14 +1,21 @@
 #include "engine/play_session.h"
 #include "core/camera_tools.h"
+#include "raylib.h"
 
 void InitPlaySession(PlaySession* session){
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
 
-  LoadMap("highway 101",&session->map);
+  LoadMap("rivers",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
   CenterCameraOn(&session->camera,session->map.player->position,2.0f, &session->map);
+  int tx = (int)(session->map.player->position.x / TILE_SIZE);
+  int ty = (int)(session->map.player->position.y / TILE_SIZE);
+
+      // Set the altitude to the floor height immediately
+    float startFloor = session->map.grid[ty][tx].height * 8.0f;
+    session->map.player->altitude = startFloor;
 }
 
 void UpdatePlaySession(PlaySession* session){
@@ -29,52 +36,29 @@ void UpdatePlaySession(PlaySession* session){
             if(session->manager.active) session->state = TALKING;
           }
         }else{
-          // bool moved = UpdatePhysics(&session->map, &input);
-          // Update_Map(&session->map, moved);
-          // // Inside UpdatePlaySession, replace the camera logic:
-          float dt = GetFrameTime();
-          float lerpSpeed = 10.0f; // Adjust this: higher = snappier, lower = smoother
-          // 1. Resolve ALL physics first
-          UpdatePhysics(&session->map, &input);
-          // 2. NOW calculate camera based on the FINAL position for this frame
-          Vector2 targetIsoPos = GetWorldToIso(session->map.player->position);
+            float dt = GetFrameTime();
+                    if (dt > 0.1f) dt = 0.1f;
 
-          int gridX = (int)(session->map.player->position.x / TILE_SIZE);
-          int gridY = (int)(session->map.player->position.y / TILE_SIZE);
-          gridX = Clamp(gridX, 0, session->map.columns - 1);
-          gridY = Clamp(gridY, 0, session->map.rows - 1);
+                    // 1. RUN PHYSICS FIRST
+                    UpdatePhysics(&session->map, &input);
 
-          // USE A LERP FOR THE HEIGHT TOO
-          // If you snap the height, the camera "pops" when crossing tiles.
-          // static float smoothTileHeight = 0.0f;
-          // float targetTileHeight = session->map.grid[gridY][gridX].height * 8.0f;
-          // smoothTileHeight += (targetTileHeight - smoothTileHeight) * (1.0f - expf(-5.0f * dt));
+                    // 2. FIND THE EXACT POSITION OF THE PLAYER'S FEET
+                    Vector2 playerIso = GetWorldToIso(session->map.player->position);
 
-          static float smoothTileHeight = -1.0f; // Initialize to an impossible value
-          float targetTileHeight = session->map.grid[gridY][gridX].height * 8.0f;
+                    // The player is drawn at playerIso.y - altitude.
+                    // We want the camera to center on the player's sprite, not the floor.
+                    Vector2 targetPos = playerIso;
+                    targetPos.y -= session->map.player->altitude; // ONLY subtract altitude
 
-          // If this is the first run, snap immediately to avoid the "elevator" effect
-          if (smoothTileHeight < 0) {
-              smoothTileHeight = targetTileHeight;
-          } else {
-              // Otherwise, lerp smoothly as we walk/jump
-              smoothTileHeight += (targetTileHeight - smoothTileHeight) * (1.0f - expf(-5.0f * dt));
-          }
+                    // 3. ONE SINGLE LERP
+                    float camSpeed = 15.0f;
+                    // float dt = GetFrameTime();
+                    if (dt > 0.1f) dt = 0.1f;
+                    float lerpFactor = 1.0f - expf(-camSpeed * dt);
 
-          // float totalOffset = smoothTileHeight + session->map.player->jumpoffset;
-          float totalOffset = smoothTileHeight + session->map.player->jumpoffset;
-          targetIsoPos.y -= totalOffset;
+                    session->camera.target.x += (targetPos.x - session->camera.target.x) * lerpFactor;
+                    session->camera.target.y += (targetPos.y - session->camera.target.y) * lerpFactor;
 
-          // 3. Final Camera Lerp
-          float dist = Vector2Distance(session->camera.target, targetIsoPos);
-
-          if (dist > 2.0f) { // Only move if more than 2 pixels away
-              float blend = 1.0f - expf(-lerpSpeed * dt);
-              session->camera.target.x += (targetIsoPos.x - session->camera.target.x) * blend;
-              session->camera.target.y += (targetIsoPos.y - session->camera.target.y) * blend;
-          } else {
-              session->camera.target = targetIsoPos; // Snap the last tiny bit
-          }
         }
       AdjustCamera(session, false);
       break;

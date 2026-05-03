@@ -27,6 +27,7 @@ typedef struct MapEntity {
   Vector2 velocity;
   float jumpoffset;
   float vertical_velocity;
+  float altitude;
   uint32_t trait_flags;
   struct MapEntity* next_in_bucket;
 } MapEntity;

@@ -8,63 +8,59 @@ bool UpdatePhysics(Map* map,const Input* input){
   return ResolveMovement(map);
 }
 
-void UpdateVelocity(Map* map,const Input* input){
-  float dt = GetFrameTime();
-  if (dt > 0.1f) dt = 0.1f;
-  if (input->buttons_pressed & JUMP_PRESSED){
-    if(map->player->state != JUMPING_STATE){
-      map->player->state = JUMPING_STATE;
-      map->player->vertical_velocity= 280.0f;
-    }
-  }
+void UpdateVelocity(Map* map, const Input* input) {
+    float dt = GetFrameTime();
+    if (dt > 0.1f) dt = 0.1f;
 
-  if (input->buttons_pressed & MOVEMENT_PRESSED) {
-    // This is the "proper" way to get 0.707 for diagonals
-    float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
-    map->player->velocity.x = input->dir.x * PLAYER->speed * length;
-    map->player->velocity.y = input->dir.y * PLAYER->speed * length;
-  } else{
-    map->player->velocity.x = 0;
-    map->player->velocity.y = 0;
-  }
+    // Get current floor height to check if we are grounded
+    int tx = Clamp((int)(map->player->position.x / TILE_SIZE), 0, map->columns - 1);
+    int ty = Clamp((int)(map->player->position.y / TILE_SIZE), 0, map->rows - 1);
+    float floorY = map->grid[ty][tx].height * 8.0f;
+
+    // JUMP: If altitude is close to the floor, BLAST OFF.
+    if (input->buttons_pressed & JUMP_PRESSED) {
+        // Allow jumping if we are on the floor (or within 2 pixels for "coyote time")
+        if (map->player->altitude <= floorY + 2.0f) {
+            map->player->state = JUMPING_STATE;
+            map->player->vertical_velocity = 500.0f;
+        }
+    }
+
+    if (input->buttons_pressed & MOVEMENT_PRESSED) {
+        float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
+        map->player->velocity.x = input->dir.x * PLAYER->speed * length;
+        map->player->velocity.y = input->dir.y * PLAYER->speed * length;
+    } else {
+        map->player->velocity.x = 0;
+        map->player->velocity.y = 0;
+    }
 }
 
 void ApplyGravity(Map* map) {
-  int tx = (int)(map->player->position.x / TILE_SIZE);
-  int ty = (int)(map->player->position.y / TILE_SIZE);
-  if (tx < 0 || tx >= map->columns || ty < 0 || ty >= map->rows) return;
+    float dt = GetFrameTime();
+    if (dt > 0.1f) dt = 0.1f;
 
-  // If we move to a lower tile, the "jumpoffset" needs to increase
-  // to keep us at the same visual height while we start falling.
-  int current_tile_height = map->grid[ty][tx].height;
+    // Get current floor height in pixels
+    int tx = (int)(map->player->position.x / TILE_SIZE);
+    int ty = (int)(map->player->position.y / TILE_SIZE);
+    tx = Clamp(tx, 0, map->columns - 1);
+    ty = Clamp(ty, 0, map->rows - 1);
 
-  if (map->lastTileHeight != -1 && current_tile_height < map->lastTileHeight) {
-      // We just stepped down! Add the difference to jumpoffset so we don't "snap" down.
-      map->player->jumpoffset += (map->lastTileHeight - current_tile_height) * 8.0f;
-      map->player->state = JUMPING_STATE;
-  }
-  map->lastTileHeight = current_tile_height;
+    float currentFloorY = map->grid[ty][tx].height * 8.0f;
 
-  // Constants for gravity
-  const float GRAVITY_STRENGTH = 600.0f; // Adjust this to feel right
+    // 1. GRAVITY ALWAYS PULLS DOWN
+    const float GRAVITY = 1200.0f;
+    map->player->vertical_velocity -= GRAVITY * dt;
 
-  if (map->player->state == JUMPING_STATE || map->player->jumpoffset > 0.0f) {
-      float dt = GetFrameTime();
-      if (dt > 0.1f) dt = 0.1f;
+    // Move the player's altitude
+    map->player->altitude += map->player->vertical_velocity * dt;
 
-      // 1. Gravity drains velocity (Scaled by time)
-      map->player->vertical_velocity -= GRAVITY_STRENGTH  * dt; // Multiply strength
-
-      // 2. Velocity moves position (Scaled by time)
-      map->player->jumpoffset += map->player->vertical_velocity * dt;
-  }
-
-  // Hit the floor
-  if (map->player->jumpoffset <= 0.0f) {
-      map->player->jumpoffset = 0.0f;
-      map->player->vertical_velocity = 0.0f;
-      map->player->state = NORMAL_STATE;
-  }
+    // 2. THE HARD FLOOR
+    if (map->player->altitude <= currentFloorY) {
+        map->player->altitude = currentFloorY;
+        map->player->vertical_velocity = 0;
+        map->player->state = NORMAL_STATE;
+    }
 }
 
 bool ResolveMovement(Map* map){
@@ -90,26 +86,17 @@ bool ResolveMovement(Map* map){
 }
 
 bool CheckCollision(Map* map, Vector2 nextPos) {
-    // 1. Get the tile coordinates for the CURRENT position
     int cur_x = (int)(map->player->position.x / TILE_SIZE);
     int cur_y = (int)(map->player->position.y / TILE_SIZE);
-
-    // Safety check
     if (cur_x < 0 || cur_x >= map->columns || cur_y < 0 || cur_y >= map->rows) return true;
 
-    // IMPORTANT: Calculate current world height (Tile + Jump)
-    // float currentWorldHeight = (float)map->grid[cur_y][cur_x].height + (map->player->jumpoffset / 8.0f);
-    // // OLD: currentWorldHeight was based on the tile under the player center
-    // NEW: currentWorldHeight is the actual altitude of the player's feet
-    float currentWorldHeight = (float)map->grid[cur_y][cur_x].height + (map->player->jumpoffset / 8.0f);
+    // The player's actual height is just their altitude
+    float currentWorldHeight = map->player->altitude / 8.0f;
 
-    // Collision Box
     float foot_left   = nextPos.x - 14;
     float foot_right  = nextPos.x + 14;
     float foot_top    = nextPos.y - 8;
     float foot_bottom = nextPos.y + 8;
-
-    if (foot_left < 0 || foot_right >= map->pixel_width || foot_top < 0 || foot_bottom >= map->pixel_height) return true;
 
     int checkX[] = { (int)(foot_left / TILE_SIZE), (int)(foot_right / TILE_SIZE) };
     int checkY[] = { (int)(foot_top / TILE_SIZE), (int)(foot_bottom / TILE_SIZE) };
@@ -119,9 +106,12 @@ bool CheckCollision(Map* map, Vector2 nextPos) {
             float targetHeight = (float)map->grid[checkY[j]][checkX[i]].height;
             bool is_blocking = TILE_REGISTRY[map->grid[checkY[j]][checkX[i]].type].is_blocking;
 
-            // Use 1.1f to allow for tiny float errors when stepping up 1 unit
-            if (is_blocking || targetHeight > (currentWorldHeight + 1.5f)) {
-                return true;
+            if (is_blocking) return true;
+
+            // STEP HEIGHT LOGIC:
+            // If the tile is more than 1.5 units higher than our CURRENT feet...
+            if (targetHeight > currentWorldHeight + 1.5f) {
+                return true; // We hit a wall
             }
         }
     }

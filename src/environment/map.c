@@ -81,7 +81,7 @@ Vector2 GetGridToIsoWorld(int x, int y) {
 Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
     // 1. Define your max height (matches your grid limits)
     // If your max height is 10, start there.
-    const int MAX_HEIGHT = 120;
+    const int MAX_HEIGHT = 150;
     const float HEIGHT_STEP = 8.0f; // From your Draw_Tile: height * 8.0f
 
     for (int h = MAX_HEIGHT; h >= 0; h--) {
@@ -233,37 +233,41 @@ void Draw_Tile(Map* map, int x, int y){
 
 }
 
-void  Draw_MapEntity(MapEntity* entity,Map* map){
-  Vector2 position = GetWorldToIso(entity->position);
+void Draw_MapEntity(MapEntity* entity, Map* map) {
+    // 1. Get the flat Isometric base
+    Vector2 position = GetWorldToIso(entity->position);
 
-  int tx = (int)(entity->position.x / TILE_SIZE);
-  int ty = (int)(entity->position.y / TILE_SIZE);
-  if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
-      float hOffset = map->grid[ty][tx].height * 8.0f;
-      position.y -= (hOffset + entity->jumpoffset); // Lift the character up!
-  }
-  Texture2D* sprite = GetSprite(entity->type, entity->id);
-  // Calculate vertical offset based on the actual (potentially scaled) height
+    // 2. THE FIX: Subtract ONLY the altitude.
+    // No tileH, no jumpoffset math here. Just the absolute height.
+    position.y -= entity->altitude;
+
+    Texture2D* sprite = GetSprite(entity->type, entity->id);
     float renderHeight = (entity->type == ENTITY_ITEM) ? (sprite->height * 0.5f) : (float)sprite->height;
     float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
 
-    // Center the sprite horizontally (width/2) and place bottom at isoPos.y
     Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-  if(entity->type == ENTITY_ITEM ){
-    DrawTextureEx(*sprite,drawPos,0.0,0.5, WHITE );
-  }else{
-    // Rectangle r= (Rectangle){0,0,32,64};
-    DrawTextureV(*sprite,drawPos, WHITE );
-    // Draw a small gray ellipse at 'position' to ground the character
+    if(entity->type == ENTITY_ITEM ) {
+        DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
+    } else {
+        DrawTextureV(*sprite, drawPos, WHITE);
 
-    DrawCircleGradient(position.x, position.y, 8, Fade(BLACK, 0.3f), BLANK);
-    // //draws their name
-    char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
-    DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
-  }
+        // SHADOW LOGIC:
+        // We still want the shadow on the ACTUAL floor so the player can see where they'll land.
+        int tx = (int)(entity->position.x / TILE_SIZE);
+        int ty = (int)(entity->position.y / TILE_SIZE);
+        float floorY = (tx >= 0 && ty >= 0) ? map->grid[ty][tx].height * 8.0f : 0;
 
+        Vector2 shadowPos = GetWorldToIso(entity->position);
+        shadowPos.y -= floorY; // Shadow stays glued to the tile surface
+        DrawCircleGradient(shadowPos.x, shadowPos.y, 8, Fade(BLACK, 0.3f), BLANK);
+
+        char* name = (entity->type == ENTITY_PLAYER) ? "player" : GetName(entity->type, entity->id);
+        DrawText(name, drawPos.x, drawPos.y - 10, 10, COLOR_SUNKEN_INK);
+    }
 }
+
+
 
 void DrawWaterTile(Vector2 t1, Vector2 t2, Vector2 t3, Vector2 t4, int x, int y) {
     // 1. Base Water (unchanged, but noted: Indanthrone Blue looks great here)

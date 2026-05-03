@@ -45,6 +45,16 @@ typedef struct HeightAdjuster{
     Rectangle minus_1;
     Rectangle plus_1;
     Rectangle plus_5;
+    Rectangle minus_25;
+    Rectangle minus_10;
+    Rectangle plus_10;
+    Rectangle plus_25;
+    Rectangle minus_8;
+    Rectangle plus_8;
+    Rectangle zero;
+    Rectangle twenty_five;
+    Rectangle fifty;
+    Rectangle one_hundred;
 }HeightAdjuster;
 
 typedef struct EntityDrawer{
