@@ -1,12 +1,15 @@
 #include "engine/gamestate.h"
+#include "defs/types_engine.h"
 #include "editor/edit_ui.h"
 void InitGame(Gamestate* gamestate){
   // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0;
   FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
-  InitEditSession(&gamestate->edit_session);
-  InitPlaySession(&gamestate->session);
+  gamestate->session = calloc(1, sizeof(PlaySession));
+  gamestate->edit_session = calloc(1, sizeof(EditSession));
+  InitEditSession(gamestate->edit_session);
+  InitPlaySession(gamestate->session);
 }
 
 //routes to update based on gamestate
@@ -28,10 +31,10 @@ void UpdateScene(Gamestate* gamestate){
       break;
     }
     case GAMEPLAY:
-      UpdatePlaySession(&gamestate->session);
+      UpdatePlaySession(gamestate->session);
       break;
     case EDIT_SCREEN:
-      if(!UpdateEditSession(&gamestate->edit_session, &input)){
+      if(!UpdateEditSession(gamestate->edit_session, &input)){
         gamestate->screen = MENU;
       }
       break;
@@ -70,18 +73,19 @@ void DrawScreen(Gamestate* gamestate){
         DrawSystemMenu(&gamestate->main_menu);
         break;
       case GAMEPLAY:
-        DrawPlaySession(&gamestate->session);
+        DrawPlaySession(gamestate->session);
         break;
       case EDIT_SCREEN:
-        DrawEditSession(&gamestate->edit_session);
+        DrawEditSession(gamestate->edit_session);
         break;
     }
 }
 
 void CloseGame(Gamestate* gamestate){
   Close_Player(PLAYER);
-  Close_Map(&gamestate->session.map);
-  CloseEditor(&gamestate->edit_session);
+  Close_Map(&gamestate->session->map);
+  CloseEditor(gamestate->edit_session);
+  free(gamestate->session);
   free(gamestate);
   CloseWindow();
 }

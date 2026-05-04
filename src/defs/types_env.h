@@ -48,5 +48,7 @@ typedef struct Map{
   MapEntity* entities;
   MapEntity* player;
   int lastTileHeight;
+  bool is_ready;
+  MapEntity* buckets[MAP_HEIGHT];
 }Map;
 #endif

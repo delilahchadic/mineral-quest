@@ -1,5 +1,6 @@
 #include "defs/types_env.h"
 #include "environment/map.h"
+#include <stdbool.h>
 
 static void LoadMapEntityFile(const char* filename, Map* map){
   map->entities = NULL;
@@ -116,6 +117,7 @@ void LoadMap(const char* mapName, Map* map){
   snprintf(entsPath, sizeof(entsPath), "data/maps/%s.ents", mapName);
   LoadMapGridFile(gridPath, map);
   LoadMapEntityFile(entsPath, map);
+  map->is_ready = true;
 }
 
 void SaveMapGridFile(const char* filename, Map* map){

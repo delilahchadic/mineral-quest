@@ -6,10 +6,9 @@
 int main(void) {
   //Begin Engine
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mineral Quest");
-  SetTargetFPS(TARGET_FPS); 
+  SetTargetFPS(TARGET_FPS);
 
   InitRegistries();
-  
   Gamestate* gamestate = calloc(1, sizeof(Gamestate));
   InitGame(gamestate);
 

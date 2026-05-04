@@ -32,7 +32,7 @@ void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map, Camera2D* camera);
 
 
-void DrawWaterTile(Vector2 t1,Vector2 t2,Vector2 t3,Vector2 t4,int x, int y);
+void DrawWaterEffects(Map* map,int x, int y);
 void DrawSimpleSparkle(Vector2 pos, Color color, float size);
 
 void Close_Map(Map* map);

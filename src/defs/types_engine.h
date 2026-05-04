@@ -49,8 +49,8 @@ typedef struct Gamestate{
   GameScreen screen;
   int framesCounter;
   SystemMenu main_menu;
-  EditSession edit_session;
-  PlaySession session;
+  EditSession* edit_session;
+  PlaySession* session;
 } Gamestate;
 
 #endif

@@ -1,15 +1,16 @@
 #include "engine/play_session.h"
 #include "core/camera_tools.h"
+#include "defs/types_engine.h"
 #include "raylib.h"
 
 void InitPlaySession(PlaySession* session){
+  session->state = ADVENTURE;
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
-
   LoadMap("rivers",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
-  CenterCameraOn(&session->camera,session->map.player->position,2.0f, &session->map);
+  CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
   int tx = (int)(session->map.player->position.x / TILE_SIZE);
   int ty = (int)(session->map.player->position.y / TILE_SIZE);
 
@@ -42,6 +43,13 @@ void UpdatePlaySession(PlaySession* session){
                     // 1. RUN PHYSICS FIRST
                     UpdatePhysics(&session->map, &input);
 
+                    float max_w = (session->map.columns - 1) * TILE_SIZE;
+                    float max_h = (session->map.rows - 1) * TILE_SIZE;
+
+                    if (session->map.player->position.x < 0) session->map.player->position.x = 0;
+                    if (session->map.player->position.y < 0) session->map.player->position.y = 0;
+                    if (session->map.player->position.x > max_w) session->map.player->position.x = max_w;
+                    if (session->map.player->position.y > max_h) session->map.player->position.y = max_h;
                     // 2. FIND THE EXACT POSITION OF THE PLAYER'S FEET
                     Vector2 playerIso = GetWorldToIso(session->map.player->position);
 
@@ -78,7 +86,6 @@ void UpdatePlaySession(PlaySession* session){
 }
   //if dialog manager is active input is disabled
 void DrawPlaySession(PlaySession* session){
-
   if(session->state == INVENTORY){
     DrawInventory(&session->menu);
   }else{
@@ -102,9 +109,9 @@ void UpdateInventory(PlaySession* session, Input* input){
 
 void AdjustCamera(PlaySession* session, bool dialog){
   if(dialog){
-    session->camera.zoom += (2.2f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (3.2f - session->camera.zoom) * 0.05f;
   }else{
-    session->camera.zoom += (2.0f - session->camera.zoom) * 0.05f;
+    session->camera.zoom += (3.0f - session->camera.zoom) * 0.05f;
   }
 }
 
