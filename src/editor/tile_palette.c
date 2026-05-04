@@ -8,10 +8,10 @@
 
 void InitTilePalette(TilePalette* palette, int start_x, int start_y){
     for (int i = 0; i < 4; i++) {
-        for(int j = 0; j < 5; j++){
+        for(int j = 0; j < 7; j++){
             Rectangle slot = { start_x + (j * 50), start_y + (i * 60), 40, 40 };
-            palette->tile_type_buttons[j + (i*5)] = slot;
-            palette->colors[j + (i*5)] =  TILE_REGISTRY[j + (i*5)].color;
+            palette->tile_type_buttons[j + (i*7)] = slot;
+            palette->colors[j + (i*7)] =  TILE_REGISTRY[j + (i*5)].color;
         }
     }
     palette->execute_button = (Rectangle){start_x, start_y+280, 100, 40};
@@ -23,7 +23,7 @@ void DrawTilePalette(TilePalette* palette) {
     int startY = (palette->tile_type_buttons[0].height) * 10;
     DrawText("Tile Palette", startX, 100, 30, COLOR_DUSTY_CORAL);
 
-    for(int i =0;i<20;i++){
+    for(int i =0;i<28;i++){
         DrawRectangleRec(palette->tile_type_buttons[i],TILE_REGISTRY[i].color );
         if(i ==palette->selected_tile_type){
             DrawText(TILE_REGISTRY[i].label, startX, startY, 20, COLOR_SUNKEN_INK);
@@ -50,7 +50,7 @@ void SetSelectionTileType(Map* map, SelectionBuffer* buffer, int selected_tile_t
 
 void UpdateTilePalette(TilePalette* palette, Map* map, SelectionBuffer* buffer, Input* input){
 
-    for(int i =0;i<20;i++){
+    for(int i =0;i<28;i++){
         if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
             if(CheckCollisionPointRec(input->mouse, palette->tile_type_buttons[i])){
                 palette->selected_tile_type = i;

@@ -53,4 +53,11 @@ typedef struct Gamestate{
   PlaySession* session;
 } Gamestate;
 
+typedef struct Command{
+  char label[32];
+  char description[100];
+  void(*callback) (void* context);
+} Command;
+
+
 #endif

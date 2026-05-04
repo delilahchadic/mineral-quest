@@ -4,11 +4,6 @@
 #include <assert.h>
 #include "defs/types_engine.h"
 
-typedef struct Command{
-  char label[32];
-  char description[100];
-  void(*callback) (void* context);
-} Command;
 
 extern Command COMMAND_REGISTRY[100];
 void(*callbacks[100]) (void* context);
@@ -19,8 +14,5 @@ void EditMode(void* context);
 void EditModeNew(void* context);
 void EditModeLoad(void* context);
 
-char* GetCommandLabel(int id);
-void ExecuteCommand(int id, void* context);
-char* GetCommandDescription(int id);
 
 #endif

@@ -13,29 +13,36 @@ Player* PLAYER;
 static int item_count = 0;
 static int plant_count = 0;
 static int charcter_count = 0;
-// static int item_count = 0;
 
-TileDefinition TILE_REGISTRY[20] = {
-  { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
-  { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
-  { TILE_SAND,  false, 0.4f, 103, COLOR_PALE_SAND,"Sand"},
-  { TILE_DIRT,  false, 0.8f, 104, COLOR_DUSTY_SALMON,"Dirt"},
-  { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"},
-  { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"},
-  {TILE_TERRA_PALE,false,1.0f,107,COLOR_TERRA_PALE, "Terra Pale"},
-  {TILE_SILT, false, 1.0f, 108, COLOR_OCHRE_SILT,"Ochre Silt"},
-  { TILE_MOON_STONE, false,  1.0f, 102, COLOR_MOONGLOW,"Moon Glow"},
-  { TILE_PURPLE_OCHRE,  false, 0.4f, 103, COLOR_PURPLE_OCHRE,"Purple Ochre"},
-  { TILE_BUFF_TITANIUM,  false, 0.8f, 104, COLOR_BUFF_TITANIUM,"Buff Titanium"},
-  { TILE_POTTERS_PINK, false, 0.9f, 105, COLOR_POTTERS_PINK,"Potters Pink"},
-  { TILE_ROSE,  false, 1.0f, 106, COLOR_DUSTY_ROSE ,"Rose"},
-  { TILE_CELADON,false,1.0f,107,COLOR_CELADON, "Celadon"},
-  { TILE_MAY_GREEN, false, 1.0f, 108, COLOR_GREEN_GOLD,"Green Gold"},
-  { TILE_INDANTHRONE, false, 1.0f, 108, COLOR_INDANTHRONE_BLUE,"Indanthrone"},
-  { TILE_SAGE,  false, 0.8f, 104, COLOR_SAGE_BRUSH,"Sage"},
-  { TILE_CHROME_YELLOW, false, 0.9f, 105, COLOR_DUSTY_CORAL,"Coral"},
-  { TILE_19,  false, 1.0f, 106, COLOR_WITHERED_LILAC ,"Wistful"},
-  { TILE_20,false,1.0f,107,COLOR_CERULEAN_BERYL, "Beryl"}
+TileDefinition TILE_REGISTRY[28] = {
+    { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
+    { TILE_BUFF_TITANIUM,  false, 0.8f, 104, COLOR_BUFF_TITANIUM,"Buff Titanium"},
+    { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"},
+    { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"},
+    { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
+    { TILE_MAY_GREEN, false, 1.0f, 108, COLOR_GREEN_GOLD,"Green Gold"},
+    { TILE_DEEP_MOSS,false,1.0f,107,COLOR_DEEP_MOSS, "Deep Moss"},
+    { TILE_SAGE,  false, 0.8f, 104, COLOR_SAGE_BRUSH,"Sage"},
+    { TILE_CELADON,false,1.0f,107,COLOR_CELADON, "Celadon"},
+    { TILE_BERYL,false,1.0f,107,COLOR_CERULEAN_BERYL, "Beryl"},
+    { TILE_AMAZONITE,false,1.0f,107,COLOR_AMAZONITE, "Amazonite"},
+    { TILE_BASALT,  false, 1.0f, 106, COLOR_BASALT ,"Basalt"},
+    { TILE_MOON_STONE, false,  1.0f, 102, COLOR_MOONGLOW,"Moon Glow"},
+    { TILE_WITHERED_LILAC,false,1.0f,107,COLOR_WITHERED_LILAC, "Withered Lilac"},
+    { TILE_SHELL_PINK,false,1.0f,107,COLOR_SHELL_PINK, "Shell Pink"},
+    { TILE_BRILLIANT_JAUNE,false,1.0f,107,COLOR_BRILLIANT_JAUNE, "Brilliant Jaune"},
+    { TILE_NAPLES_YELLOW,false,1.0f,107,COLOR_NAPLES_YELLOW, "Naples Yellow"},
+    { TILE_NICKEL_TITANITE,  false, 0.8f, 104, COLOR_NICKEL_TITANITE,"Nickel Titanite"},
+    { TILE_SALMON,  false, 1.0f, 106, COLOR_DUSTY_SALMON ,"Salmon"},
+    { TILE_POTTERS_PINK, false, 0.9f, 105, COLOR_POTTERS_PINK,"Potters Pink"},
+    {TILE_TERRA_PALE,false,1.0f,107,COLOR_TERRA_PALE, "Terra Pale"},
+    {TILE_SILT, false, 1.0f, 108, COLOR_OCHRE_SILT,"Ochre Silt"},
+    { TILE_FIRED_GOLD_OCHRE, false, 0.9f, 105, COLOR_FIRED_GOLD_OCHRE,"Fired Gold Ochre"},
+    { TILE_YELLOW_OCHRE,  false, 0.4f, 103, COLOR_YELLOW_OCHRE,"Yellow Ochre"},
+    { TILE_RED_OCHRE, false, 1.0f, 108, COLOR_RED_OCHRE,"Red Ochre"},
+    { TILE_PURPLE_OCHRE,  false, 0.4f, 103, COLOR_PURPLE_OCHRE,"Purple Ochre"},
+    { TILE_BLUE_OCHRE,false,1.0f,107,COLOR_BLUE_OCHRE, "Blue Ochre"},
+    { TILE_BURNT_SIENNA,false,1.0f,107,COLOR_BURNT_SIENNA, "Burnt Sienna"}
 };
 
 char* GetName(EntityType type, int id){

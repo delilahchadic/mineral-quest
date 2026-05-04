@@ -1,5 +1,5 @@
 #include "ui/menu.h"
-
+#include "registry/command_interface.h"
 void FillMenu(Menu* menu, int(*itemIds)[MAX_SLOTS], int count){
   memcpy(&menu->itemIds, itemIds, sizeof(int) * MAX_SLOTS);
   menu->count = count;

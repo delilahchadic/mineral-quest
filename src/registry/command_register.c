@@ -1,5 +1,8 @@
 #include "registry/command_register.h"
+
 #include "defs/types_engine.h"
+#include "engine/play_session.h"
+#include "editor/edit_session.h"
 
 Command COMMAND_REGISTRY[100] = {0};
 
@@ -12,13 +15,17 @@ void(*callbacks[100]) (void*) = {
 
 // Used in Main menu to set the gsme state to bein game
 void AdventureMode(void* context){
-  Gamestate* state = (Gamestate*)context;
-  state->screen = GAMEPLAY;
+  Gamestate* gamestate = (Gamestate*)context;
+  gamestate->session = calloc(1, sizeof(PlaySession));
+  InitPlaySession(gamestate->session);
+  gamestate->screen = GAMEPLAY;
 }
 
 void EditMode(void* context){
-  Gamestate* state = (Gamestate*)context;
-  state->screen = EDIT_SCREEN;
+  Gamestate* gamestate = (Gamestate*)context;
+  gamestate->edit_session = calloc(1, sizeof(EditSession));
+  InitEditSession(gamestate->edit_session);
+  gamestate->screen = EDIT_SCREEN;
 }
 
 void EditModeNew(void* context){
@@ -29,16 +36,4 @@ void EditModeNew(void* context){
 void EditModeLoad(void* context){
   EditSession* session = (EditSession*)context;
   session->state = LOAD_PROMPT;
-}
-
-char* GetCommandLabel(int id){
-  return COMMAND_REGISTRY[id].label;
-}
-
-char* GetCommandDescription(int id){
-  return COMMAND_REGISTRY[id].description;
-}
-
-void ExecuteCommand(int id, void* context){
-  callbacks[id](context);
 }

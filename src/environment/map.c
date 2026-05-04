@@ -1,5 +1,7 @@
 #include "map.h"
 #include "defs/types_entities.h"
+#include "raylib.h"
+#include "registry/mineral_register.h"
 
 void InitMap(Map* map){
   Init_Player(map);
@@ -113,10 +115,39 @@ Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
     return GetIsoWorldToGrid(screenWorldPos);
 }
 
-void Draw_Map(Map* map, Camera2D* camera) {
-    if (!map->is_ready){
-        return;
+void DrawProceduralGem(Vector2 center, float width, float height, Color baseColor) {
+    int sides = 6; // Hexagonal
+    Vector2 points[6];
+
+    // 1. Calculate the 'waist' points
+    for (int i = 0; i < sides; i++) {
+        float angle = i * (360.0f / sides) * DEG2RAD;
+        points[i] = (Vector2){
+            center.x + cosf(angle) * width,
+            center.y + sinf(angle) * (width / 2.0f) // Isometric squash
+        };
     }
+
+    // 2. Draw Top Faces (Pointed up)
+    Vector2 topPoint = { center.x, center.y - height };
+    for (int i = 0; i < sides; i++) {
+        // Vary the brightness per face to simulate 'facets'
+        Color facetColor = ColorBrightness(baseColor, (i % 2 == 0) ? -0.1f : 0.1f);
+        DrawTriangle(topPoint, points[(i + 1) % sides], points[i], facetColor);
+    }
+
+    // 3. Draw Bottom Faces (Pointed down)
+    Vector2 bottomPoint = { center.x, center.y + height };
+    for (int i = 0; i < sides; i++) {
+        Color facetColor = ColorBrightness(baseColor, (i % 2 == 0) ? -0.2f : -0.3f);
+        DrawTriangle(bottomPoint, points[i], points[(i + 1) % sides], facetColor);
+    }
+}
+
+
+
+void Draw_Map(Map* map, Camera2D* camera) {
+    if (map == NULL || !map->is_ready) return;
 
     BeginMode2D(*camera);
 
@@ -149,7 +180,7 @@ void Draw_Map(Map* map, Camera2D* camera) {
 
     // 5. Safe Bucket Allocation
     // MapEntity** buckets = (MapEntity**)calloc(map->rows, sizeof(MapEntity*));
-    memset(map->buckets, 0, sizeof(MapEntity*) * map->rows);
+    memset(map->buckets, 0, sizeof(map->buckets));
     MapEntity* e = map->entities;
     while (e != NULL) {
         int ty = (int)(e->position.y / TILE_SIZE);
@@ -175,6 +206,7 @@ for (int y = min_y; y <= max_y; y++) {
             }
         }
     }
+
     BeginBlendMode(BLEND_ADDITIVE);
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
@@ -270,30 +302,37 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
     Vector2 position = GetWorldToIso(entity->position);
     position.y -= entity->altitude;
 
-    Texture2D* sprite = GetSprite(entity->type, entity->id);
-    float renderHeight = (entity->type == ENTITY_ITEM) ? (sprite->height * 0.5f) : (float)sprite->height;
-    float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
-    Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
+    if(entity->type == ENTITY_MINERAL){
+        DrawMineral(entity->id, position);
+    }else{
+        Texture2D* sprite = GetSprite(entity->type, entity->id);
+        float renderHeight = (entity->type == ENTITY_ITEM) ? (sprite->height * 0.5f) : (float)sprite->height;
+        float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
+        Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-    if(entity->type == ENTITY_ITEM ) {
-        DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
-    } else {
-        DrawTextureV(*sprite, drawPos, WHITE);
 
-        // SHADOW LOGIC WITH BOUNDS CHECK
-        int tx = (int)(entity->position.x / TILE_SIZE);
-        int ty = (int)(entity->position.y / TILE_SIZE);
+            if(entity->type == ENTITY_ITEM ) {
+            DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
+        } else {
+            DrawTextureV(*sprite, drawPos, WHITE);
 
-        float floorY = 0;
-        // SAFETY: Prevent accessing grid[-1] or grid[MAX]
-        if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
-            floorY = map->grid[ty][tx].height * 8.0f;
+            // SHADOW LOGIC WITH BOUNDS CHECK
+            int tx = (int)(entity->position.x / TILE_SIZE);
+            int ty = (int)(entity->position.y / TILE_SIZE);
+
+            float floorY = 0;
+            // SAFETY: Prevent accessing grid[-1] or grid[MAX]
+            if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
+                floorY = map->grid[ty][tx].height * 8.0f;
+            }
+
+            Vector2 shadowPos = GetWorldToIso(entity->position);
+            shadowPos.y -= floorY;
+            DrawCircleGradient(shadowPos.x, shadowPos.y, 8, Fade(BLACK, 0.3f), BLANK);
         }
-
-        Vector2 shadowPos = GetWorldToIso(entity->position);
-        shadowPos.y -= floorY;
-        DrawCircleGradient(shadowPos.x, shadowPos.y, 8, Fade(BLACK, 0.3f), BLANK);
     }
+
+
 }
 
 void DrawWaterEffects(Map* map, int x, int y) {

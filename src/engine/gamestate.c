@@ -1,15 +1,12 @@
 #include "engine/gamestate.h"
 #include "defs/types_engine.h"
 #include "editor/edit_ui.h"
+#include "registry/command_interface.h"
+
 void InitGame(Gamestate* gamestate){
-  // System Setup
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0;
   FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
-  gamestate->session = calloc(1, sizeof(PlaySession));
-  gamestate->edit_session = calloc(1, sizeof(EditSession));
-  InitEditSession(gamestate->edit_session);
-  InitPlaySession(gamestate->session);
 }
 
 //routes to update based on gamestate
@@ -25,9 +22,7 @@ void UpdateScene(Gamestate* gamestate){
       break;
     case MENU:{
       int option_selected = UpdateSystemMenu(&gamestate->main_menu,&input);
-      if(option_selected >=0){
-        ExecuteCommand(option_selected, gamestate);
-      }
+      if(option_selected >=0) ExecuteCommand(option_selected, gamestate);
       break;
     }
     case GAMEPLAY:
@@ -41,43 +36,46 @@ void UpdateScene(Gamestate* gamestate){
   }
 }
 
+void DrawLogo(){
+    // 1. Define the colors in the order you want them to appear
+  Color barPalette[] = {
+      COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE,
+      COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON,
+      COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
+  };
+  int colorCount = 8;
+  float barWidth = (float)SCREEN_WIDTH / colorCount;
+
+    // 2. Draw the vertical bars
+  for (int i = 0; i < colorCount; i++) {
+      DrawRectangle(i * barWidth, 0, barWidth,SCREEN_HEIGHT, barPalette[i]);
+  }
+
+    // 3.
+    // Draw a dark semi-transparent bar behind the text for readability
+    DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
+    DrawText("ARCHAEOLOGY", SCREEN_WIDTH/4, SCREEN_HEIGHT/2, 30, COLOR_PULP_PAPER);
+
+}
+
 void DrawScreen(Gamestate* gamestate){
     switch(gamestate->screen) {
-      case LOGO:{
-            // 1. Define the colors in the order you want them to appear
-          Color barPalette[] = {
-              COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE,
-              COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON,
-              COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
-          };
-          int colorCount = 8;
-          float barWidth = (float)SCREEN_WIDTH / colorCount;
-
-            // 2. Draw the vertical bars
-          for (int i = 0; i < colorCount; i++) {
-              DrawRectangle(i * barWidth, 0, barWidth,SCREEN_HEIGHT, barPalette[i]);
-          }
-
-            // 3.
-            // Draw a dark semi-transparent bar behind the text for readability
-            DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
-            DrawText("ARCHAEOLOGY", SCREEN_WIDTH/4, SCREEN_HEIGHT/2, 30, COLOR_PULP_PAPER);
-
+        case LOGO:
+            DrawLogo();
             break;
-      }
-      case TITLE:
-        DrawText("Mineral Quest", SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 40, COLOR_SUNKEN_INK);
-        DrawText("PRESS ENTER TO START",( SCREEN_WIDTH/2) , (SCREEN_HEIGHT/2) + 50, 20, COLOR_SUNKEN_INK);
-        break;
-      case MENU:
-        DrawSystemMenu(&gamestate->main_menu);
-        break;
-      case GAMEPLAY:
-        DrawPlaySession(gamestate->session);
-        break;
-      case EDIT_SCREEN:
-        DrawEditSession(gamestate->edit_session);
-        break;
+        case TITLE:
+            DrawText("Mineral Quest", SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 40, COLOR_SUNKEN_INK);
+            DrawText("PRESS ENTER TO START",( SCREEN_WIDTH/2) , (SCREEN_HEIGHT/2) + 50, 20, COLOR_SUNKEN_INK);
+            break;
+        case MENU:
+            DrawSystemMenu(&gamestate->main_menu);
+            break;
+        case GAMEPLAY:
+            DrawPlaySession(gamestate->session);
+            break;
+        case EDIT_SCREEN:
+            DrawEditSession(gamestate->edit_session);
+            break;
     }
 }
 

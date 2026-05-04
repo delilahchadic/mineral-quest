@@ -19,9 +19,8 @@
 #include "engine/palette.h"
 #include "environment/map.h"
 #include "environment/map_loader.h"
-#include "registry/command_register.h"
+#include "registry/command_interface.h"
 #include "ui/dialog_box.h"
-
 
 void InitEditSession(EditSession* session){
   session->menu = (SystemMenu){0};
@@ -32,7 +31,7 @@ void InitEditSession(EditSession* session){
   LoadFiles(session);
   session->form.active_field = FIELD_NAME;
   int s = (int)(SCREEN_WIDTH  * 0.66f);
-  session->current_tile_panel = (Rectangle){s,(SCREEN_HEIGHT *2 /3) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
+  session->current_tile_panel = (Rectangle){s,(int)(SCREEN_HEIGHT *2 /3) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
   FillSystemMenu(&session->menu, (int[]){3,4,2},3, "Edit Mode");
   CenterCameraOn(&session->camera,(Vector2){0,0}, 0.75f, &session->map );
   InitEditSessionMouseTracking(session);

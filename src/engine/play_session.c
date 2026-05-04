@@ -7,7 +7,7 @@ void InitPlaySession(PlaySession* session){
   session->state = ADVENTURE;
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
-  LoadMap("rivers",&session->map);
+  LoadMap("sea temple",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
   CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
