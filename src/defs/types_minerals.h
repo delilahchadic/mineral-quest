@@ -1,3 +1,5 @@
+#ifndef TYPES_MINERAL_H
+#define TYPES_MINERAL_H
 #include "raylib.h"
 
 typedef enum Mineral{
@@ -5,8 +7,10 @@ typedef enum Mineral{
     MINERAL_SAPHIRE,
     MINERAL_PYRITE,
     MINERAL_PEARL,
-    MINERAL_QUARTZ,
+    MINERAL_ROSE_QUARTZ,
     MINERAL_FELDSPAR,
+    MINERAL_EMERALD,
+    MINERAL_TOPAZ,
     MINERAL_COUNT
 }Mineral;
 
@@ -16,3 +20,4 @@ typedef struct MineralDefinition{
     void (*draw_function)(Vector2 position);
 }MineralDefinition;
 void(*draw_functions[100]) (void* context);
+#endif

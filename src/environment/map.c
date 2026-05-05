@@ -115,34 +115,7 @@ Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
     return GetIsoWorldToGrid(screenWorldPos);
 }
 
-void DrawProceduralGem(Vector2 center, float width, float height, Color baseColor) {
-    int sides = 6; // Hexagonal
-    Vector2 points[6];
 
-    // 1. Calculate the 'waist' points
-    for (int i = 0; i < sides; i++) {
-        float angle = i * (360.0f / sides) * DEG2RAD;
-        points[i] = (Vector2){
-            center.x + cosf(angle) * width,
-            center.y + sinf(angle) * (width / 2.0f) // Isometric squash
-        };
-    }
-
-    // 2. Draw Top Faces (Pointed up)
-    Vector2 topPoint = { center.x, center.y - height };
-    for (int i = 0; i < sides; i++) {
-        // Vary the brightness per face to simulate 'facets'
-        Color facetColor = ColorBrightness(baseColor, (i % 2 == 0) ? -0.1f : 0.1f);
-        DrawTriangle(topPoint, points[(i + 1) % sides], points[i], facetColor);
-    }
-
-    // 3. Draw Bottom Faces (Pointed down)
-    Vector2 bottomPoint = { center.x, center.y + height };
-    for (int i = 0; i < sides; i++) {
-        Color facetColor = ColorBrightness(baseColor, (i % 2 == 0) ? -0.2f : -0.3f);
-        DrawTriangle(bottomPoint, points[i], points[(i + 1) % sides], facetColor);
-    }
-}
 
 
 
@@ -406,6 +379,7 @@ void Remove_Entity(Map* map, MapEntity* entity){
     curr->next = entity->next;
     entity->next = NULL;
     if(entity->type != ENTITY_PLAYER) free(entity);
+    map->entity_count--;
     return;
   }
 }
@@ -413,6 +387,7 @@ void Remove_Entity(Map* map, MapEntity* entity){
 void Add_Entity(Map* map, MapEntity* entity){
   entity->next = map->entities;
   map->entities = entity;
+  map->entity_count++;
   return;
 }
 

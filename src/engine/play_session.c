@@ -1,13 +1,14 @@
 #include "engine/play_session.h"
 #include "core/camera_tools.h"
 #include "defs/types_engine.h"
+#include "environment/map.h"
 #include "raylib.h"
 
 void InitPlaySession(PlaySession* session){
   session->state = ADVENTURE;
   session->player = Get_Default_Player();
   session->menu = (Menu){0};
-  LoadMap("sea temple",&session->map);
+  LoadMap("rivers",&session->map);
   InitMap(&session->map);
   InitScriptManager(&session->manager,100);
   CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
@@ -17,6 +18,10 @@ void InitPlaySession(PlaySession* session){
       // Set the altitude to the floor height immediately
     float startFloor = session->map.grid[ty][tx].height * 8.0f;
     session->map.player->altitude = startFloor;
+    session->mineral_sound = LoadSound("data/audio/mineral.wav");
+
+        // Optional: set a default volume if it's too loud
+        SetSoundVolume(session->mineral_sound, 0.33);
 }
 
 void UpdatePlaySession(PlaySession* session){
@@ -43,8 +48,33 @@ void UpdatePlaySession(PlaySession* session){
                     // 1. RUN PHYSICS FIRST
                     UpdatePhysics(&session->map, &input);
 
+                    MapEntity* e = session->map.entities;
+                    while(e!=NULL){
+                        if (e->type == ENTITY_MINERAL) {
+                            // Ensure we are comparing WORLD coordinates to WORLD coordinates
+                            // If e->position is stored as Iso, you'd need GetIsoToWorld(e->position)
+                            Vector2 playerPos = session->map.player->position;
+                            Vector2 mineralPos = e->position;
+
+                            // 15.0f to 20.0f is usually the "sweet spot" for 32px tiles
+                            if (CheckMineralPickup(playerPos, mineralPos, 30.0f)) {
+                                float pitch = 0.95f + ((float)(e->id % 10)/ 100.0f); // 0.95 to 1.05
+                                    SetSoundPitch(session->mineral_sound, pitch);
+
+                                    PlaySound(session->mineral_sound);
+                                session->player.mineral_inventory[e->id]++;
+                                Remove_Entity(&session->map, e);
+                                break;
+                            }
+                        }
+                        e = e->next;
+
+                    }
+
+
                     float max_w = (session->map.columns - 1) * TILE_SIZE;
                     float max_h = (session->map.rows - 1) * TILE_SIZE;
+
 
                     if (session->map.player->position.x < 0) session->map.player->position.x = 0;
                     if (session->map.player->position.y < 0) session->map.player->position.y = 0;
@@ -141,4 +171,12 @@ int PollChest(Player* player,Map* map){
     return p->id;
   }
   return -1;
+}
+
+bool CheckMineralPickup(Vector2 playerPos, Vector2 mineralPos, float radius) {
+    // We "stretch" the Y distance to turn a circle check into an oval check
+    // float dx = playerPos.x - mineralPos.x;
+    // float dy = (playerPos.y - mineralPos.y) * 2.0f; // 2.0 matches your 2:1 isometric ratio
+    return Vector2Distance(playerPos, mineralPos) < radius;
+    // return (dx * dx + dy * dy) <= (radius * radius);
 }

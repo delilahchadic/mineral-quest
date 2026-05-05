@@ -67,6 +67,7 @@ typedef struct EntityDrawer{
     Rectangle buttons[10];
     Rectangle plant_button;
     Rectangle character_button;
+    Rectangle mineral_button;
     Rectangle item_button;
     int ids[10];
 }EntityDrawer;

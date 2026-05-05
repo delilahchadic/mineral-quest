@@ -4,6 +4,7 @@
 #include "defs/types_ui.h"
 #include "engine/palette.h"
 #include "raylib.h"
+#include "registry/mineral_register.h"
 #include "registry/register.h"
 #include "systems/physics.h"
 #include "ui/ui_helpers.h"
@@ -31,20 +32,29 @@ void InitDrawerButtons(EntityDrawer* drawer, int start_x, int start_y){
     drawer->plant_button = (Rectangle) {start_x, start_y, 64,32};
     drawer->character_button = (Rectangle) {start_x + 70, start_y, 64,32};
     drawer->item_button = (Rectangle) {start_x + 140, start_y, 64,32};
+    drawer->mineral_button = (Rectangle) {start_x + 210, start_y, 64,32};
     drawer->prev_page_button = (Rectangle) {start_x, start_y+32, 64,32};
     drawer->next_page_button = (Rectangle) {start_x + 128, start_y +32, 64,32};
-    for(int i =0;i< 2;i++){
-        for(int j=0;j<5;j++){
-            drawer->buttons[(i *5) +j] = (Rectangle) {(start_x) + (i*64), (start_y+64) + (j*64), 64, 64};
+    int spacing = 70; // 64px button + 6px padding
+        int grid_start_y = start_y + 90;
+
+        for (int i = 0; i < drawer->entities_per_page; i++) {
+            int row = i / 3; // Integer division gives you the row (0, 0, 0, 1, 1, 1...)
+            int col = i % 3; // Modulo gives you the column (0, 1, 2, 0, 1, 2...)
+
+            drawer->buttons[i] = (Rectangle) {
+                (float)start_x + (col * spacing),
+                (float)grid_start_y + (row * spacing),
+                64, 64
+            };
         }
-    }
 
 }
 
 void SetPage(EntityDrawer* drawer){
     EntityType type = drawer->current_type;
     int page = drawer->current_page;
-    int count = GetEntityTypeCount(type);
+    int count = type == ENTITY_MINERAL ? MINERAL_COUNT: GetEntityTypeCount(type);
     int pagestart = page * drawer->entities_per_page;
 
     for (int k = 0; k < drawer->entities_per_page; k++) {
@@ -52,34 +62,31 @@ void SetPage(EntityDrawer* drawer){
     }
 
     if(pagestart < count){
-    for(int i = pagestart,j = 0; i<pagestart + drawer->entities_per_page && i < count;i++,j++){
+    for(int i = pagestart,j = 0; i < pagestart + drawer->entities_per_page && i < count;i++,j++){
         drawer->ids[j] = i;
     }}
 }
 
 bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input* input) {
-    // 1. Safety Check: Only place if something is selected
     if (drawer->selected_id == -1) return false;
-
-    // 2. Prevent "clicking through" the UI
-    // If the mouse is inside the area where the Entity Drawer is drawn, don't place.
     if (input->mouse.x > (SCREEN_WIDTH * 0.66f)) return false;
 
     if (input->buttons_pressed & LEFT_MOUSE_CLICKED) {
-        // 3. Convert Screen Mouse -> World Coordinates
         Vector2 mouseWorldPos = GetScreenToWorld2D(input->mouse, *camera);
-
-        // 4. Use your height-aware math to find the exact tile
         Vector2 gridCoords = GetIsoWorldToGridWithHeight(map, mouseWorldPos);
 
-        // 5. Create and add the entity
+        int ix = (int)gridCoords.x;
+        int iy = (int)gridCoords.y;
+
         MapEntity* newEntity = malloc(sizeof(MapEntity));
         newEntity->type = drawer->current_type;
         newEntity->id = drawer->selected_id;
+
+        // FIX: Capture the height of the tile and convert to pixels (8.0f step)
+        newEntity->altitude = map->grid[iy][ix].height * 8.0f;
+
         newEntity->state = NORMAL_STATE;
         newEntity->jumpoffset = 0.0f;
-
-        // Convert grid indices back to "Square World" coordinates for storage
         newEntity->position.x = gridCoords.x * TILE_SIZE + (TILE_SIZE / 2.0f);
         newEntity->position.y = gridCoords.y * TILE_SIZE + (TILE_SIZE / 2.0f);
 
@@ -117,6 +124,10 @@ bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, Input* input,Camera2D* 
             drawer->current_type = ENTITY_ITEM;
             SetPage(drawer);
         }
+        if(CheckCollisionPointRec(input->mouse, drawer->mineral_button)){
+            drawer->current_type = ENTITY_MINERAL;
+            SetPage(drawer);
+        }
         for(int i =0;i<drawer->entities_per_page && drawer->ids[i] > -1;i++){
             if(CheckCollisionPointRec(input->mouse, drawer->buttons[i])){
                 drawer->selected_id = drawer->ids[i];
@@ -145,20 +156,32 @@ void DrawEnitityDrawer(EntityDrawer* drawer) {
     DrawText(count_ch, startX, startY+40, 14.0f, COLOR_SUNKEN_INK);
     DrawButton(drawer->plant_button, "Plants", COLOR_SAP_GREEN, COLOR_PULP_PAPER);
     DrawButton(drawer->character_button, "Character", COLOR_CERULEAN_COBALT, COLOR_PULP_PAPER);
+    DrawButton(drawer->mineral_button, "Minerals", COLOR_ROSE, COLOR_PULP_PAPER);
     DrawButton(drawer->item_button, "Items", COLOR_NICKEL_TITANITE, COLOR_PULP_PAPER);
     DrawButton(drawer->prev_page_button, "Previous", COLOR_AMBER, COLOR_PULP_PAPER);
     DrawButton(drawer->next_page_button, "Next", COLOR_RED_OCHRE, COLOR_PULP_PAPER);
+
     for(int i=0;i<10 && drawer->ids[i] > -1;i++){
-        DrawTexture(*GetSprite(drawer->current_type, drawer->ids[i]), drawer->buttons[i].x, drawer->buttons[i].y, WHITE);
+        if(drawer->current_type == ENTITY_MINERAL){
+            DrawMineral(drawer->ids[i],(Vector2){drawer->buttons[i].x,drawer->buttons[i].y});
+        }else{
+            DrawTexture(*GetSprite(drawer->current_type, drawer->ids[i]), drawer->buttons[i].x, drawer->buttons[i].y, WHITE);
+        }
+
     }
     Rectangle panel = (Rectangle){s,(SCREEN_HEIGHT *2 /3) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
 
     DrawRectangleRec(panel, COLOR_PULP_PAPER);
     DrawRectangleLinesEx(panel, 1.0f, COLOR_SUNKEN_INK);
-    DrawText("Current Entity", panel.x+10, panel.y+15, 15.0f, COLOR_SUNKEN_INK);
-    int selected_id =drawer->selected_id;
+    DrawText("Current Entity", panel.x+20, panel.y+25, 15.0f, COLOR_SUNKEN_INK);
+    int selected_id = drawer->selected_id;
     if(selected_id >-1){
         DrawText(GetName(drawer->current_type, selected_id), panel.x+10, panel.y+30, 15.0f, COLOR_SUNKEN_INK);
+        if(drawer->current_type == ENTITY_MINERAL){
+            DrawMineral(selected_id,GetMousePosition());
+        }else{
+            DrawTexture(*GetSprite(drawer->current_type, selected_id), GetMousePosition().x, GetMousePosition().y, WHITE);
+        }
     }
-    DrawTexture(*GetSprite(drawer->current_type, drawer->selected_id), GetMousePosition().x, GetMousePosition().y, WHITE);
+
 }

@@ -1,5 +1,6 @@
 #include "engine/gamestate.h"
 #include "engine/palette.h"
+#include "raylib.h"
 #include "registry/register.h"
 #include "registry/register_loader.h"
 
@@ -11,7 +12,7 @@ int main(void) {
   InitRegistries();
   Gamestate* gamestate = calloc(1, sizeof(Gamestate));
   InitGame(gamestate);
-
+  InitAudioDevice();
   // Main game loop
   while (!WindowShouldClose()) {
     // --- 1. Update Logic ---
@@ -22,6 +23,7 @@ int main(void) {
       DrawScreen(gamestate);
     EndDrawing();
   }
+  UnloadSound(gamestate->session->mineral_sound);
   CloseGame(gamestate);
   CloseRegistries();
   return 0;

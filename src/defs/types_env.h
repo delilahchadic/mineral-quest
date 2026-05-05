@@ -46,6 +46,7 @@ typedef struct Map{
   int columns;
   char name[32];
   MapEntity* entities;
+  int entity_count;
   MapEntity* player;
   int lastTileHeight;
   bool is_ready;

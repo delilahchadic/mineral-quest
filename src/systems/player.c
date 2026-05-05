@@ -1,8 +1,8 @@
 #include "systems/player.h"
+#include "defs/types_minerals.h"
 
 Player Get_Default_Player(){
   Player player = {0};
-
   InitInventory(&player.inventory);
   player.inventory.itemIds[0]=1;
   player.inventory.itemIds[1]=3;

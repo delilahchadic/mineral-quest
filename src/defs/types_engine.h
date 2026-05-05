@@ -21,6 +21,7 @@ typedef struct PlaySession{
   Menu menu;
   char pendingItemName[100];
   Camera2D camera;
+  Sound mineral_sound;
 } PlaySession;
 
 typedef struct EditLoader{

@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include <stdint.h>
 #include "defs/types_entities.h"
+#include "defs/types_minerals.h"
 #include "defs/constants.h"
 
 typedef struct Input{
@@ -43,6 +44,7 @@ typedef struct ScriptManager{
 
 typedef struct player{
   Inventory inventory;
+  int mineral_inventory[MINERAL_COUNT];
   float speed;
   Texture2D sprite;     // How fast we move
 } Player;

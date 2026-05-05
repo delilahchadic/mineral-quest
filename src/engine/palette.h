@@ -39,13 +39,13 @@
 // --- THE WARM SPECTRUM (Artist Pigments) ---
 #define COLOR_MAGENTA        (Color){ 202, 31, 123, 255 }
 #define COLOR_ROSE           (Color){ 184, 32, 72, 255 }
-#define COLOR_RED_OCHRE      (Color){ 200, 100, 100, 255 }
+#define COLOR_RED_OCHRE      (Color){ 145, 95, 85, 255 }
 #define COLOR_SCARLET        (Color){ 255, 36, 0, 255 }
 #define COLOR_PERYLENE_RED   (Color){ 177, 24, 44, 255 }
 #define COLOR_POTTERS_PINK   (Color){ 195, 141, 131, 255 }
 #define COLOR_PURPLE_OCHRE   (Color){ 196, 160, 170, 255 }
-#define COLOR_SHELL_PINK   (Color){ 255, 215, 215, 255 }
-#define COLOR_BRILLIANT_JAUNE  (Color){ 255, 200, 140, 255 }
+#define COLOR_SHELL_PINK      (Color){ 215, 185, 185, 255 } // Muted Berry-leaning Pink
+#define COLOR_BRILLIANT_JAUNE (Color){ 225, 190, 140, 255 } // Muted Golden Earth
 
 // --- THE GOLDEN SPECTRUM ---
 #define COLOR_QUIN_GOLD      (Color){ 178, 125, 38, 255 }
@@ -87,4 +87,5 @@
 #define COLOR_MOONGLOW       (Color){ 111, 103, 138, 255 }
 #define COLOR_AUREOLIN       (Color){ 255, 238, 0, 255 }
 
+#define COLOR_PYRITE_BRASS    (Color){ 185, 160, 50, 255 }
 #endif
