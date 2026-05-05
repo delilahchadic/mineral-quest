@@ -27,6 +27,9 @@ Input CaptureInput(){
   if(IsKeyDown(KEY_SPACE)){
     i.buttons_pressed |= JUMP_PRESSED;
   }
+  if(IsKeyPressed(KEY_M)){
+    i.buttons_pressed |= MINERAL_PRESSED;
+  }
 
   if(IsKeyDown(KEY_LEFT_SHIFT)){
     i.buttons_pressed |= SHIFT_PRESSED;

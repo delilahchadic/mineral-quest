@@ -14,7 +14,72 @@ void DrawSaphire(Vector2 center){
 void DrawPyrite(Vector2 center) {
     float size = 8.0f;
     float rotation = GetTime() * 2.0f; // Matches your Ruby/Sapphire speed
-    DrawMetallicCube(center, size, size * 1.2f, COLOR_PYRITE_BRASS, rotation);
+    DrawIsometricCube(center, size, size * 1.2f, COLOR_PYRITE_BRASS, rotation,1.0,true);
+}
+
+void DrawMagnetite(Vector2 center) {
+    float size = 8.0f;
+    float rotation = GetTime() * 2.0f; // Matches your Ruby/Sapphire speed
+    DrawIsometricCube(center, size, size * 1.2f, COLOR_SUNKEN_INK, rotation,1.0,true);
+}
+
+void DrawIsometricCube(Vector2 center, float width, float height, Color baseColor, float rotation, float transparency, bool isMetallic) {
+    Vector2 top[4], bot[4];
+    float time = GetTime();
+
+    // 1. Calculate points
+    for (int i = 0; i < 4; i++) {
+        float angle = (i * 90.0f * DEG2RAD) + rotation;
+        bot[i] = (Vector2){
+            center.x + cosf(angle) * width,
+            center.y + sinf(angle) * (width * 0.5f) // Isometric 2:1 ratio
+        };
+        top[i] = (Vector2){ bot[i].x, bot[i].y - height };
+    }
+
+    // 3. Draw Faces
+    for (int i = 0; i < 4; i++) {
+        int next = (i + 1) % 4;
+
+        if (bot[next].x < bot[i].x) { // Visibility check
+            float faceAngle = (i * 90.0f * DEG2RAD) + rotation;
+            float shade = cosf(faceAngle) * 0.4f;
+            Color faceCol = ColorBrightness(baseColor, shade);
+            faceCol.a = (unsigned char)(transparency * 255);
+
+            // Triangle 1 & 2 (Body)
+            DrawTriangle(bot[i], top[i], bot[next], faceCol);
+            DrawTriangle(top[i], top[next], bot[next], faceCol);
+
+            // 4. Luster Logic
+            if (isMetallic) {
+                // Sharp Metallic Shimmer
+                float shimmer = sinf(time * 5.0f + (bot[i].x * 0.05f));
+                if (shimmer > 0.8f) DrawLineV(top[i], bot[i], Fade(WHITE, 0.5f));
+            }
+        }
+    }
+
+    // 5. Top Cap
+    Color topCol = ColorBrightness(baseColor, 0.2f);
+    topCol.a = (unsigned char)(transparency * 255);
+    DrawTriangle(top[0], top[3], top[2], topCol);
+    DrawTriangle(top[0], top[2], top[1], topCol);
+}
+
+void DrawHalite(Vector2 center) {
+    float size = 8.0f;
+    float time = GetTime();
+
+    // Use a slightly more "paper" white so the highlights actually show up
+    Color saltBase = COLOR_PULP_PAPER;
+
+    // 1. THE CORE GLOW (Keep this, it makes it look translucent)
+    DrawCircleGradient(center.x, center.y - 4, size * 0.9f, Fade(WHITE, 0.3f), BLANK);
+
+    // 2. THE MAIN CUBE
+    // Transparency at 0.8f makes it look like solid rock salt
+    DrawIsometricCube(center, size, size * 1.1f, saltBase, time * 0.5f, 0.8f, false);
 }
 
 void DrawMetallicCube(Vector2 center, float width, float height, Color baseColor, float rotation) {
@@ -180,7 +245,9 @@ void DrawPearl(Vector2 center) {
     DrawRingLines(center, radius, radius, 200, 290, 20, Fade(WHITE, 0.7f));
 }
 
-void DrawRoseQuartz(Vector2 center) {
+
+
+void DrawBasicQuartz(Vector2 center, Color color) {
     float width = 7.0f;
     float bodyHeight = 12.0f;
     float capHeight = 6.0f;
@@ -201,7 +268,7 @@ void DrawRoseQuartz(Vector2 center) {
     Vector2 tipBot = { center.x, center.y + (bodyHeight / 2.0f) + capHeight };
 
     // 2. SOFT SUBSURFACE GLOW
-    DrawCircleGradient(center.x, center.y, width * 1.6f, Fade(COLOR_POTTERS_PINK, 0.25f), BLANK);
+    DrawCircleGradient(center.x, center.y, width * 1.6f, Fade(color, 0.25f), BLANK);
 
     // 3. DRAW FACETS
     // 3. DRAW FACETS
@@ -215,7 +282,7 @@ void DrawRoseQuartz(Vector2 center) {
             float lightIntensity = (cosf(faceAngle) * 0.2f) + 0.2f;
 
             // Use a higher alpha (0.8f - 0.9f) to keep the color solid and vibrant
-            Color fColor = ColorBrightness(COLOR_POTTERS_PINK, lightIntensity);
+            Color fColor = ColorBrightness(color, lightIntensity);
             fColor.a = 230; // Solid but slightly glassy
 
             // Instead of darkening the body, keep it near base color
@@ -231,10 +298,6 @@ void DrawRoseQuartz(Vector2 center) {
             // BOTTOM CAP (The only truly dark part)
             DrawTriangle(botRing[i], botRing[next], tipBot, ColorBrightness(dColor, -0.2f));
 
-            // ... shimmer logic remains same
-
-
-
             // 4. THE SHIMMER (Cleaned up threshold)
             float shimmerPos = topRing[i].x - center.x;
             float shimmer = sinf(time * 4.0f + (shimmerPos * 0.15f));
@@ -246,7 +309,26 @@ void DrawRoseQuartz(Vector2 center) {
     }
 }
 
+void DrawRoseQuartz(Vector2 center) {
+    DrawBasicQuartz(center, COLOR_POTTERS_PINK);
+}
+
+void DrawAmethyst(Vector2 center) {
+    DrawBasicQuartz(center, COLOR_WITHERED_LILAC);
+}
+
+void DrawQuartz(Vector2 center) {
+    DrawBasicQuartz(center, COLOR_TEXAS_HAZE);
+}
+
 void DrawOrthoclase(Vector2 center) {
+    DrawFeldspar(center, COLOR_DUSTY_SALMON, COLOR_BRILLIANT_JAUNE);
+}
+void DrawPlagiocase(Vector2 center){
+    DrawFeldspar(center, COLOR_TEXAS_HAZE, COLOR_BLUE_OCHRE);
+}
+
+void DrawFeldspar(Vector2 center, Color color_1, Color color_2) {
     float width = 10.0f;
     float height = 14.0f;
     float lean = 4.0f;
@@ -276,7 +358,7 @@ void DrawOrthoclase(Vector2 center) {
     }
 
     // 2. MATTE UNDER-GLOW
-    DrawCircleGradient(center.x, center.y, width * 1.2f, Fade(COLOR_DUSTY_SALMON, 0.2f), BLANK);
+    DrawCircleGradient(center.x, center.y, width * 1.2f, Fade(color_1, 0.2f), BLANK);
 
     // 3. DRAW SIDE FACETS
     for (int i = 0; i < sides; i++) {
@@ -285,7 +367,7 @@ void DrawOrthoclase(Vector2 center) {
         if (top[next].x < top[i].x) {
             float faceAngle = (i * 90.0f * DEG2RAD) + rotation;
             float light = (cosf(faceAngle) * 0.2f) + 0.1f;
-            Color faceColor = ColorLerp(COLOR_DUSTY_SALMON, COLOR_BRILLIANT_JAUNE, light);
+            Color faceColor = ColorLerp(color_1, color_2, light);
 
             // Using the pre-calculated points ensures hinges are connected
             DrawTriangle(bot[i], top[i], bot[next], faceColor);
@@ -296,17 +378,19 @@ void DrawOrthoclase(Vector2 center) {
                 float offset = j * 0.3f;
                 Vector2 start = Vector2Lerp(top[i], top[next], offset);
                 Vector2 end = Vector2Lerp(bot[i], bot[next], offset + 0.1f);
-                DrawLineV(start, end, Fade(COLOR_BRILLIANT_JAUNE, 0.15f));
+                DrawLineV(start, end, Fade(color_2, 0.15f));
             }
         }
     }
 
     // 4. DRAW TOP CAP (The missing face)
-    Color topColor = ColorLerp(COLOR_DUSTY_SALMON, COLOR_BRILLIANT_JAUNE, 0.4f);
+    Color topColor = ColorLerp(color_1, color_2, 0.4f);
     // Standard triangle fan for a 4-sided cap
     DrawTriangle(top[0], top[3], top[2], topColor);
     DrawTriangle(top[0], top[2], top[1], topColor);
 }
+
+
 
 void DrawProceduralGem(Vector2 center, float width, float height, Color baseColor) {
     int sides = 6; // Hexagonal
@@ -341,6 +425,10 @@ void DrawEmerald(Vector2 center) {
     DrawWindowGem(center, 7.0f, 11.0f, 6.0f,  COLOR_JADE);
 }
 
+void DrawBeryl(Vector2 center) {
+    DrawWindowGem(center, 7.0f, 11.0f, 6.0f,  COLOR_CERULEAN_BERYL);
+}
+
 void DrawTopaz(Vector2 center) {
     DrawWindowGem(center, 9.0f, 12.0f, 6.0f, COLOR_NAPLES_YELLOW);
 }
@@ -349,12 +437,7 @@ void DrawWindowGem(Vector2 center, float width, float height, float thickness, C
     float time = GetTime();
     float rotation = time * 2.0f;
     float tableScale = 0.65f;
-
-
-    // This goes at the top of the function
-    float lightAngle = rotation;
-
-    Vector2 frontTable[8], girdle[8], backTable[8];
+    Vector2 frontTable[8], girdle[8];
     float cosRot = cosf(rotation);
     float sinRot = sinf(rotation);
 
@@ -421,4 +504,132 @@ void DrawWindowGem(Vector2 center, float width, float height, float thickness, C
         float alpha = (edgeShade > 0.7f) ? 0.6f : 0.2f;
         DrawLineV(frontTable[i], frontTable[next], Fade(WHITE, alpha));
     }
+}
+
+// Biotite: The Dark, Mafic Mica
+void DrawBiotite(Vector2 center) {
+    // Deep black-brown with a resinous/sub-metallic luster
+    DrawMicaSheet(center, COLOR_SUNKEN_INK, (Color){ 80, 60, 45, 255 });
+}
+
+// Muscovite: The Clear, Rivers-region Mica
+void DrawMuscovite(Vector2 center) {
+    // Silvery-white/clear with a pearly luster
+    DrawMicaSheet(center, COLOR_TEXAS_HAZE, Fade(WHITE, 0.8f));
+}
+
+void DrawMicaSheet(Vector2 center, Color baseColor, Color highlightColor) {
+    float width = 9.0f;
+    float thickness = 2.5f; // Very thin to show cleavage planes
+    float time = GetTime();
+    float rotation = time * 1.5f;
+    int sides = 6; // Hexagonal "books"
+
+    Vector2 top[6], bot[6];
+
+    // 1. Calculate Hexagonal Layers
+    for (int i = 0; i < sides; i++) {
+        float angle = (i * 60.0f * DEG2RAD) + rotation;
+        float cosA = cosf(angle);
+        float sinA = sinf(angle) * 0.5f; // Isometric squash
+
+        bot[i] = (Vector2){ center.x + cosA * width, center.y + (thickness / 2.0f) + sinA * width };
+        top[i] = (Vector2){ bot[i].x, bot[i].y - thickness };
+    }
+
+    // 2. Draw Bottom Cap (Darkest)
+    DrawTriangleFan((Vector2[]){ center, bot[0], bot[1], bot[2], bot[3], bot[4], bot[5], bot[0] }, 8, ColorBrightness(baseColor, -0.4f));
+
+    // 3. Draw Side Edges (Showing "Layers")
+    for (int i = 0; i < sides; i++) {
+        int next = (i + 1) % sides;
+        if (top[next].x < top[i].x) {
+            // Alternate brightness to show the jagged "book" edges
+            Color edgeCol = ColorBrightness(baseColor, (i % 2 == 0) ? -0.1f : -0.2f);
+            DrawTriangle(bot[i], top[i], bot[next], edgeCol);
+            DrawTriangle(top[i], top[next], bot[next], edgeCol);
+
+            // CLEAVAGE LINES: Draw a faint horizontal line to simulate stacked sheets
+            DrawLineV((Vector2){top[i].x, top[i].y + thickness/2}, (Vector2){top[next].x, top[next].y + thickness/2}, Fade(highlightColor, 0.3f));
+        }
+    }
+
+    // 4. Draw Top Face (The "Window")
+    // For Mica, the top face is often very reflective
+    Color topCol = ColorBrightness(baseColor, 0.2f);
+    Vector2 topCenter = { center.x, center.y - (thickness / 2.0f) };
+
+    // Triangle fan for the top hexagonal face
+    for (int i = 0; i < sides; i++) {
+        int next = (i + 1) % sides;
+        DrawTriangle(topCenter, top[next], top[i], topCol);
+    }
+
+    // 5. THE PEARLY/METALLIC FLASH
+    // Mica has a distinct "sheen" when it catches the light
+    float sheen = sinf(time * 3.0f + center.x);
+    if (sheen > 0.7f) {
+        DrawTriangle(topCenter, top[0], top[1], Fade(highlightColor, 0.4f));
+        // Add a sharp "glint" on one edge
+        DrawLineV(top[1], top[2], Fade(WHITE, 0.6f));
+    }
+}
+
+void DrawOlivine(Vector2 center) {
+    // A bright, translucent olive green
+    Color olivineBase = (Color){ 154, 185, 45, 255 };
+    DrawRawChunk(center, olivineBase);
+}
+
+void DrawRawChunk(Vector2 center, Color baseColor) {
+    float size = 8.0f;
+    float verticalScale = 6.0f; // This gives it "height"
+    float time = GetTime();
+    float rotation = time * 1.5f;
+    int points = 5;
+    Vector2 verts[5];
+
+    // 1. Calculate the "Waist" Points (The middle ring)
+    for (int i = 0; i < points; i++) {
+        float angle = (i * (360.0f / points) * DEG2RAD) + rotation;
+        // Keep your jitter logic to make it look unpolished
+        float jitter = (i % 2 == 0) ? 1.2f : 0.7f;
+        verts[i] = (Vector2){
+            center.x + cosf(angle) * size * jitter,
+            center.y + sinf(angle) * (size / 2.0f) * jitter // Isometric squash
+        };
+    }
+
+    // 2. Define Top and Bottom Peaks
+    Vector2 topPeak = { center.x, center.y - verticalScale };
+    Vector2 botPeak = { center.x, center.y + verticalScale };
+
+    // 3. Draw Bottom Half (The part touching the sand)
+    for (int i = 0; i < points; i++) {
+        int next = (i + 1) % points;
+        Color fCol = ColorBrightness(baseColor, -0.3f); // Darker on bottom
+        DrawTriangle(botPeak, verts[i], verts[next], fCol);
+    }
+
+    // 4. Draw Top Half (The part facing the sun)
+    for (int i = 0; i < points; i++) {
+        int next = (i + 1) % points;
+
+        // Visibility check: only draw faces in front
+        if (verts[next].x < verts[i].x || (verts[i].y > center.y)) {
+            float faceAngle = (i * (360.0f / points) * DEG2RAD) + rotation;
+            float light = cosf(faceAngle) * 0.2f;
+            Color fCol = ColorBrightness(baseColor, light);
+
+            DrawTriangle(topPeak, verts[next], verts[i], fCol);
+
+            // 5. Glassy Specular Glints
+            if (sinf(time * 3.0f + i) > 0.85f) {
+                DrawLineV(topPeak, verts[i], Fade(WHITE, 0.6f));
+            }
+        }
+    }
+
+    // 6. Subsurface Scattering Glow
+    DrawCircleGradient(center.x, center.y, size * 1.2f, Fade(baseColor, 0.2f), BLANK);
 }

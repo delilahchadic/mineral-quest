@@ -30,6 +30,7 @@ typedef struct MapEntity {
   float altitude;
   uint32_t trait_flags;
   struct MapEntity* next_in_bucket;
+  float swordRotation;
 } MapEntity;
 
 typedef struct Tile{
@@ -46,7 +47,6 @@ typedef struct Map{
   int columns;
   char name[32];
   MapEntity* entities;
-  int entity_count;
   MapEntity* player;
   int lastTileHeight;
   bool is_ready;

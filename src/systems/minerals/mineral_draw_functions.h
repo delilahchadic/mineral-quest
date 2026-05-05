@@ -14,4 +14,17 @@ void DrawOrthoclase(Vector2 center);
 void DrawEmerald(Vector2 center);
 void DrawTopaz(Vector2 center);
 void DrawWindowGem(Vector2 center, float width, float length, float height, Color baseColor);
+void DrawAmethyst(Vector2 center);
+void DrawQuartz(Vector2 center);
+void DrawMagnetite(Vector2 center);
+void DrawPlagiocase(Vector2 center);
+void DrawFeldspar(Vector2 center, Color color_1, Color color_2);
+void DrawBiotite(Vector2 center);
+void DrawMuscovite(Vector2 center);
+void DrawMicaSheet(Vector2 center, Color baseColor, Color highlightColor);
+void DrawOlivine(Vector2 center);
+void DrawRawChunk(Vector2 center, Color baseColor);
+void DrawBeryl(Vector2 center);
+void DrawHalite(Vector2 center);
+void DrawIsometricCube(Vector2 center, float width, float height, Color baseColor, float rotation, float transparency, bool isMetallic);
 #endif

@@ -1,34 +1,66 @@
 #include "engine/play_session.h"
 #include "core/camera_tools.h"
 #include "defs/types_engine.h"
+#include "defs/types_minerals.h"
+#include "defs/types_systems.h"
 #include "environment/map.h"
 #include "raylib.h"
+#include "registry/mineral_register.h"
 
 void InitPlaySession(PlaySession* session){
-  session->state = ADVENTURE;
-  session->player = Get_Default_Player();
-  session->menu = (Menu){0};
-  LoadMap("rivers",&session->map);
-  InitMap(&session->map);
-  InitScriptManager(&session->manager,100);
-  CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
-  int tx = (int)(session->map.player->position.x / TILE_SIZE);
-  int ty = (int)(session->map.player->position.y / TILE_SIZE);
-
-      // Set the altitude to the floor height immediately
+    session->state = ADVENTURE;
+    session->player = Get_Default_Player();
+    session->menu = (Menu){0};
+    LoadMap("bx",&session->map);
+    InitMap(&session->map);
+    InitScriptManager(&session->manager,100);
+    CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
+    int tx = (int)(session->map.player->position.x / TILE_SIZE);
+    int ty = (int)(session->map.player->position.y / TILE_SIZE);
+    // Set the altitude to the floor height immediately
     float startFloor = session->map.grid[ty][tx].height * 8.0f;
     session->map.player->altitude = startFloor;
     session->mineral_sound = LoadSound("data/audio/mineral.wav");
+SetSoundVolume(session->mineral_sound, 0.33);
+}
 
-        // Optional: set a default volume if it's too loud
-        SetSoundVolume(session->mineral_sound, 0.33);
+void UpdateMineralInventory(PlaySession* session, Input* input){
+  if(input->buttons_pressed & MINERAL_PRESSED){
+    session->state = ADVENTURE;
+  }
+}
+
+
+void DrawMineralInventory(Player* player){
+  // 1. Background - The Aged Paper
+  ClearBackground(COLOR_PULP_PAPER);
+
+  // Dynamic horizontal line based on screen width
+  int margin = 50;
+  int uiWidth = SCREEN_WIDTH - (margin * 2);
+
+  // 2. Title - The "Ink" look
+  DrawText("GEOLOGY LOG", margin, 40, 30, COLOR_SUNKEN_INK);
+  DrawRectangle(50, 80, uiWidth, 2, COLOR_SUNKEN_INK); // A simple line
+
+  for(int i = 0;i< MINERAL_COUNT;i++){
+      Color textColor = GetMineralColor(i);
+      char count[5];
+      sprintf(count, "%d", player->mineral_inventory[i]);
+      DrawMineral(i, (Vector2){50, 120 + (i * 30) + 12});
+      DrawText(GetMineralLabel(i), 100, 120 + (i * 30), 20, textColor);
+      DrawText(count,250, 120 + (i * 30), 20, textColor);
+  }
 }
 
 void UpdatePlaySession(PlaySession* session){
   Input input = CaptureInput();
   switch(session->state){
     case ADVENTURE:
-        if(input.buttons_pressed & INVENTORY_PRESSED){
+    if(input.buttons_pressed & MINERAL_PRESSED){
+
+      session->state = MINERAL_INVENTORY;
+    }else if(input.buttons_pressed & INVENTORY_PRESSED){
           session->menu.type = ENTITY_ITEM;
           FillMenu(&session->menu, &session->player.inventory.itemIds, session->player.inventory.count);
           session->state = INVENTORY;
@@ -103,6 +135,9 @@ void UpdatePlaySession(PlaySession* session){
     case INVENTORY:
       UpdateInventory(session, &input);
       break;
+    case MINERAL_INVENTORY:
+        UpdateMineralInventory(session, &input);
+        break;
     case TALKING:
       UpdateScriptManager(&session->manager, &input);
       session->state = session->manager.active ? TALKING : ADVENTURE;
@@ -118,7 +153,9 @@ void UpdatePlaySession(PlaySession* session){
 void DrawPlaySession(PlaySession* session){
   if(session->state == INVENTORY){
     DrawInventory(&session->menu);
-  }else{
+  }else if(session->state==MINERAL_INVENTORY){
+    DrawMineralInventory(&session->player);
+  }else {
     Draw_Map(&session->map,&session->camera);
     if(session->state == TALKING){
       DrawMessage(&session->manager);
@@ -144,6 +181,8 @@ void AdjustCamera(PlaySession* session, bool dialog){
     session->camera.zoom += (3.0f - session->camera.zoom) * 0.05f;
   }
 }
+
+
 
 void DrawInventory(Menu* menu) {
   DrawMenu(menu);

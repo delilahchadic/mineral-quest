@@ -1,6 +1,7 @@
 #include "registry/register.h"
 #include "defs/types_engine.h"
 #include "defs/types_entities.h"
+#include "defs/types_minerals.h"
 #include "engine/palette.h"
 
 ItemDefinition ITEM_REGISTRY[100] = {0};
@@ -130,6 +131,7 @@ int GetEntityTypeCount(EntityType type){
         case ENTITY_PLANT: return plant_count;
         case ENTITY_ITEM: return item_count;
         case ENTITY_CHARACTER: return charcter_count;
+        case ENTITY_MINERAL: return MINERAL_COUNT;
         case ENTITY_PLAYER: return 1;
         default: return -1;
     }

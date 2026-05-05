@@ -10,7 +10,7 @@
 #include "raylib.h"
 
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,MENU, EDIT_SCREEN } GameScreen;
-typedef enum PlayState { ADVENTURE = 0, INVENTORY, TALKING, ITEM } PlayState;
+typedef enum PlayState { ADVENTURE = 0, INVENTORY, TALKING, ITEM, MINERAL_INVENTORY } PlayState;
 typedef enum EditState {EDITOR_MENU = 0, EDITOR, EDITOR_PROMPT, LOAD_PROMPT}EditState;
 
 typedef struct PlaySession{

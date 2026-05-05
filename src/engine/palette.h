@@ -34,7 +34,7 @@
 #define COLOR_CERULEAN_TEAL     (Color){ 54, 117, 136, 255 }
 #define COLOR_CERULEAN_COBALT   (Color){ 0, 71, 171, 255 }
 #define COLOR_CERULEAN_WISTFUL  (Color){ 100, 149, 237, 255 }
-#define COLOR_CERULEAN_BERYL    (Color){ 119, 158, 145, 255 }
+#define COLOR_CERULEAN_BERYL    (Color){ 0, 210, 225, 255 }
 
 // --- THE WARM SPECTRUM (Artist Pigments) ---
 #define COLOR_MAGENTA        (Color){ 202, 31, 123, 255 }
