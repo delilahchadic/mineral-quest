@@ -86,7 +86,10 @@ bool UpdateEditSession(EditSession* session, Input* input){
 }
 
 void CloseEditor(EditSession* session){
-    Close_Map(&session->map);
-    CloseSelection(&session->buffer);
-    free(session);
+    if(session != NULL){
+        Close_Map(&session->map);
+        CloseSelection(&session->buffer);
+        free(session);
+        session = NULL;
+    }
 }
