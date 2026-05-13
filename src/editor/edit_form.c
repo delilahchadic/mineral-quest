@@ -4,6 +4,7 @@
 #include "defs/types_engine.h"
 #include "environment/map.h"
 #include "ui/ui_helpers.h"
+#include "ui/dialog_box.h"
 
 bool UpdateEditForm(EditorForm* form, Map* map, SelectionBuffer* buffer, Input* input){
     switch(form->active_field){
