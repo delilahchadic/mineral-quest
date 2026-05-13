@@ -1,11 +1,23 @@
 #include "engine/gamestate.h"
-#include "defs/types_engine.h"
+
+#include "raylib.h"
+#include "raymath.h"
+#include "defs/constants.h"
+#include "editor/edit_session.h"
 #include "editor/edit_ui.h"
+#include "engine/palette.h"
+#include "environment/map.h"
+#include "play/play_session.h"
+#include "play/play_ui.h"
+#include "registry/register.h"
 #include "registry/command_interface.h"
+#include "systems/input.h"
+#include "ui/menu.h"
 
 void InitGame(Gamestate* gamestate){
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0;
+  gamestate->edit_session = NULL;
   FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
 }
 
