@@ -3,6 +3,7 @@
 #include "environment/map.h"
 #include "core/selection_buffer.h"
 #include "raylib.h"
+#include <math.h>
 
 void ProcessTextInput(char* buffer, int* count, int maxLen, bool numbersOnly) {
     int key = GetCharPressed();
