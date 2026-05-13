@@ -1,6 +1,9 @@
 #include "systems/physics.h"
-#include "systems/input.h"
 
+#include "environment/map.h"
+#include "registry/register.h"
+#include "systems/input.h"
+#include "raymath.h"
 bool UpdatePhysics(Map* map,const Input* input){
   UpdateVelocity(map, input);
   ApplyGravity(map);
