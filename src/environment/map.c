@@ -1,4 +1,18 @@
 #include "map.h"
+
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include "engine/palette.h"
+#include "systems/player.h"
+#include "systems/script_manager.h"
+#include "systems/input.h"
+#include "registry/register.h"
+#include "raymath.h"
 #include "defs/types_entities.h"
 #include "defs/types_systems.h"
 #include "raylib.h"
@@ -44,6 +58,10 @@ void Init_Player(Map* map){
   Add_Entity(map,player);
   map->player = player;
   player->jumpoffset = 0.0f;
+
+  player->combat.isAttacking = false;
+  player->combat.attackTimer = 0;
+  player->combat.attackDuration = 0.25f;
 }
 
 void Close_Map(Map* map){
@@ -366,11 +384,23 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
                 float idleSwing = sinf(GetTime() * 2.0f) * 0.1f;
 
                 // -0.8f points it up and away; adding idleSwing makes it move!
-                DrawSimpleSword(handPos, -0.8f + idleSwing);
+                float angle = map->player->combat.isAttacking
+                    ? map->player->combat.attackAngle
+                    : (-0.8f + idleSwing);
+
+                DrawSimpleSword(handPos, angle);
             }
     }
 
 
+}
+
+void ResetAllHitFlags(Map* map) {
+    MapEntity* e = map->entities;
+    while (e != NULL) {
+        e->hitThisSwing = false;
+        e = e->next;
+    }
 }
 
 void DrawWaterEffects(Map* map, int x, int y) {

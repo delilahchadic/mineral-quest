@@ -1,6 +1,13 @@
+#include "environment/map_loader.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "defs/types_env.h"
 #include "environment/map.h"
-#include <stdbool.h>
+#include "registry/register.h"
 
 static void LoadMapEntityFile(const char* filename, Map* map){
   map->entities = NULL;

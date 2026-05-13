@@ -8,6 +8,7 @@
 #include "registry/register.h"
 #include "systems/physics.h"
 #include "ui/ui_helpers.h"
+#include "environment/map.h"
 
 void DrawEnityTypeLabel(EntityType type, int start_x, int start_y){
     switch (type) {
@@ -169,7 +170,7 @@ void DrawEnitityDrawer(EntityDrawer* drawer) {
         }
 
     }
-    Rectangle panel = (Rectangle){s,(SCREEN_HEIGHT *2 /3) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
+    Rectangle panel = (Rectangle){s,(SCREEN_HEIGHT * 0.66f) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
 
     DrawRectangleRec(panel, COLOR_PULP_PAPER);
     DrawRectangleLinesEx(panel, 1.0f, COLOR_SUNKEN_INK);

@@ -1,27 +1,13 @@
 #ifndef MAP_H
 #define MAP_H
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "raylib.h"
-#include "raymath.h"
 #include "defs/types_env.h"
-#include "engine/palette.h"
-#include "systems/player.h"
-#include "systems/script_manager.h"
-#include "systems/input.h"
-#include "registry/register.h"
 #include "defs/constants.h"
-#define TILE_SIZE 32
 
+#define TILE_SIZE 32
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
-
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
@@ -30,17 +16,13 @@ void InitNewMap(Map* map,char* name,int rows, int columns);
 void InitMap(Map* map);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void Draw_Map(Map* map, Camera2D* camera);
-
-
 void DrawWaterEffects(Map* map,int x, int y);
 void DrawSimpleSparkle(Vector2 pos, Color color, float size);
-
+void ResetAllHitFlags(Map* map);
 void Close_Map(Map* map);
 void Add_Entity(Map* map, MapEntity* entity);
 void Remove_Entity(Map* map, MapEntity* entity);
 void Init_Player(Map* map);
-
-// void AdjustCamera(Map* map,bool dialog);
 void Draw_Tile(Map* map, int x, int y);
 Vector2 GetWorldToIso(Vector2 worldPos);
 Vector2 GetIsoWorldToGrid(Vector2 worldPos);

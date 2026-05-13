@@ -12,11 +12,5 @@
 
 void InitPlaySession(PlaySession* session);
 void UpdatePlaySession(PlaySession* session);
-void DrawPlaySession(PlaySession* session);
-void DrawInventory(Menu* menu);
-void UpdateInventory(PlaySession* session, Input* input);
-void InitDialog(Map* map, ScriptManager* manager);
-int PollChest(Player* player, Map* map);
-void AdjustCamera(PlaySession* session, bool dialog);
-bool CheckMineralPickup(Vector2 playerPos, Vector2 mineralPos, float radius);
+
 #endif

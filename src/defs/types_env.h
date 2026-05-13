@@ -18,6 +18,13 @@ typedef enum State{
   JUMPING_STATE
 } State;
 
+typedef struct {
+    bool isAttacking;
+    float attackTimer;
+    float attackDuration;
+    float attackAngle;
+} CombatState;
+
 typedef struct MapEntity {
   EntityType type;      // Is this a person or a flower?
   Vector2 position; // Pointer to the actual Character, Item, or Plant struct
@@ -30,7 +37,8 @@ typedef struct MapEntity {
   float altitude;
   uint32_t trait_flags;
   struct MapEntity* next_in_bucket;
-  float swordRotation;
+  CombatState combat;
+  bool hitThisSwing;
 } MapEntity;
 
 typedef struct Tile{
