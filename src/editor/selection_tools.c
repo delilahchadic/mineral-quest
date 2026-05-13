@@ -1,4 +1,7 @@
 #include "editor/selection_tools.h"
+
+#include "raymath.h"
+#include "core/selection_buffer.h"
 #include "environment/map.h"
 
 void UpdateSelectionBuffer(EditSession* session,Input *input){
