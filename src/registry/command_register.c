@@ -1,7 +1,7 @@
 #include "registry/command_register.h"
 
 #include "defs/types_engine.h"
-#include "engine/play_session.h"
+#include "play/play_session.h"
 #include "editor/edit_session.h"
 
 Command COMMAND_REGISTRY[100] = {0};
