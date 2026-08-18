@@ -1,6 +1,7 @@
 #include "play/play_session.h"
 
 #include <stdio.h>
+#include "defs/types_engine.h"
 #include "raylib.h"
 #include "core/camera_tools.h"
 #include "defs/types_entities.h"
@@ -18,13 +19,14 @@
 #include "systems/input.h"
 #include "systems/player.h"
 #include "systems/physics.h"
+#include "ui/dialog_box.h"
 #include "ui/menu.h"
 
 void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
     session->player = Get_Default_Player();
     session->menu = (Menu){0};
-    LoadMap("rivers",&session->map);
+    LoadMap("chill treasure room",&session->map);
     InitMap(&session->map);
     InitScriptManager(&session->manager,100);
 
@@ -39,6 +41,10 @@ void InitPlaySession(PlaySession* session){
     SetSoundVolume(session->mineral_sound, 0.33);
 }
 
+void ChangeMap(PlaySession* session, char* map_name){
+    LoadMap(map_name,&session->map);
+    InitMap(&session->map);
+}
 void UpdateTalking(PlaySession* session, Input* input, float dt){
     UpdateScriptManager(&session->manager, input);
     session->state = session->manager.active ? TALKING : ADVENTURE;
@@ -50,6 +56,9 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         session->state = MINERAL_INVENTORY;
         return;
     }
+    if(input->buttons_pressed & SHIFT_PRESSED){
+        ChangeMap(session, "falls");
+    }
     if(input->buttons_pressed & INVENTORY_PRESSED){
         session->menu.type = ENTITY_ITEM;
         FillMenu(&session->menu, &session->player.inventory.itemIds, session->player.inventory.count);
@@ -58,21 +67,50 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
     }
     if(input->buttons_pressed & INTERACT_PRESSED){
         int item = PollChest(&session->player,&session->map);
-        if(item > 0){
+        if(item >= 0){
             session->state = ITEM;
             sprintf(session->pendingItemName,"You got a %s !", GetName(ENTITY_ITEM, item));
         }else{
             InitDialog(&session->map, &session->manager);
             if(session->manager.active) session->state = TALKING;
             else{
-                session->map.player->combat.isAttacking = true;
-                session->map.player->combat.attackTimer = 0;
-                ResetAllHitFlags(&session->map);
+                // COMBO LOGIC
+                if (!session->map.player->combat.isAttacking) {
+                    if (session->map.player->combat.combo_state == COMBO_NONE || session->map.player->combat.combo_timer <= 0) {
+                        session->map.player->combat.combo_state = COMBO_1;
+                        session->map.player->combat.attackDuration = 0.25f;
+                    } else if (session->map.player->combat.combo_state == COMBO_1) {
+                        session->map.player->combat.combo_state = COMBO_2;
+                        session->map.player->combat.attackDuration = 0.25f;
+                    } else if (session->map.player->combat.combo_state == COMBO_2) {
+                        session->map.player->combat.combo_state = COMBO_3;
+                        session->map.player->combat.attackDuration = 0.45f;
+                    } else {
+                        session->map.player->combat.combo_state = COMBO_1;
+                        session->map.player->combat.attackDuration = 0.25f;
+                    }
+
+                    session->map.player->combat.isAttacking = true;
+                    session->map.player->combat.attackTimer = 0;
+                    session->map.player->combat.combo_timer = 0.5f; // Window to hit next
+                    ResetAllHitFlags(&session->map);
+                }
             }
         }
     }
 
     UpdatePlayerCombatAnimation(session->map.player, dt);
+
+    // Update facing direction based on movement
+    if (input->buttons_pressed & (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
+        // Points Right (W/D) or Left (A/S) with an "Upward" bias (braced)
+        if (input->dir.x > 0 || input->dir.y < 0) {
+            session->map.player->combat.facing_direction = -1.2f; // Braced Up-Right
+        } else if (input->dir.x < 0 || input->dir.y > 0) {
+            session->map.player->combat.facing_direction = -1.94f; // Braced Up-Left
+        }
+    }
+
     UpdatePhysics(&session->map, input);
     UpdateCombat(&session->map);
     CheckForMineralCollision(session);

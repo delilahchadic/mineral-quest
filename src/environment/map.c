@@ -23,6 +23,7 @@ typedef enum ElementType{
     ELEMENT_FIRE,
     ELEMENT_WATER
 }ElementType;
+
 void InitMap(Map* map){
   Init_Player(map);
   map->lastTileHeight = -1;
@@ -380,15 +381,7 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
                 // Based on image_0f13da.png, his 'hand' area is about 32 pixels down and 8 pixels in.
                 Vector2 handPos = { drawPos.x + 12, drawPos.y + 48 };
 
-                // For a 'Combat Idle', we can make it breathe slightly
-                float idleSwing = sinf(GetTime() * 2.0f) * 0.1f;
-
-                // -0.8f points it up and away; adding idleSwing makes it move!
-                float angle = map->player->combat.isAttacking
-                    ? map->player->combat.attackAngle
-                    : (-0.8f + idleSwing);
-
-                DrawSimpleSword(handPos, angle);
+                DrawSimpleSword(handPos, map->player->combat.attackAngle);
             }
     }
 
