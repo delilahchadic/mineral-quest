@@ -51,11 +51,12 @@ int PollChest(Player* player,Map* map){
   // get characterid
   // set dialg
   MapEntity* p = PollTrait(map, TRAIT_GATHER, 50.0f);
-  if(p && p->type == ENTITY_ITEM){
 
-    GiveItem(player, p->id);
+  if(p && p->type == ENTITY_ITEM){
+    int item_id = p->id;
+    GiveItem(player, item_id);
     Remove_Entity(map, p);
-    return p->id;
+    return item_id;
   }
   return -1;
 }
