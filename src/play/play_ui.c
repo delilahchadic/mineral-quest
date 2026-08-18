@@ -60,5 +60,4 @@ void DrawPlaySession(PlaySession* session){
       DrawDialog("you found a christmas present", session->pendingItemName);
     }
   }
-
 }
