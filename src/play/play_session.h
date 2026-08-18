@@ -1,13 +1,6 @@
 #ifndef PlAY_SESSION_H
 #define PlAY_SESSION_H
 
-#include <stdio.h>
-#include "systems/player.h"
-#include "environment/map.h"
-#include "environment/map_loader.h"
-#include "ui/menu.h"
-#include "systems/input.h"
-#include "systems/physics.h"
 #include "defs/types_engine.h"
 
 void InitPlaySession(PlaySession* session);
