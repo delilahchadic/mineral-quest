@@ -1,4 +1,3 @@
-
 #ifndef TYPES_ENV
 #define TYPES_ENV
 #include <stdint.h>
@@ -18,11 +17,21 @@ typedef enum State{
   JUMPING_STATE
 } State;
 
+typedef enum ComboState{
+    COMBO_NONE,
+    COMBO_1,
+    COMBO_2,
+    COMBO_3
+} ComboState;
+
 typedef struct {
     bool isAttacking;
     float attackTimer;
     float attackDuration;
     float attackAngle;
+    ComboState combo_state;
+    float combo_timer;
+    float facing_direction; // Base angle (e.g. 0 for right, PI for left)
 } CombatState;
 
 typedef struct MapEntity {
