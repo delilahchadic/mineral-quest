@@ -55,8 +55,10 @@ void DrawPlaySession(PlaySession* session){
     Draw_Map(&session->map,&session->camera);
     if(session->state == TALKING){
       DrawMessage(&session->manager);
-    }else if(session->state == ITEM){
+    }
+    if(session->state == ITEM){
       DrawDialog("you found a christmas present", session->pendingItemName);
     }
   }
+
 }
