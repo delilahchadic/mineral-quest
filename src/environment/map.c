@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include "defs/types_env.h"
 #include "engine/palette.h"
 #include "systems/player.h"
 #include "systems/script_manager.h"
@@ -488,4 +489,73 @@ MapEntity* PollTrait(Map* map, TraitFlags trait, float distance){
     tmp = tmp->next;
   }
   return NULL;
+}
+
+bool PickNewWanderTarget(Map* map, MapEntity* entity) {
+    int cur_tx = (int)(entity->position.x / TILE_SIZE);
+    int cur_ty = (int)(entity->position.y / TILE_SIZE);
+
+    if (cur_tx < 0 || cur_tx >= map->columns || cur_ty < 0 || cur_ty >= map->rows) return false;
+    int cur_h = map->grid[cur_ty][cur_tx].height;
+
+    for (int i = 0; i < 10; i++) {
+        // Generate candidate around current position
+        float cx = entity->position.x + ((rand() % 128) - 64);
+        float cy = entity->position.y + ((rand() % 128) - 64);
+
+        // Clamp to map boundaries so it never goes into negative space or off-screen
+        if (cx < 0.0f) cx = 0.0f;
+        if (cx > (float)map->pixel_width) cx = (float)map->pixel_width;
+        if (cy < 0.0f) cy = 0.0f;
+        if (cy > (float)map->pixel_height) cy = (float)map->pixel_height;
+
+        int t_tx = (int)(cx / TILE_SIZE);
+        int t_ty = (int)(cy / TILE_SIZE);
+
+        if (t_tx >= map->columns) t_tx = map->columns - 1;
+        if (t_ty >= map->rows) t_ty = map->rows - 1;
+
+        if (t_tx >= 0 && t_tx < map->columns && t_ty >= 0 && t_ty < map->rows) {
+            if (abs(map->grid[t_ty][t_tx].height - cur_h) <= 2) {
+                entity->target_position = (Vector2){cx, cy};
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void UpdateEntityMovement(Map* map, float dt) {
+    MapEntity* entity = map->entities;
+    while (entity) {
+        if (entity->behavior == WANDER) {
+            Vector2 diff = Vector2Subtract(entity->target_position, entity->position);
+            float distance = Vector2Length(diff);
+
+            if (distance > 1.0f) {
+                entity->position = Vector2Add(entity->position, Vector2Scale(Vector2Normalize(diff), entity->speed * dt));
+
+                // Hard clamp position to stay within map pixel boundaries
+                if (entity->position.x < 0.0f) entity->position.x = 0.0f;
+                if (entity->position.x > (float)map->pixel_width) entity->position.x = (float)map->pixel_width;
+                if (entity->position.y < 0.0f) entity->position.y = 0.0f;
+                if (entity->position.y > (float)map->pixel_height) entity->position.y = (float)map->pixel_height;
+
+                int tx = (int)(entity->position.x / TILE_SIZE);
+                int ty = (int)(entity->position.y / TILE_SIZE);
+
+                // Prevent array out-of-bounds if exactly on the right/bottom edge
+                if (tx >= map->columns) tx = map->columns - 1;
+                if (ty >= map->rows) ty = map->rows - 1;
+
+                if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
+                    float targetAlt = map->grid[ty][tx].height * 8.0f;
+                    entity->altitude += (targetAlt - entity->altitude) * 10.0f * dt;
+                }
+            } else if (!PickNewWanderTarget(map, entity)) {
+                entity->target_position = entity->position;
+            }
+        }
+        entity = entity->next;
+    }
 }

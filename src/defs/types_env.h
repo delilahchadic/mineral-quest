@@ -17,6 +17,11 @@ typedef enum State{
   JUMPING_STATE
 } State;
 
+typedef enum Behavior{
+    IMMOBILE,
+    WANDER
+} Behavior;
+
 typedef enum ComboState{
     COMBO_NONE,
     COMBO_1,
@@ -37,10 +42,13 @@ typedef struct {
 typedef struct MapEntity {
   EntityType type;      // Is this a person or a flower?
   Vector2 position; // Pointer to the actual Character, Item, or Plant struct
+  Vector2 target_position;
+  Behavior behavior;
   struct MapEntity* next;
   int id;
   State state;
   Vector2 velocity;
+  float speed;
   float jumpoffset;
   float vertical_velocity;
   float altitude;

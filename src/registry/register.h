@@ -30,8 +30,5 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id);
 
 int GetEntityTypeCount(EntityType type);
 void SetEntityTypeCount(EntityType type, int count);
-// void SetItemCount(int count);
-// void SetPlantCount(int count);
-// void SetCharacterCount(int count);
 int GetCharacterCount();
 #endif

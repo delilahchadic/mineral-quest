@@ -125,6 +125,7 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
     UpdateCombat(&session->map);
     CheckForMineralCollision(session);
     AdjustCamera(session, false,dt);
+    UpdateEntityMovement(&session->map, dt);
     MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
     if(entity && entity->type ==  ENTITY_PORTAL){
         ChangeMap(session, GetName(ENTITY_PORTAL, entity->id));

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "defs/types_entities.h"
 #include "defs/types_env.h"
 #include "environment/map.h"
 #include "registry/register.h"
@@ -36,7 +36,11 @@ static void LoadMapEntityFile(const char* filename, Map* map){
       m->next = NULL;
       m->id = atoi(idToken);
       m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
-
+      if(m->type== ENTITY_CHARACTER){
+          m->behavior = WANDER;
+          m->speed = 30.0f;
+          m->target_position = m->position;
+      }
       int tx = (int)(m->position.x / TILE_SIZE);
       int ty = (int)(m->position.y / TILE_SIZE);
 

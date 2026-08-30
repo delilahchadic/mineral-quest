@@ -15,6 +15,7 @@
 void InitNewMap(Map* map,char* name,int rows, int columns);
 void InitMap(Map* map);
 void Draw_MapEntity(MapEntity* entity, Map* map);
+void UpdateEntityMovement(Map* map, float dt);
 void Draw_Map(Map* map, Camera2D* camera);
 void DrawWaterEffects(Map* map,int x, int y);
 void DrawSimpleSparkle(Vector2 pos, Color color, float size);
