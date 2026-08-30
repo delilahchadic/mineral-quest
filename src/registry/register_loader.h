@@ -11,7 +11,7 @@ void LoadDialogRegistry();
 int LoadCharacterRegistry();
 int LoadPlantRegistry();
 void LoadSpriteOverrideRegistry();
-
+int LoadPortalRegistry();
 void LoadCommandRegistry();
 
 void CloseRegistries();

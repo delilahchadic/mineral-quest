@@ -31,6 +31,10 @@ Input CaptureInput(){
     i.buttons_pressed |= MINERAL_PRESSED;
   }
 
+  if(IsKeyPressed(KEY_L)){
+    i.buttons_pressed |= LEVEL_PRESSED;
+  }
+
   if(IsKeyDown(KEY_LEFT_SHIFT)){
     i.buttons_pressed |= SHIFT_PRESSED;
   }

@@ -7,6 +7,8 @@
 
 void DrawInventory(Menu* menu);
 void DrawMineralInventory(Player* player);
+void DrawLevelInventory();
 void UpdateInventory(PlaySession* session, Input* input);
 void UpdateMineralInventory(PlaySession* session, Input* input);
+void UpdateLevelInventory(PlaySession* session, Input* input);
 #endif

@@ -9,11 +9,13 @@ Message DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
 Texture2D SPRITE_OVERRIDE[10] = {0};
 Plant PLANT_REGISTRY[100] = {0};
+Portal PORTAL_REGISTRY[100] = {0};
 Player GLOBAL_PLAYER;
 Player* PLAYER;
 static int item_count = 0;
 static int plant_count = 0;
 static int charcter_count = 0;
+static int level_count = 0;
 
 TileDefinition TILE_REGISTRY[28] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
@@ -47,18 +49,21 @@ TileDefinition TILE_REGISTRY[28] = {
 };
 
 char* GetName(EntityType type, int id){
-  switch (type)
-  {
-  case ENTITY_PLANT:
-    return PLANT_REGISTRY[id].species_name;
-    break;
-  case ENTITY_CHARACTER:
-    return CHARACTER_REGISTRY[id].name;
-  case ENTITY_ITEM:
-    return ITEM_REGISTRY[id].name;
-  default:
-    return NULL;
-  }
+    switch (type){
+        case ENTITY_PLANT:
+            return PLANT_REGISTRY[id].species_name;
+            break;
+        case ENTITY_CHARACTER:
+            return CHARACTER_REGISTRY[id].name;
+            break;
+        case ENTITY_ITEM:
+            return ITEM_REGISTRY[id].name;
+            break;
+        case ENTITY_PORTAL:
+            return PORTAL_REGISTRY[id].level_name;
+        default:
+        return NULL;
+    }
 }
 
 char* GetDescription(EntityType type, int id){
@@ -109,28 +114,35 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id){
       return CHARACTER_REGISTRY[id].default_trait_flags;
     case ENTITY_ITEM:
       return TRAIT_GATHER;
+    case ENTITY_PORTAL:
+        return TRAIT_TELEPORT;
     default:
       return TRAIT_NONE;
   }
 }
 
-void SetItemCount(int count){
-    item_count = count;
-}
+// void SetItemCount(int count){
+//     item_count = count;
+// }
 
-void SetPlantCount(int count){
-    item_count = count;
-}
+// void SetPlantCount(int count){
+//     plant_count = count;
+// }
 
-void SetCharacterCount(int count){
-    item_count = count;
-}
+// void SetCharacterCount(int count){
+//     charcter_count = count;
+// }
+
+// void SetLevelCount(int count){
+//     level_count = count;
+// }
 
 int GetEntityTypeCount(EntityType type){
     switch (type) {
         case ENTITY_PLANT: return plant_count;
         case ENTITY_ITEM: return item_count;
         case ENTITY_CHARACTER: return charcter_count;
+        case ENTITY_PORTAL: return level_count;
         case ENTITY_MINERAL: return MINERAL_COUNT;
         case ENTITY_PLAYER: return 1;
         default: return -1;
@@ -147,6 +159,9 @@ void SetEntityTypeCount(EntityType type, int count){
             return;
         case ENTITY_CHARACTER:
             charcter_count = count;
+            return;
+        case ENTITY_PORTAL:
+            level_count = count;
             return;
         default: return;
     }

@@ -51,6 +51,8 @@ void DrawPlaySession(PlaySession* session){
     DrawInventory(&session->menu);
   }else if(session->state==MINERAL_INVENTORY){
     DrawMineralInventory(&session->player);
+  }else if(session->state == LEVEL_INVENTORY){
+    DrawLevelInventory();
   }else {
     Draw_Map(&session->map,&session->camera);
     if(session->state == TALKING){

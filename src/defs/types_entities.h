@@ -35,6 +35,11 @@ typedef struct Plant{
   uint32_t default_trait_flags;
 } Plant;
 
+typedef struct Portal{
+    int id;
+    char level_name[32];
+} Portal;
+
 typedef enum {
     TILE_WATER,TILE_GRASS ,TILE_YELLOW_OCHRE, TILE_DEEP_MOSS,TILE_STONE,
     TILE_ROAD, TILE_TERRA_PALE,TILE_SILT,TILE_MOON_STONE,TILE_PURPLE_OCHRE,
@@ -57,13 +62,15 @@ typedef enum EntityType{
     ENTITY_PLANT,
     ENTITY_DECOR,
     ENTITY_MINERAL,
+    ENTITY_PORTAL,
     ENTITY_PLAYER
 } EntityType;
 
 typedef enum TraitFlags{
   TRAIT_NONE = 0,
   TRAIT_TALK = 1 << 0,
-  TRAIT_GATHER = 1 << 1
+  TRAIT_GATHER = 1 << 1,
+  TRAIT_TELEPORT = 1 <<2, // used to designate that a enity can change the map
 } TraitFlags;
 
 typedef struct Character{

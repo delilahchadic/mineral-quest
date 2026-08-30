@@ -29,6 +29,7 @@ typedef enum ButtonPressed{
   SHIFT_PRESSED = 1 << 7,
   CONTROL_PRESSED = 1 <<8,
   MINERAL_PRESSED = 1 << 9,
+  LEVEL_PRESSED = 1 << 10,
   MOVEMENT_PRESSED = 1 <<15,
   LEFT_MOUSE_CLICKED = 1 <<16,
   LEFT_MOUSE_DOWN = 1 <<17,

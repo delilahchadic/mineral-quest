@@ -14,7 +14,7 @@ extern Plant PLANT_REGISTRY[100];
 extern Character CHARACTER_REGISTRY[200];
 extern ItemDefinition ITEM_REGISTRY[100];
 extern Message DIALOG_REGISTRY[500];
-
+extern Portal PORTAL_REGISTRY[100];
 extern Player GLOBAL_PLAYER;
 extern Player* PLAYER;
 extern TileDefinition TILE_REGISTRY[28];
@@ -30,8 +30,8 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id);
 
 int GetEntityTypeCount(EntityType type);
 void SetEntityTypeCount(EntityType type, int count);
-void SetItemCount(int count);
-void SetPlantCount(int count);
-void SetCharacterCount(int count);
+// void SetItemCount(int count);
+// void SetPlantCount(int count);
+// void SetCharacterCount(int count);
 int GetCharacterCount();
 #endif

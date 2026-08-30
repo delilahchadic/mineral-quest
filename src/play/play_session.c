@@ -45,6 +45,7 @@ void ChangeMap(PlaySession* session, char* map_name){
     LoadMap(map_name,&session->map);
     InitMap(&session->map);
 }
+
 void UpdateTalking(PlaySession* session, Input* input, float dt){
     UpdateScriptManager(&session->manager, input);
     session->state = session->manager.active ? TALKING : ADVENTURE;
@@ -52,6 +53,14 @@ void UpdateTalking(PlaySession* session, Input* input, float dt){
 }
 
 void UpdateAdventure(PlaySession* session, Input* input, float dt){
+
+    // int worrld
+
+    if(input->buttons_pressed & LEVEL_PRESSED){
+        session->state = LEVEL_INVENTORY;
+        return;
+    }
+
     if(input->buttons_pressed & MINERAL_PRESSED){
         session->state = MINERAL_INVENTORY;
         return;
@@ -115,6 +124,10 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
     UpdateCombat(&session->map);
     CheckForMineralCollision(session);
     AdjustCamera(session, false,dt);
+    // MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
+    // if(entity && entity->type ==  ENTITY_PORTAL){
+    //     ChangeMap(PlaySession *session, char *map_name)
+    // }
 }
 
 void UpdateItemPopup(PlaySession* session, Input* input){
@@ -128,10 +141,11 @@ void UpdatePlaySession(PlaySession* session){
   float dt = GetFrameTime();
   if (dt > 0.1f) dt = 0.1f;
   switch(session->state){
-    case ADVENTURE: UpdateAdventure(session,&input, dt);break;
-    case INVENTORY: UpdateInventory(session, &input);break;
-    case MINERAL_INVENTORY: UpdateMineralInventory(session, &input);break;
-    case TALKING: UpdateTalking(session, &input,dt);break;
-    case ITEM: UpdateItemPopup(session, &input);break;
+        case ADVENTURE: UpdateAdventure(session,&input, dt);break;
+        case INVENTORY: UpdateInventory(session, &input);break;
+        case MINERAL_INVENTORY: UpdateMineralInventory(session, &input);break;
+        case TALKING: UpdateTalking(session, &input,dt);break;
+        case ITEM: UpdateItemPopup(session, &input);break;
+        case LEVEL_INVENTORY: UpdateLevelInventory(session, &input);break;
   }
 }

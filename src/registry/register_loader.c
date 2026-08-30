@@ -7,6 +7,7 @@ void InitRegistries(){
   SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
   SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
   SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
+  SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
   LoadDialogRegistry();
   LoadSpriteOverrideRegistry();
 
@@ -54,6 +55,17 @@ void ParseCommandRegistryRow(char* line){
     d->label[sizeof(d->label) - 1] = '\0';
     strncpy(d->description, descriptionToken, sizeof(d->description) - 1);
     d->description[sizeof(d->description) - 1] = '\0';
+  }
+}
+
+void ParsePortalRow(char* line){
+  char* idToken = strtok(line,",");
+  char* nameToken = strtok(NULL,",");
+  if(idToken && nameToken){
+    int id = atoi(idToken);
+    Portal* p = &PORTAL_REGISTRY[id];
+    strncpy(p->level_name, nameToken, sizeof(p->level_name) - 1);
+    p->level_name[sizeof(p->level_name) - 1] = '\0';
   }
 }
 
@@ -206,4 +218,8 @@ void LoadSpriteOverrideRegistry(){
 
 void LoadCommandRegistry(){
   LoadRegistry("data/tables/commands.csv", ParseCommandRegistryRow);
+}
+
+int LoadPortalRegistry(){
+    return LoadRegistry("data/tables/portals.csv", ParsePortalRow);
 }
