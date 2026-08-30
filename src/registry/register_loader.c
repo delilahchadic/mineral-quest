@@ -1,5 +1,6 @@
 #include "registry/register_loader.h"
 #include "defs/types_entities.h"
+#include "raylib.h"
 #include "registry/register.h"
 
 
@@ -61,11 +62,13 @@ void ParseCommandRegistryRow(char* line){
 void ParsePortalRow(char* line){
   char* idToken = strtok(line,",");
   char* nameToken = strtok(NULL,",");
+  char* spriteToken = strtok(NULL,",");
   if(idToken && nameToken){
     int id = atoi(idToken);
     Portal* p = &PORTAL_REGISTRY[id];
     strncpy(p->level_name, nameToken, sizeof(p->level_name) - 1);
     p->level_name[sizeof(p->level_name) - 1] = '\0';
+    p->sprite = LoadTexture(spriteToken);
   }
 }
 

@@ -38,6 +38,7 @@ typedef struct Plant{
 typedef struct Portal{
     int id;
     char level_name[32];
+    Texture2D sprite;
 } Portal;
 
 typedef enum {

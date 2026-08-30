@@ -15,6 +15,7 @@
 #include "play/play_combat.h"
 #include "play/play_ui.h"
 #include "registry/mineral_register.h"
+#include "registry/register.h"
 #include "systems/script_manager.h"
 #include "systems/input.h"
 #include "systems/player.h"
@@ -124,10 +125,10 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
     UpdateCombat(&session->map);
     CheckForMineralCollision(session);
     AdjustCamera(session, false,dt);
-    // MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
-    // if(entity && entity->type ==  ENTITY_PORTAL){
-    //     ChangeMap(PlaySession *session, char *map_name)
-    // }
+    MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
+    if(entity && entity->type ==  ENTITY_PORTAL){
+        ChangeMap(session, GetName(ENTITY_PORTAL, entity->id));
+    }
 }
 
 void UpdateItemPopup(PlaySession* session, Input* input){

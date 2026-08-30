@@ -81,19 +81,21 @@ Texture2D* GetSpriteOverride(int id){
 }
 
 Texture2D* GetSprite(EntityType type, int id){
-  switch (type){
-  case ENTITY_PLANT:
-    return &PLANT_REGISTRY[id].sprite;
-    break;
-  case ENTITY_CHARACTER:
-    return &CHARACTER_REGISTRY[id].sprite;
-  case ENTITY_ITEM:
-    return GetSpriteOverride(0);
-  case ENTITY_PLAYER:
-    return &GLOBAL_PLAYER.sprite;
-  default:
-    return NULL;
-  }
+    switch (type){
+        case ENTITY_PLANT:
+            return &PLANT_REGISTRY[id].sprite;
+            break;
+        case ENTITY_CHARACTER:
+            return &CHARACTER_REGISTRY[id].sprite;
+        case ENTITY_ITEM:
+            return GetSpriteOverride(0);
+        case ENTITY_PLAYER:
+            return &GLOBAL_PLAYER.sprite;
+        case ENTITY_PORTAL:
+            return &PORTAL_REGISTRY[id].sprite;
+        default:
+            return NULL;
+        }
 }
 
 int GetDialogID(EntityType type, int id){
