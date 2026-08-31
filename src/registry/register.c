@@ -4,6 +4,7 @@
 #include "defs/types_minerals.h"
 #include "engine/palette.h"
 
+Enemy ENEMY_REGISTRY[100] = {0};
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Message DIALOG_REGISTRY[500] = {0};
 Character CHARACTER_REGISTRY[200] = {0};
@@ -16,6 +17,7 @@ static int item_count = 0;
 static int plant_count = 0;
 static int charcter_count = 0;
 static int level_count = 0;
+static int enemy_count = 0;
 
 TileDefinition TILE_REGISTRY[28] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
@@ -61,6 +63,9 @@ char* GetName(EntityType type, int id){
             break;
         case ENTITY_PORTAL:
             return PORTAL_REGISTRY[id].level_name;
+            break;
+        case ENTITY_ENEMY:
+            return ENEMY_REGISTRY[id].species_name;
         default:
         return NULL;
     }
@@ -93,6 +98,8 @@ Texture2D* GetSprite(EntityType type, int id){
             return &GLOBAL_PLAYER.sprite;
         case ENTITY_PORTAL:
             return &PORTAL_REGISTRY[id].sprite;
+        case ENTITY_ENEMY:
+            return &ENEMY_REGISTRY[id].sprite;
         default:
             return NULL;
         }
@@ -123,28 +130,13 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id){
   }
 }
 
-// void SetItemCount(int count){
-//     item_count = count;
-// }
-
-// void SetPlantCount(int count){
-//     plant_count = count;
-// }
-
-// void SetCharacterCount(int count){
-//     charcter_count = count;
-// }
-
-// void SetLevelCount(int count){
-//     level_count = count;
-// }
-
 int GetEntityTypeCount(EntityType type){
     switch (type) {
         case ENTITY_PLANT: return plant_count;
         case ENTITY_ITEM: return item_count;
         case ENTITY_CHARACTER: return charcter_count;
         case ENTITY_PORTAL: return level_count;
+        case ENTITY_ENEMY: return enemy_count;
         case ENTITY_MINERAL: return MINERAL_COUNT;
         case ENTITY_PLAYER: return 1;
         default: return -1;
@@ -164,6 +156,9 @@ void SetEntityTypeCount(EntityType type, int count){
             return;
         case ENTITY_PORTAL:
             level_count = count;
+            return;
+        case ENTITY_ENEMY:
+            enemy_count = count;
             return;
         default: return;
     }

@@ -13,7 +13,7 @@ int LoadPlantRegistry();
 void LoadSpriteOverrideRegistry();
 int LoadPortalRegistry();
 void LoadCommandRegistry();
-
+int LoadEnemyRegistry();
 void CloseRegistries();
 void CloseCharacterRegistry();
 void ClosePlantRegistry();

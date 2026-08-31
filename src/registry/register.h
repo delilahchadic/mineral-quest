@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include "engine/palette.h"
 
+extern Enemy ENEMY_REGISTRY[100];
 extern Plant PLANT_REGISTRY[100];
 extern Character CHARACTER_REGISTRY[200];
 extern ItemDefinition ITEM_REGISTRY[100];

@@ -9,6 +9,7 @@ void InitRegistries(){
   SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
   SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
   SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
+  SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
   LoadDialogRegistry();
   LoadSpriteOverrideRegistry();
 
@@ -69,6 +70,21 @@ void ParsePortalRow(char* line){
     strncpy(p->level_name, nameToken, sizeof(p->level_name) - 1);
     p->level_name[sizeof(p->level_name) - 1] = '\0';
     p->sprite = LoadTexture(spriteToken);
+  }
+}
+
+void ParseEnemyRow(char* line){
+  char* idToken = strtok(line,",");
+  char* nameToken = strtok(NULL,",");
+  char* spriteToken = strtok(NULL,",");
+  char* hpToken = strtok(NULL,",");
+  if(idToken && nameToken){
+    int id = atoi(idToken);
+    Enemy* e = &ENEMY_REGISTRY[id];
+    strncpy(e->species_name, nameToken, sizeof(e->species_name) - 1);
+    e->species_name[sizeof(e->species_name) - 1] = '\0';
+    e->sprite = LoadTexture(spriteToken);
+    e->hp = atoi(hpToken);
   }
 }
 
@@ -214,7 +230,9 @@ int LoadCharacterRegistry(){
 int LoadPlantRegistry(){
   return LoadRegistry("data/tables/plants.csv", ParsePlantRow);
 }
-
+int LoadEnemyRegistry(){
+  return LoadRegistry("data/tables/enemies.csv", ParseEnemyRow);
+}
 void LoadSpriteOverrideRegistry(){
   LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
 }
