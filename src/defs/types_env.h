@@ -45,6 +45,7 @@ typedef struct MapEntity {
   Vector2 target_position;
   Behavior behavior;
   struct MapEntity* next;
+  int hp;
   int id;
   State state;
   Vector2 velocity;
