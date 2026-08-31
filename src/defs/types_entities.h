@@ -25,6 +25,12 @@ typedef struct Message{
   int nextid;
 } Message;
 
+typedef struct Enemy{
+    char species_name[32];
+    Texture2D sprite;
+    int hp;
+}Enemy;
+
 typedef struct Plant{
   char species_name[32];
   Texture2D sprite;
@@ -64,6 +70,7 @@ typedef enum EntityType{
     ENTITY_DECOR,
     ENTITY_MINERAL,
     ENTITY_PORTAL,
+    ENTITY_ENEMY,
     ENTITY_PLAYER
 } EntityType;
 
