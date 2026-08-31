@@ -1,4 +1,5 @@
 #include "play/play_combat.h"
+#include "defs/types_entities.h"
 #include "defs/types_env.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -17,7 +18,7 @@ void UpdateCombat(Map* map) {
     if (t < 0.3f || t > 0.7f) return;
 
     float baseAngle = player->combat.attackAngle;
-    
+
     // Forgiving Hit Sweep: Check a small arc instead of a single point
     float hitRadius = 24.0f; // Increased for forgiveness
 
@@ -32,7 +33,7 @@ void UpdateCombat(Map* map) {
                     player->position.x + cosf(baseAngle + offset) * 35.0f,
                     player->position.y + sinf(baseAngle + offset) * 35.0f
                 };
-                
+
                 if (Vector2Distance(checkPos, e->position) < hitRadius) {
                     hit = true;
                     break;
@@ -49,6 +50,10 @@ void UpdateCombat(Map* map) {
                 );
                 if(e->type == ENTITY_PLANT){
                     Remove_Entity(map, e);
+                }else if(e->type == ENTITY_ENEMY){
+                    if(e->hp == 1){
+                        Remove_Entity(map, e);
+                    }else{e->hp = e->hp - 1;}
                 }else{
                 e->position.x += dir.x * 20.0f;
                 e->position.y += dir.y * 20.0f;}

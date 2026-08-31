@@ -356,12 +356,16 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
         float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
         Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-
-            if(entity->type == ENTITY_ITEM ) {
+        if(entity->type == ENTITY_ITEM ) {
             DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
         } else {
             DrawTextureV(*sprite, drawPos, WHITE);
-
+            DrawText(GetName(entity->type, entity->id), drawPos.x+20, drawPos.y-20.0, 2.0, COLOR_SUNKEN_INK);
+            if(entity->type == ENTITY_ENEMY){
+                char hpStr[10];
+                sprintf(hpStr,"hp:%d", entity->hp);
+                DrawText(hpStr, drawPos.x+20, drawPos.y-10.0, 1.0, COLOR_SUNKEN_INK);
+            }
             // SHADOW LOGIC WITH BOUNDS CHECK
             int tx = (int)(entity->position.x / TILE_SIZE);
             int ty = (int)(entity->position.y / TILE_SIZE);

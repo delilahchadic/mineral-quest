@@ -36,7 +36,10 @@ static void LoadMapEntityFile(const char* filename, Map* map){
       m->next = NULL;
       m->id = atoi(idToken);
       m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
-      if(m->type== ENTITY_CHARACTER){
+      if(m->type == ENTITY_ENEMY){
+          m->hp = ENEMY_REGISTRY[m->id].hp;
+      }
+      if(m->type== ENTITY_CHARACTER || m->type == ENTITY_ENEMY){
           m->behavior = WANDER;
           m->speed = 30.0f;
           m->target_position = m->position;
