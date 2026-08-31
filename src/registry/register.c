@@ -3,6 +3,7 @@
 #include "defs/types_entities.h"
 #include "defs/types_minerals.h"
 #include "engine/palette.h"
+#include "registry/mineral_register.h"
 
 Enemy ENEMY_REGISTRY[100] = {0};
 ItemDefinition ITEM_REGISTRY[100] = {0};
@@ -66,6 +67,8 @@ char* GetName(EntityType type, int id){
             break;
         case ENTITY_ENEMY:
             return ENEMY_REGISTRY[id].species_name;
+        case ENTITY_MINERAL:
+            return GetMineralLabel(id);
         default:
         return NULL;
     }

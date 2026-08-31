@@ -30,7 +30,7 @@ void InitTileEditor(TileEditor* tile_editor){
     tile_editor->entity_drawer_button = (Rectangle){tool_selector_x + 240, tool_selector_y, 120, 40};
     InitTilePalette(&tile_editor->palette, startX, startY);
     InitHeightAdjuster(&tile_editor->adjuster, startX, startY);
-    InitEnitityDrawer(&tile_editor->drawer, startX, startY);
+    InitEnitityDrawer(&tile_editor->drawer, startX, 130);
 }
 
 bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer, Input* input, Camera2D* camera){
