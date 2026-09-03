@@ -76,6 +76,7 @@ typedef struct Map{
   MapEntity* player;
   int lastTileHeight;
   bool is_ready;
+  float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
 }Map;
 #endif
