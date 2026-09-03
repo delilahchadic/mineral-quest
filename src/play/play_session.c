@@ -83,29 +83,37 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         }else{
             InitDialog(&session->map, &session->manager);
             if(session->manager.active) session->state = TALKING;
-            else{
-                InitCombat(&session->map);
+
+        }
+    }
+
+    if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
+        InitCombat(&session->map);
+    }
+
+    if (session->map.hitstop_timer > 0.0f) {
+        // If we are in hitstop, count down the timer but SKIP updating the world
+        session->map.hitstop_timer -= dt;
+        }
+    else {
+        UpdatePlayerCombatAnimation(session->map.player, dt);
+        // Update facing direction based on movement
+        if (input->buttons_pressed & (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
+            // Points Right (W/D) or Left (A/S) with an "Upward" bias (braced)
+            if (input->dir.x > 0 || input->dir.y < 0) {
+                session->map.player->combat.facing_direction = -1.2f; // Braced Up-Right
+            } else if (input->dir.x < 0 || input->dir.y > 0) {
+                session->map.player->combat.facing_direction = -1.94f; // Braced Up-Left
             }
         }
+
+        UpdatePhysics(&session->map, input);
+        UpdateCombat(&session->map);
+        CheckForMineralCollision(session);
+        UpdateEntityMovement(&session->map, dt);
     }
-
-    UpdatePlayerCombatAnimation(session->map.player, dt);
-
-    // Update facing direction based on movement
-    if (input->buttons_pressed & (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
-        // Points Right (W/D) or Left (A/S) with an "Upward" bias (braced)
-        if (input->dir.x > 0 || input->dir.y < 0) {
-            session->map.player->combat.facing_direction = -1.2f; // Braced Up-Right
-        } else if (input->dir.x < 0 || input->dir.y > 0) {
-            session->map.player->combat.facing_direction = -1.94f; // Braced Up-Left
-        }
-    }
-
-    UpdatePhysics(&session->map, input);
-    UpdateCombat(&session->map);
-    CheckForMineralCollision(session);
     AdjustCamera(session, false,dt);
-    UpdateEntityMovement(&session->map, dt);
+
     MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
     if(entity && entity->type ==  ENTITY_PORTAL){
         ChangeMap(session, GetName(ENTITY_PORTAL, entity->id));
