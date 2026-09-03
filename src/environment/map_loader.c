@@ -131,6 +131,7 @@ void LoadMap(const char* mapName, Map* map){
   snprintf(entsPath, sizeof(entsPath), "data/maps/%s.ents", mapName);
   LoadMapGridFile(gridPath, map);
   LoadMapEntityFile(entsPath, map);
+  map->hitstop_timer = 0.0f;
   map->is_ready = true;
 }
 
