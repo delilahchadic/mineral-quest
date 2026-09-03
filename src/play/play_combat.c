@@ -7,6 +7,29 @@
 #include <math.h>
 #include <stdio.h>
 
+
+void InitCombat(Map* map){
+    if (!map->player->combat.isAttacking) {
+        if (map->player->combat.combo_state == COMBO_NONE || map->player->combat.combo_timer <= 0) {
+            map->player->combat.combo_state = COMBO_1;
+            map->player->combat.attackDuration = 0.25f;
+        } else if (map->player->combat.combo_state == COMBO_1) {
+            map->player->combat.combo_state = COMBO_2;
+            map->player->combat.attackDuration = 0.25f;
+        } else if (map->player->combat.combo_state == COMBO_2) {
+            map->player->combat.combo_state = COMBO_3;
+            map->player->combat.attackDuration = 0.45f;
+        } else {
+            map->player->combat.combo_state = COMBO_1;
+            map->player->combat.attackDuration = 0.25f;
+        }
+
+        map->player->combat.isAttacking = true;
+        map->player->combat.attackTimer = 0;
+        map->player->combat.combo_timer = 0.5f; // Window to hit next
+        ResetAllHitFlags(map);
+    }
+}
 void UpdateCombat(Map* map) {
     MapEntity* player = map->player;
 

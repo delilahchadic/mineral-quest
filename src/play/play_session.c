@@ -84,27 +84,7 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
             InitDialog(&session->map, &session->manager);
             if(session->manager.active) session->state = TALKING;
             else{
-                // COMBO LOGIC
-                if (!session->map.player->combat.isAttacking) {
-                    if (session->map.player->combat.combo_state == COMBO_NONE || session->map.player->combat.combo_timer <= 0) {
-                        session->map.player->combat.combo_state = COMBO_1;
-                        session->map.player->combat.attackDuration = 0.25f;
-                    } else if (session->map.player->combat.combo_state == COMBO_1) {
-                        session->map.player->combat.combo_state = COMBO_2;
-                        session->map.player->combat.attackDuration = 0.25f;
-                    } else if (session->map.player->combat.combo_state == COMBO_2) {
-                        session->map.player->combat.combo_state = COMBO_3;
-                        session->map.player->combat.attackDuration = 0.45f;
-                    } else {
-                        session->map.player->combat.combo_state = COMBO_1;
-                        session->map.player->combat.attackDuration = 0.25f;
-                    }
-
-                    session->map.player->combat.isAttacking = true;
-                    session->map.player->combat.attackTimer = 0;
-                    session->map.player->combat.combo_timer = 0.5f; // Window to hit next
-                    ResetAllHitFlags(&session->map);
-                }
+                InitCombat(&session->map);
             }
         }
     }
