@@ -132,7 +132,7 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
             float roofH = (b->min_height + b->max_height) * 8.0f;
             float floorH = b->min_height * 8.0f;
 
-            Color roofColor = COLOR_BURNT_SIENNA;
+            Color roofColor = b->color;
             Color wallSouth = ColorBrightness(roofColor, -0.3f);
             Color wallEast = ColorBrightness(roofColor, -0.5f);
 
@@ -146,7 +146,7 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
             Vector2 g1 = map->grid[current_y][current_x].isoPos;
 
             // Floor coordinates (anchors)
-            Vector2 f1 = { g1.x, g1.y - floorH };
+            // Vector2 f1 = { g1.x, g1.y - floorH };
             Vector2 f2 = { g1.x + TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) - floorH };
             Vector2 f4 = { g1.x - TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) - floorH };
             Vector2 f3 = { g1.x, g1.y + TILE_SIZE - floorH };
@@ -157,10 +157,6 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
             Vector2 r4 = { g1.x - TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) - roofH };
             Vector2 r3 = { g1.x, g1.y + TILE_SIZE - roofH };
 
-            // 1. Draw interior floor segment (so entities sort properly on top)
-            DrawTriangleFan((Vector2[]){ f1, f4, f3, f2 }, 4, COLOR_SUNKEN_INK);
-
-            // 2. Draw South Wall segment ONLY if this tile is on the bottom edge
             if (current_y == b->y2) {
                 DrawTriangleFan((Vector2[]){ r4, f4, f3, r3 }, 4, wallSouth);
             }
