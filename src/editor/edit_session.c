@@ -61,10 +61,11 @@ bool UpdateEditSession(EditSession* session, Input* input){
     }
     break;
     case EDITOR:{
-        if(!UpdateTileEditor(&session->editor, &session->map, &session->buffer, input, &session->camera)){
+        if(!UpdateTileEditor(&session->editor, &session->map, &session->buffer, input, &session->camera, session->last_selected_tile.x, session->last_selected_tile.y)){
             UpdateSelectionBuffer(session,input);
         }
         UpdateEditorCamera(session,input);
+
     }
     break;
     case LOAD_PROMPT:{
