@@ -10,6 +10,7 @@
 #include "registry/register.h"
 #include "ui/ui_helpers.h"
 #include "editor/edit_loader.h"
+#include "environment/map_ui.h"
 
 void DrawCurrentPanel(EditSession* session){
     DrawRectangleRec(session->current_tile_panel, COLOR_PULP_PAPER);

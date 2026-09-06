@@ -7,6 +7,7 @@
 #include "defs/types_minerals.h"
 #include "defs/types_systems.h"
 #include "environment/map.h"
+#include "environment/map_ui.h"
 #include "raylib.h"
 #include "registry/mineral_register.h"
 #include "play/play_inventory.h"
