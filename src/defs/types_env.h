@@ -73,6 +73,7 @@ typedef struct BuildingZone {
     int max_height;     // Roof/ceiling voxel height
     int total_floors;   // Number of interior levels
     Vector2 door_pos;   // Entrance position
+    Color color;
     struct BuildingZone* next;
 } BuildingZone;
 
@@ -90,5 +91,6 @@ typedef struct Map{
   float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
   BuildingZone* buildings;
+  int building_count;
 }Map;
 #endif
