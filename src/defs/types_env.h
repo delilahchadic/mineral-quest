@@ -65,6 +65,17 @@ typedef struct Tile{
   Vector2 isoPos;
 } Tile;
 
+typedef struct BuildingZone {
+    int id;
+    int x1, y1;         // Northwest grid corner
+    int x2, y2;         // Southeast grid corner
+    int min_height;     // Ground floor voxel height
+    int max_height;     // Roof/ceiling voxel height
+    int total_floors;   // Number of interior levels
+    Vector2 door_pos;   // Entrance position
+    struct BuildingZone* next;
+} BuildingZone;
+
 typedef struct Map{
   Tile grid[MAP_WIDTH][MAP_HEIGHT];
   int pixel_width;
@@ -78,5 +89,6 @@ typedef struct Map{
   bool is_ready;
   float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
+  BuildingZone* buildings;
 }Map;
 #endif
