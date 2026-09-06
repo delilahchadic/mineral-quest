@@ -6,6 +6,7 @@
 #include <string.h>
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "engine/palette.h"
 #include "environment/map.h"
 #include "raylib.h"
 #include "registry/register.h"
@@ -172,9 +173,10 @@ void LoadMap(const char* mapName, Map* map) {
                 b->max_height=atoi(maxHeightToken);
                 b->total_floors = atoi(totalFloorsToken);
                 b->door_pos = (Vector2){atoi(doorX),atoi(doorY)};
-
+                b->color = COLOR_SHELL_PINK;
                 b->next=map->buildings;
                 map->buildings=b;
+                map->building_count++;
             }
     }
     fclose(file);
