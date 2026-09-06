@@ -2,11 +2,12 @@
 #define TYPES_UI
 
 #include "defs/types_entities.h"
+#include "defs/types_env.h"
 #include "defs/types_systems.h"
 #include "raylib.h"
 
 typedef enum EditFormActiveField {FIELD_NAME = 0, FIELD_WIDTH, FIELD_HEIGHT, FIELD_CONFIRM}EditFormActiveField;
-typedef enum TileEditorActiveTool{TILE_PALETTE = 0, HEIGHT_ADJUSTER, ENTITY_DRAWER}TileEditorActiveTool;
+typedef enum TileEditorActiveTool{TILE_PALETTE = 0, HEIGHT_ADJUSTER, ENTITY_DRAWER, BUIDING_BUILDER}TileEditorActiveTool;
 typedef enum UIResponse{UI_ACTION_NONE,UI_ACTION_CLICK, UI_ACTION_EXECUTE}UIResponse;
 typedef struct SystemMenu{
   char name[32];
@@ -74,6 +75,27 @@ typedef struct EntityDrawer{
     int ids[9];
 }EntityDrawer;
 
+typedef struct BuildingBuilder{
+    BuildingZone* current_building;
+    int last_x, last_y;
+    int x1, y1;
+    int x2, y2;
+    int curr_height;
+    int min_height, max_height;
+    Rectangle add_building_button;
+    Rectangle minus_5;
+    Rectangle minus_1;
+    Rectangle plus_1;
+    Rectangle plus_5;
+    Rectangle set_tile_1;
+    Rectangle set_tile_2;
+    Rectangle set_min, set_max;
+    Rectangle set_min_height;
+    Rectangle set_max_height;
+    Rectangle cycle_selected_building;
+    Rectangle remove_building;
+}BuildingBuilder;
+
 typedef struct TileEditor{
     Rectangle panel;
     TileEditorActiveTool tool;
@@ -81,9 +103,11 @@ typedef struct TileEditor{
     Rectangle tile_palette_button;
     Rectangle height_adjuster_button;
     Rectangle entity_drawer_button;
+    Rectangle building_builder_button;
     TilePalette palette;
     HeightAdjuster adjuster;
     EntityDrawer drawer;
+    BuildingBuilder builder;
 }TileEditor;
 
 
