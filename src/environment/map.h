@@ -30,5 +30,6 @@ Vector2 GetIsoWorldToGrid(Vector2 worldPos);
 Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos);
 Vector2 GetGridToIsoWorld(int x, int y);
 MapEntity*  PollTrait(Map* map, TraitFlags traits, float distance);
+void Remove_Building(Map* map, BuildingZone* building);
 
 #endif

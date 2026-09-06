@@ -70,12 +70,21 @@ void Close_Map(Map* map){
   if(map == NULL){
     return;
   }
+
   MapEntity* tmp = NULL;
   tmp = map->entities;
   while(tmp != NULL){
     map->entities = tmp->next;
     free(tmp);
     tmp = map->entities;
+  }
+
+  BuildingZone* tmp2 = NULL;
+  tmp2 = map->buildings;
+  while(tmp != NULL){
+    map->buildings = tmp2->next;
+    free(tmp2);
+    tmp2 = map->buildings;
   }
 }
 
@@ -166,6 +175,28 @@ void Remove_Entity(Map* map, MapEntity* entity){
     curr->next = entity->next;
     entity->next = NULL;
     if(entity->type != ENTITY_PLAYER) free(entity);
+    return;
+  }
+}
+
+void Remove_Building(Map* map, BuildingZone* building){
+  if(map==NULL || building == NULL) return;
+
+  if(map->buildings == building){
+    map->buildings = building->next;
+    building->next =  NULL;
+    return;
+  }
+
+  BuildingZone* curr = map->buildings;
+  while(curr->next != NULL && curr->next != building){
+    curr = curr->next;
+  }
+  if(curr->next == building){
+    curr->next = building->next;
+    building->next = NULL;
+    free(building);
+    map->building_count--;
     return;
   }
 }
