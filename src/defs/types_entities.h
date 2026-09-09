@@ -33,8 +33,7 @@ typedef enum ItemType{
   ITEM_MISC,
   ITEM_KEY_ITEM,
   ITEM_MINERAL,
-  ITEM_WEAPON,
-  ITEM_ACCESSORY
+  ITEM_EQUIP
 } ItemType;
 
 typedef enum {
