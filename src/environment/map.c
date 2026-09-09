@@ -64,6 +64,7 @@ void Init_Player(Map* map){
   player->combat.isAttacking = false;
   player->combat.attackTimer = 0;
   player->combat.attackDuration = 0.25f;
+  player->stats = GetStats(ENTITY_PLAYER, 0);
 }
 
 void Close_Map(Map* map){
@@ -71,50 +72,46 @@ void Close_Map(Map* map){
     return;
   }
 
-  MapEntity* tmp = NULL;
-  tmp = map->entities;
-  while(tmp != NULL){
-    map->entities = tmp->next;
-    free(tmp);
-    tmp = map->entities;
+  MapEntity* e = NULL;
+  e = map->entities;
+  while(e != NULL){
+    map->entities = e->next;
+    free(e);
+    e = map->entities;
   }
 
-  BuildingZone* tmp2 = NULL;
-  tmp2 = map->buildings;
-  while(tmp != NULL){
-    map->buildings = tmp2->next;
-    free(tmp2);
-    tmp2 = map->buildings;
+  BuildingZone* b = NULL;
+  b = map->buildings;
+  while(b != NULL){
+    map->buildings = b->next;
+    free(b);
+    b = map->buildings;
   }
 }
-
-// This function takes your "Normal" coordinates and returns "Isometric" screen pixels
+// 1. Converts World Coordinates (e.g. Player position) to Screen Isometric
 Vector2 GetWorldToIso(Vector2 worldPos) {
-  Vector2 iso;
-  // The Standard Formula:
-  iso.x = (worldPos.x - worldPos.y);
-  iso.y = (worldPos.x + worldPos.y) / 2.0f; // This /2 creates the 50% "squash"
-  return iso;
+    Vector2 iso;
+    iso.x = (worldPos.x - worldPos.y);
+    iso.y = (worldPos.x + worldPos.y) / 2.0f;
+    return iso;
 }
 
-// This function takes your "Normal" coordinates and returns "Isometric" screen pixels
+// 2. Converts Screen Isometric pixels back to Grid Indices (e.g. x=1, y=2)
 Vector2 GetIsoWorldToGrid(Vector2 worldPos) {
     Vector2 grid;
-    float halfW = TILE_SIZE / 1.0f;
-    float halfH = TILE_SIZE / 2.0f;
+    float tileW = (float)TILE_SIZE;
+    float tileH = (float)TILE_SIZE / 2.0f;
 
-    // The "Inverse" Isometric Formula:
-    // This turns the 'Diamond' pixels back into 'Square' indices
-    grid.x = (worldPos.x / halfW + worldPos.y / halfH) / 2.0f;
-    grid.y = (worldPos.y / halfH - worldPos.x / halfW) / 2.0f;
-
+    grid.x = (worldPos.x / tileW + worldPos.y / tileH) / 2.0f;
+    grid.y = (worldPos.y / tileH - worldPos.x / tileW) / 2.0f;
     return grid;
 }
 
+// 3. Converts Grid Indices directly to Screen Isometric pixels
 Vector2 GetGridToIsoWorld(int x, int y) {
-    float worldX = (x - y) * (TILE_SIZE / 2.0f);
-    float worldY = (x + y) * (TILE_SIZE / 2.0f);
-
+    // FIXED: X-axis now uses TILE_SIZE to perfectly match GetWorldToIso
+    float worldX = (x - y) * (float)TILE_SIZE;
+    float worldY = (x + y) * ((float)TILE_SIZE / 2.0f);
     return (Vector2){ worldX, worldY };
 }
 
@@ -179,6 +176,12 @@ void Remove_Entity(Map* map, MapEntity* entity){
   }
 }
 
+void AddBuilding(Map* map, BuildingZone* building){
+    if(building == NULL) return;
+    building->next=map->buildings;
+    map->buildings=building;
+    map->building_id++;
+}
 void Remove_Building(Map* map, BuildingZone* building){
   if(map==NULL || building == NULL) return;
 
@@ -196,7 +199,6 @@ void Remove_Building(Map* map, BuildingZone* building){
     curr->next = building->next;
     building->next = NULL;
     free(building);
-    map->building_count--;
     return;
   }
 }
