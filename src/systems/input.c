@@ -18,6 +18,10 @@ Input CaptureInput(){
     i.buttons_pressed |= KEY_S_PRESSED;
   }
 
+  if(IsKeyPressed(KEY_P)){
+    i.buttons_pressed |= KEY_P_PRESSED;
+  }
+
   if(IsKeyPressed(KEY_I)){
     i.buttons_pressed |= INVENTORY_PRESSED;
   }
