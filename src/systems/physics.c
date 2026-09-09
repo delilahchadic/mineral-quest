@@ -1,5 +1,6 @@
 #include "systems/physics.h"
 
+#include "defs/types_entities.h"
 #include "environment/map.h"
 #include "registry/register.h"
 #include "systems/input.h"
@@ -25,14 +26,14 @@ void UpdateVelocity(Map* map, const Input* input) {
         // Allow jumping if we are on the floor (or within 2 pixels for "coyote time")
         if (map->player->altitude <= floorY + 2.0f) {
             map->player->state = JUMPING_STATE;
-            map->player->vertical_velocity = 500.0f;
+            map->player->vertical_velocity = (500.0f + (float)PLAYER->stats.current[STAT_AEROBICS]);
         }
     }
 
     if (input->buttons_pressed & MOVEMENT_PRESSED) {
         float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
-        map->player->velocity.x = input->dir.x * PLAYER->speed * length;
-        map->player->velocity.y = input->dir.y * PLAYER->speed * length;
+        map->player->velocity.x = input->dir.x * (PLAYER->speed + (float)PLAYER->stats.current[STAT_SPEED]) * length;
+        map->player->velocity.y = input->dir.y * (PLAYER->speed + (float)PLAYER->stats.current[STAT_SPEED])  * length;
     } else {
         map->player->velocity.x = 0;
         map->player->velocity.y = 0;
