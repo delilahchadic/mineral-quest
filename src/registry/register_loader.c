@@ -14,8 +14,9 @@ void InitRegistries(){
   LoadSpriteOverrideRegistry();
 
   LoadCommandRegistry();
-  PLAYER = &GLOBAL_PLAYER;
   GLOBAL_PLAYER = Get_Default_Player();
+  PLAYER = &GLOBAL_PLAYER;
+
 }
 
 void CloseRegistries(){
@@ -160,21 +161,39 @@ void ParseCharacterRow(char* line) {
 }
 
 void ParseItemRow(char* line) {
-  char* idToken = strtok(line,",");
-  char* nameToken = strtok(NULL,",");
-  char* descToken = strtok(NULL,",");
-  char* typeToken = strtok(NULL,",");
-  if(idToken && nameToken && descToken && typeToken){
-    int id = atoi(idToken);
-    ItemDefinition* d = &ITEM_REGISTRY[id];
-    d->id = id;
-    d->type = atoi(typeToken);
-    strncpy(d->name, nameToken, sizeof(d->name) - 1);
-    d->name[sizeof(d->name) - 1] = '\0'; // Safety null terminator
+    char* idToken = strtok(line, ",");
+    char* nameToken = strtok(NULL, ",");
+    char* descToken = strtok(NULL, ",");
+    char* typeToken = strtok(NULL, ",");
 
-    strncpy(d->description, descToken, sizeof(d->description) - 1);
-    d->description[sizeof(d->description) - 1] = '\0';
-  }
+    if (idToken && nameToken && descToken && typeToken) {
+        int id = atoi(idToken);
+        ItemDefinition* d = &ITEM_REGISTRY[id];
+
+        // 1. Base Core Data
+        d->id = id;
+        d->type = atoi(typeToken);
+
+        strncpy(d->name, nameToken, sizeof(d->name) - 1);
+        d->name[sizeof(d->name) - 1] = '\0';
+
+        strncpy(d->description, descToken, sizeof(d->description) - 1);
+        d->description[sizeof(d->description) - 1] = '\0';
+
+        // 2. Parse Equipment Slot (defaults to SLOT_NONE if missing/invalid)
+        char* slotToken = strtok(NULL, ",");
+        d->slot = slotToken ? (EquipSlot)atoi(slotToken) : SLOT_NONE;
+
+        // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
+        for (int i = 0; i < STAT_COUNT; i++) {
+            char* statToken = strtok(NULL, ",");
+            d->stat_bonuses[i] = statToken ? atoi(statToken) : 0;
+        }
+
+        // 4. Parse Granted Ability ID
+        char* abilityToken = strtok(NULL, ",\n\r");
+        d->granted_ability_id = abilityToken ? atoi(abilityToken) : -1;
+    }
 }
 
 void ParseDialogRow(char* line) {
