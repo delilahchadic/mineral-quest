@@ -97,7 +97,7 @@ void UpdateBuildingBuilder(BuildingBuilder* builder, Map* map, Input* input, int
         if(CheckCollisionPointRec(input->mouse, builder->add_building_button)){
             BuildingZone* b = malloc(sizeof(BuildingZone));
             if(b==NULL) return;
-            b->id = map->building_count;
+            b->id = map->building_id;
             b->x1 = builder->x1;
             b->y1 = builder->y1;
             b->x2 = builder->x2;
@@ -105,10 +105,7 @@ void UpdateBuildingBuilder(BuildingBuilder* builder, Map* map, Input* input, int
             b->min_height= builder->min_height;
             b->max_height= builder->max_height;
             b->total_floors = 0;
-
-            b->next=map->buildings;
-            map->buildings=b;
-            map->building_count++;
+            AddBuilding(map, b);
         }
 
         if(CheckCollisionPointRec(input->mouse, builder->cycle_selected_building)){
