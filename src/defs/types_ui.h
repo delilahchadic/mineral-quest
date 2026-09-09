@@ -1,6 +1,7 @@
 #ifndef TYPES_UI
 #define TYPES_UI
 
+#include "defs/constants.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
 #include "defs/types_systems.h"
@@ -23,6 +24,14 @@ typedef struct Menu{
   int functionId;
   EntityType type;
 }Menu;
+
+typedef struct EquipMenu{
+    int itemIds[MAX_SLOTS];
+    int count;
+    EquipSlot mode;
+    int activeSlot; // used to track which slot is being chosen weapon acc1, acc2, etc
+    int activeItemSlot; // used to track which item is selected zo once we are look ing at the weapons this selects the active one
+} EquipMenu;
 
 typedef struct EditorForm{
   char name[32];
@@ -110,12 +119,4 @@ typedef struct TileEditor{
     BuildingBuilder builder;
 }TileEditor;
 
-
-void FillMenu(Menu* menu, int(*list)[MAX_SLOTS], int count);
-void DrawMenu(Menu* menu);
-bool UpdateMenu(Menu* menu, Input* input);
-
-void FillSystemMenu(SystemMenu* menu, int ids[], int count, char* name);
-void DrawSystemMenu(SystemMenu* menu);
-int UpdateSystemMenu(SystemMenu* menu, Input* input);
 #endif
