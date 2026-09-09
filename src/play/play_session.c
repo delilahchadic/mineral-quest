@@ -22,10 +22,11 @@
 #include "systems/physics.h"
 #include "ui/dialog_box.h"
 #include "ui/menu.h"
+#include "ui/equip_menu.h"
 
 void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
-    session->player = Get_Default_Player();
+    session->player = PLAYER;
     session->menu = (Menu){0};
     LoadMap("chill treasure room",&session->map);
     InitMap(&session->map);
@@ -40,6 +41,9 @@ void InitPlaySession(PlaySession* session){
     session->map.player->altitude = startFloor;
     session->mineral_sound = LoadSound("data/audio/mineral.wav");
     SetSoundVolume(session->mineral_sound, 0.33);
+    session->equip_menu.activeSlot = 0;
+    session->equip_menu.activeItemSlot = 0;
+    session->equip_menu.mode = SLOT_NONE;
 }
 
 void ChangeMap(PlaySession* session, char* map_name){
@@ -57,6 +61,15 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
 
     // int worrld
 
+    if(input->buttons_pressed & BACKSPACE_PRESSED){
+        session->state = EQUIPMENT_MENU;
+        return;
+    }
+    if(input->buttons_pressed & KEY_P_PRESSED){
+        session->state = STATS_MENU;
+        return;
+    }
+
     if(input->buttons_pressed & LEVEL_PRESSED){
         session->state = LEVEL_INVENTORY;
         return;
@@ -66,29 +79,26 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         session->state = MINERAL_INVENTORY;
         return;
     }
+
     if(input->buttons_pressed & SHIFT_PRESSED){
         ChangeMap(session, "falls");
     }
     if(input->buttons_pressed & INVENTORY_PRESSED){
         session->menu.type = ENTITY_ITEM;
-        FillMenu(&session->menu, &session->player.inventory.itemIds, session->player.inventory.count);
+        FillMenu(&session->menu, &session->player->inventory.itemIds, session->player->inventory.count);
         session->state = INVENTORY;
         return;
     }
     if(input->buttons_pressed & INTERACT_PRESSED){
-        int item = PollChest(&session->player,&session->map);
+        int item = PollChest(session->player,&session->map);
         if(item >= 0){
             session->state = ITEM;
             sprintf(session->pendingItemName,"You got a %s !", GetName(ENTITY_ITEM, item));
         }else{
             InitDialog(&session->map, &session->manager);
             if(session->manager.active) session->state = TALKING;
-
+            else InitCombat(&session->map);;
         }
-    }
-
-    if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
-        InitCombat(&session->map);
     }
 
     if (session->map.hitstop_timer > 0.0f) {
@@ -126,6 +136,13 @@ void UpdateItemPopup(PlaySession* session, Input* input){
     }
 }
 
+
+void UpdateStatsMenu(PlaySession* session, Input* input){
+  if(input->buttons_pressed & INTERACT_PRESSED){
+    session->state = ADVENTURE;
+  }
+}
+
 void UpdatePlaySession(PlaySession* session){
   Input input = CaptureInput();
   float dt = GetFrameTime();
@@ -137,5 +154,7 @@ void UpdatePlaySession(PlaySession* session){
         case TALKING: UpdateTalking(session, &input,dt);break;
         case ITEM: UpdateItemPopup(session, &input);break;
         case LEVEL_INVENTORY: UpdateLevelInventory(session, &input);break;
+        case STATS_MENU: UpdateStatsMenu(session, &input);break;
+        case EQUIPMENT_MENU: UpdateEquipMenu(session,    &input);
   }
 }
