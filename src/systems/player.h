@@ -8,5 +8,6 @@
 Player Get_Default_Player();
 void Close_Player(Player* player);
 void GiveItem(Player* player,int id);
-
+void RecalculateStats(StatBlock* stats, EquipmentSet* gear);
+void RemoveItemAt(Player* player, int index);
 #endif
