@@ -57,6 +57,7 @@ typedef struct MapEntity {
   struct MapEntity* next_in_bucket;
   CombatState combat;
   bool hitThisSwing;
+  StatBlock* stats;
 } MapEntity;
 
 typedef struct Tile{
@@ -91,6 +92,6 @@ typedef struct Map{
   float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
   BuildingZone* buildings;
-  int building_count;
+  int building_id; // used to guarantee any new building has a unique id
 }Map;
 #endif
