@@ -1,21 +1,57 @@
 #ifndef TYPES_ENTITIES
 #define TYPES_ENTITIES
+
 #include "stdint.h"
 #include "raylib.h"
+#include "defs/constants.h"
+#include "defs/types_minerals.h"
+
+typedef enum {
+    STAT_STR,
+    STAT_DEF,
+    STAT_MAG_OFF,
+    STAT_MAG_DEF,
+    STAT_SPEED,
+    STAT_GEOLOGY,
+    STAT_BOTANY,
+    STAT_ALCHEMY,
+    STAT_AEROBICS,
+    STAT_ACCESORY_COUNT,
+    STAT_COUNT
+} StatType;
+
+typedef struct StatBlock {
+    int base[STAT_COUNT];
+    int current[STAT_COUNT];
+    int max_hp;
+    int current_hp;
+} StatBlock;
 
 typedef enum ItemType{
   ITEM_VHS_TAPE,
   ITEM_TAROT_CARD,
   ITEM_MISC,
   ITEM_KEY_ITEM,
-  ITEM_MINERAL
+  ITEM_MINERAL,
+  ITEM_WEAPON,
+  ITEM_ACCESSORY
 } ItemType;
 
-typedef struct ItemDefinition{
+typedef enum {
+    SLOT_NONE = -1,     // Non-equipables (Consumables, Minerals, Key Items)
+    SLOT_WEAPON = 0,    // Primary weapon
+    SLOT_ACCESSORY,     // Accessories (capped by player stats)
+    SLOT_COUNT          // Total valid equipment slot types (2)
+} EquipSlot;
+
+typedef struct ItemDefinition {
     int id;
     char name[32];
     char description[128];
-    ItemType type;
+    int type;
+    EquipSlot slot;                   // Explicit enum type instead of raw int
+    int stat_bonuses[STAT_COUNT];     // Matches all 9 stats (STR through AEROBICS)
+    int granted_ability_id;           // -1 if no ability attached
 } ItemDefinition;
 
 typedef struct Message{
@@ -87,4 +123,24 @@ typedef struct Character{
   int dialogId;
   uint32_t default_trait_flags;
 } Character;
+
+typedef struct Inventory{
+  int itemIds[MAX_SLOTS];
+  int count;
+} Inventory;
+
+typedef struct EquipmentSet{
+    int weapon_id;
+    int accessory_ids[MAX_ACCESSORY_SLOTS];
+}EquipmentSet;
+
+typedef struct player{
+  Inventory inventory;
+  int mineral_inventory[MINERAL_COUNT];
+  float speed;
+  Texture2D sprite;     // How fast we move
+  StatBlock stats;
+  EquipmentSet gear;
+} Player;
+
 #endif
