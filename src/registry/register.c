@@ -20,6 +20,19 @@ static int charcter_count = 0;
 static int level_count = 0;
 static int enemy_count = 0;
 
+char* STATS_NAMES[STAT_COUNT] = {
+    "Strength",
+    "Defense",
+    "Magic Offense",
+    "Magic Defense",
+    "Speed",
+    "Geology",
+    "Botany",
+    "Alchemy",
+    "Aerobics",
+    "Accessories"
+};
+
 TileDefinition TILE_REGISTRY[28] = {
     { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
     { TILE_BUFF_TITANIUM,  false, 0.8f, 104, COLOR_BUFF_TITANIUM,"Buff Titanium"},
@@ -74,6 +87,24 @@ char* GetName(EntityType type, int id){
     }
 }
 
+StatBlock* GetStats(EntityType type, int id){
+    switch(type){
+        case ENTITY_PLAYER:
+            return &GLOBAL_PLAYER.stats;
+        default:
+            return NULL;
+    }
+}
+
+int GetAccesorySlot(EntityType type, int id){
+    switch (type)
+    {
+    case ENTITY_ITEM:
+      return ITEM_REGISTRY[id].slot;
+    default:
+      return -1;
+    }
+}
 char* GetDescription(EntityType type, int id){
   switch (type)
   {

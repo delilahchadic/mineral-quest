@@ -20,7 +20,7 @@ extern Player GLOBAL_PLAYER;
 extern Player* PLAYER;
 extern TileDefinition TILE_REGISTRY[28];
 extern Texture2D SPRITE_OVERRIDE[10];
-
+extern char* STATS_NAMES[STAT_COUNT];
 // 3. Get Functions
 char* GetName(EntityType type, int id);
 char* GetDescription(EntityType type, int id);
@@ -28,8 +28,9 @@ Texture2D* GetSprite(EntityType type, int id);
 Texture2D* GetSpriteOverride(int id);
 int GetDialogID(EntityType type, int id);
 uint32_t GetDefaultTraitFlags(EntityType type, int id);
-
+StatBlock* GetStats(EntityType type, int id);
 int GetEntityTypeCount(EntityType type);
 void SetEntityTypeCount(EntityType type, int count);
+int GetAccesorySlot(EntityType type, int id);
 int GetCharacterCount();
 #endif
