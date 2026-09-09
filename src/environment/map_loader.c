@@ -174,9 +174,7 @@ void LoadMap(const char* mapName, Map* map) {
                 b->total_floors = atoi(totalFloorsToken);
                 b->door_pos = (Vector2){atoi(doorX),atoi(doorY)};
                 b->color = COLOR_SHELL_PINK;
-                b->next=map->buildings;
-                map->buildings=b;
-                map->building_count++;
+                AddBuilding(map, b);
             }
     }
     fclose(file);
