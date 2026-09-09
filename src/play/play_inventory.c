@@ -4,6 +4,7 @@
 #include "engine/palette.h"
 #include "registry/mineral_register.h"
 #include "registry/register.h"
+#include "ui/menu.h"
 #include <stdio.h>
 
 void DrawInventory(Menu* menu){
