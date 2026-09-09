@@ -38,7 +38,7 @@ void CheckForMineralCollision(PlaySession* session){
                     SetSoundPitch(session->mineral_sound, pitch);
 
                     PlaySound(session->mineral_sound);
-                session->player.mineral_inventory[e->id]++;
+                session->player->mineral_inventory[e->id]++;
                 Remove_Entity(&session->map, e);
                 break;
             }
