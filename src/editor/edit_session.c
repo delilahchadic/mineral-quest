@@ -21,6 +21,7 @@
 #include "environment/map_loader.h"
 #include "registry/command_interface.h"
 #include "ui/dialog_box.h"
+#include "ui/menu.h"
 
 void InitEditSession(EditSession* session){
   session->menu = (SystemMenu){0};

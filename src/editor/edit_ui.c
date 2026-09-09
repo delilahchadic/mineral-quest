@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include "registry/register.h"
 #include "ui/ui_helpers.h"
+#include "ui/menu.h"
 #include "editor/edit_loader.h"
 #include "environment/map_ui.h"
 

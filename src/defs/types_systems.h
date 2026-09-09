@@ -12,11 +12,6 @@ typedef struct Input{
   uint32_t buttons_pressed;
 } Input;
 
-typedef struct Inventory{
-  int itemIds[MAX_SLOTS];
-  int count;
-} Inventory;
-
 typedef enum ButtonPressed{
   NONE_PRESSED = 0,
   INVENTORY_PRESSED = 1 << 0,
@@ -30,6 +25,7 @@ typedef enum ButtonPressed{
   CONTROL_PRESSED = 1 <<8,
   MINERAL_PRESSED = 1 << 9,
   LEVEL_PRESSED = 1 << 10,
+  KEY_P_PRESSED = 1 <<11,
   MOVEMENT_PRESSED = 1 <<15,
   LEFT_MOUSE_CLICKED = 1 <<16,
   LEFT_MOUSE_DOWN = 1 <<17,
@@ -43,12 +39,5 @@ typedef struct ScriptManager{
   bool active;
   int currentID;
 } ScriptManager;
-
-typedef struct player{
-  Inventory inventory;
-  int mineral_inventory[MINERAL_COUNT];
-  float speed;
-  Texture2D sprite;     // How fast we move
-} Player;
 
 #endif
