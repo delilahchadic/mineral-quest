@@ -6,8 +6,6 @@
 #include "defs/constants.h"
 
 #define TILE_SIZE 32
-#define MAP_WIDTH 256
-#define MAP_HEIGHT 256
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)

@@ -290,3 +290,13 @@ void UpdateEntityMovement(Map* map, float dt) {
         entity = entity->next;
     }
 }
+
+int getExchangeNodeByCharacterId(Map* map, int character_id){ // poll map->nodes for a node that has a matching character id
+    if(map == NULL || map->node_count <0 || character_id < 0) return -1;
+
+    for(int i =0;i <map->node_count;i++){
+        int owner_id = GetCharacterId(map->active_nodes[i]);
+        if(owner_id == character_id) return map->active_nodes[i];
+    }
+    return -1;
+}
