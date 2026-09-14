@@ -12,6 +12,9 @@
 #include "registry/register.h"
 
 void LoadMap(const char* mapName, Map* map) {
+    if(map->is_ready){
+        Close_Map(map);
+    }
     memset(map, 0, sizeof(Map));
 
     char filePath[256];
@@ -95,13 +98,7 @@ void LoadMap(const char* mapName, Map* map) {
     map->entities = NULL;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
-        if (strncmp(line, "buildingid", 10) == 0 || strncmp(line, "[buildings]", 11) == 0) {
-                    // Put it back or let the next loop handle building data
-                    // Since we already read it, we need to handle it or jump to building parsing.
-                    // A clean way is to let the loop drop through to the building parser:
-                    break;
-                }
-        // Skip empty lines or header labels if you include them (like "type,positionx...")
+        if (strncmp(line, "buildingid", 10) == 0 || strncmp(line, "[buildings]", 11) == 0) break;
         if (strlen(line) == 0 || strncmp(line, "type", 4) == 0) continue;
 
         char* typeToken = strtok(line, ",");
@@ -141,12 +138,16 @@ void LoadMap(const char* mapName, Map* map) {
 
             Add_Entity(map, m);
         }
+
+
+
     }
 
     map->buildings =NULL;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
 
+        if (strncmp(line, "active_nodes", 12) == 0 ) break;
         // Skip empty lines or header labels if you include them (like "type,positionx...")
         if (strlen(line) == 0 || strncmp(line, "buildingid", 10) == 0) continue;
         // buildingid,x1, y1,x2, y2,min_height,max_height,total_floors,door_x,door_y
@@ -177,9 +178,24 @@ void LoadMap(const char* mapName, Map* map) {
                 AddBuilding(map, b);
             }
     }
+
+    map->node_count = 0;
+    for(int i=0;i<10;i++) map->active_nodes[i] = -1;
+    while (fgets(line, sizeof(line), file)) {
+        line[strcspn(line, "\n")] = 0;
+        if (strlen(line) == 0 || strncmp(line, "active_nodes", 12) == 0) continue;
+        int node_id = atoi(line);
+        if(node_id < 0) continue;
+        map->active_nodes[map->node_count] =  node_id;
+        map->node_count++;
+        if(map->node_count ==10) break;
+    }
+
     fclose(file);
     map->hitstop_timer = 0.0f;
     map->is_ready = true;
+
+
 }
 
 void SaveMap(Map* map) {
@@ -242,5 +258,13 @@ void SaveMap(Map* map) {
             );
             b_curr = b_curr->next;
         }
+    fprintf(file, "\n"); // Spacer line before active nodes
+    // 6. Write Active Nodes Header & List
+    fprintf(file, "active_nodes\n");
+    for (int i = 0; i < map->node_count; i++) {
+        if (map->active_nodes[i] >= 0) {
+            fprintf(file, "%d\n", map->active_nodes[i]);
+        }
+    }
     fclose(file);
 }
