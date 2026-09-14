@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "defs/types_engine.h"
+#include "defs/types_ui.h"
 #include "raylib.h"
 #include "core/camera_tools.h"
 #include "defs/types_entities.h"
@@ -21,8 +22,10 @@
 #include "systems/player.h"
 #include "systems/physics.h"
 #include "ui/dialog_box.h"
-#include "ui/menu.h"
 #include "ui/equip_menu.h"
+#include "ui/menu.h"
+#include "ui/node_menu.h"
+#include "ui/stats_menu.h"
 
 void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
@@ -84,20 +87,44 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         ChangeMap(session, "falls");
     }
     if(input->buttons_pressed & INVENTORY_PRESSED){
-        session->menu.type = ENTITY_ITEM;
-        FillMenu(&session->menu, &session->player->inventory.itemIds, session->player->inventory.count);
-        session->state = INVENTORY;
-        return;
-    }
+            session->menu.type = ENTITY_ITEM;
+
+            // Gather all non-zero item IDs from the frequency map into a temporary list for the menu
+            int active_item_ids[100];
+            int active_count = 0;
+            for (int i = 0; i < 100; i++) {
+                if (session->player->item_inventory[i] > 0) {
+                    active_item_ids[active_count++] = i;
+                }
+            }
+
+            FillMenu(&session->menu, active_item_ids, active_count);
+            session->state = INVENTORY;
+            return;
+        }
     if(input->buttons_pressed & INTERACT_PRESSED){
         int item = PollChest(session->player,&session->map);
         if(item >= 0){
             session->state = ITEM;
             sprintf(session->pendingItemName,"You got a %s !", GetName(ENTITY_ITEM, item));
         }else{
-            InitDialog(&session->map, &session->manager);
+            MapEntity* nodecharacter = PollTrait(&session->map, TRAIT_NODE, 50.0f);
+            if(nodecharacter!=NULL){
+                for(int i =0;i < session->map.node_count;i++){
+                    if(GetCharacterId(session->map.active_nodes[i]) == nodecharacter->id){
+                        session->node_menu.node_id = session->map.active_nodes[i];
+                        session->state =  NODE_MENU;
+                        session->node_menu.selected_index = 0;
+                        session->node_menu.state = NODE_MENU_BROWSE;
+                    }
+                }
+
+            }else{
+                InitDialog(&session->map, &session->manager);
             if(session->manager.active) session->state = TALKING;
-            else InitCombat(&session->map);;
+            else InitCombat(&session->map);
+            }
+
         }
     }
 
@@ -136,13 +163,6 @@ void UpdateItemPopup(PlaySession* session, Input* input){
     }
 }
 
-
-void UpdateStatsMenu(PlaySession* session, Input* input){
-  if(input->buttons_pressed & INTERACT_PRESSED){
-    session->state = ADVENTURE;
-  }
-}
-
 void UpdatePlaySession(PlaySession* session){
   Input input = CaptureInput();
   float dt = GetFrameTime();
@@ -155,6 +175,7 @@ void UpdatePlaySession(PlaySession* session){
         case ITEM: UpdateItemPopup(session, &input);break;
         case LEVEL_INVENTORY: UpdateLevelInventory(session, &input);break;
         case STATS_MENU: UpdateStatsMenu(session, &input);break;
-        case EQUIPMENT_MENU: UpdateEquipMenu(session,    &input);
+        case EQUIPMENT_MENU: UpdateEquipMenu(session,    &input);break;
+        case NODE_MENU: UpdateNodeMenu(session, &input);break;
   }
 }
