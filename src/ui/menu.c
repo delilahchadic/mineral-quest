@@ -1,9 +1,12 @@
 #include "ui/menu.h"
+#include <string.h>
 #include "registry/command_interface.h"
-void FillMenu(Menu* menu, int(*itemIds)[MAX_SLOTS], int count){
-  memcpy(&menu->itemIds, itemIds, sizeof(int) * MAX_SLOTS);
-  menu->count = count;
-  menu->selected = count > 0 ? 0 : -1;
+
+void FillMenu(Menu* menu, int itemIds[], int count){
+    memset(menu->itemIds, 0, sizeof(menu->itemIds));
+    memcpy(menu->itemIds, itemIds, sizeof(int) * count);
+    menu->count = count;
+    menu->selected = count > 0 ? 0 : -1;
 }
 
 void FillSystemMenu(SystemMenu* menu, int ids[], int count, char* name){

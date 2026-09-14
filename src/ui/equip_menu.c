@@ -73,22 +73,27 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
             menu->count = 0;
             menu->activeItemSlot = 0; // Reset item selection cursor to top ("------------")
 
+            // When pressing ENTER on a slot (State 1)
             if (menu->activeSlot == 0) {
                 menu->mode = SLOT_WEAPON;
-                // Filter inventory for weapons
-                for (int i = 0; i < session->player->inventory.count; i++) {
-                    int item_id = session->player->inventory.itemIds[i];
-                    if (GetAccesorySlot(ENTITY_ITEM, item_id) == SLOT_WEAPON) {
-                        menu->itemIds[menu->count++] = item_id;
+                // Filter item_inventory for weapons
+                for (int i = 0; i < 100; i++) {
+                    if (session->player->item_inventory[i] > 0) {
+                        // i represents the item_id directly now!
+                        if (GetAccesorySlot(ENTITY_ITEM, i) == SLOT_WEAPON) {
+                            menu->itemIds[menu->count++] = i;
+                        }
                     }
                 }
             } else {
                 menu->mode = SLOT_ACCESSORY;
-                // Filter inventory for accessories
-                for (int i = 0; i < session->player->inventory.count; i++) {
-                    int item_id = session->player->inventory.itemIds[i];
-                    if (GetAccesorySlot(ENTITY_ITEM, item_id) == SLOT_ACCESSORY) {
-                        menu->itemIds[menu->count++] = item_id;
+                // Filter item_inventory for accessories
+                for (int i = 0; i < 100; i++) {
+                    if (session->player->item_inventory[i] > 0) {
+                        int item_id = i;
+                        if (GetAccesorySlot(ENTITY_ITEM, item_id) == SLOT_ACCESSORY) {
+                            menu->itemIds[menu->count++] = item_id;
+                        }
                     }
                 }
             }
@@ -117,16 +122,15 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
         }
 
         if (input->buttons_pressed & ENTER_PRESSED) {
+            // Inside State 2 (when you select an item to equip)
             if (menu->mode == SLOT_WEAPON) {
                 if (menu->activeItemSlot == 0) {
-                    // Chosen "------------" -> Unequip weapon entirely
+                    // Unequip weapon entirely
                     if (session->player->gear.weapon_id != -1) {
-                        GiveItem(
-                            session->player, session->player->gear.weapon_id);
+                        GiveItem(session->player, session->player->gear.weapon_id); // Increments count
                         session->player->gear.weapon_id = -1;
                     }
                 } else {
-                    // Chosen a specific item from the list (adjust index by -1 because 0 is unequip)
                     int chosen_item_id = menu->itemIds[menu->activeItemSlot - 1];
 
                     // Return old weapon to inventory if equipped
@@ -136,26 +140,20 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
                     // Equip new weapon
                     session->player->gear.weapon_id = chosen_item_id;
 
-                    // Remove chosen item from raw inventory bag
-                    for (int i = 0; i < session->player->inventory.count; i++) {
-                        if (session->player->inventory.itemIds[i] == chosen_item_id) {
-                            RemoveItemAt(session->player, i);
-                            break;
-                        }
-                    }
+                    // Decrement item quantity directly from the inventory array
+                    session->player->item_inventory[chosen_item_id]--;
                 }
             }
             else if (menu->mode == SLOT_ACCESSORY) {
-                int acc_index = menu->activeSlot - 1; // Map activeSlot to accessory array index
+                int acc_index = menu->activeSlot - 1;
 
                 if (menu->activeItemSlot == 0) {
-                    // Chosen "------------" -> Unequip this accessory slot
+                    // Unequip accessory slot
                     if (session->player->gear.accessory_ids[acc_index] != -1) {
                         GiveItem(session->player, session->player->gear.accessory_ids[acc_index]);
                         session->player->gear.accessory_ids[acc_index] = -1;
                     }
                 } else {
-                    // Chosen a specific accessory item
                     int chosen_item_id = menu->itemIds[menu->activeItemSlot - 1];
 
                     // Return old accessory to inventory if present
@@ -165,13 +163,8 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
                     // Equip new accessory
                     session->player->gear.accessory_ids[acc_index] = chosen_item_id;
 
-                    // Remove chosen item from raw inventory bag
-                    for (int i = 0; i < session->player->inventory.count; i++) {
-                        if (session->player->inventory.itemIds[i] == chosen_item_id) {
-                            RemoveItemAt(session->player, i);
-                            break;
-                        }
-                    }
+                    // Decrement item quantity directly
+                    session->player->item_inventory[chosen_item_id]--;
                 }
             }
 
