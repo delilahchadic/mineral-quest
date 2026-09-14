@@ -33,7 +33,8 @@ typedef enum ItemType{
   ITEM_MISC,
   ITEM_KEY_ITEM,
   ITEM_MINERAL,
-  ITEM_EQUIP
+  ITEM_EQUIP,
+  ITEM_CONSUME
 } ItemType;
 
 typedef enum {
@@ -99,6 +100,7 @@ typedef struct TileDefinition{
 } TileDefinition;
 
 typedef enum EntityType{
+    ENTITY_NONE=-1,
     ENTITY_CHARACTER,
     ENTITY_ITEM,
     ENTITY_PLANT,
@@ -114,32 +116,63 @@ typedef enum TraitFlags{
   TRAIT_TALK = 1 << 0,
   TRAIT_GATHER = 1 << 1,
   TRAIT_TELEPORT = 1 <<2, // used to designate that a enity can change the map
+  TRAIT_NODE = 1 <<3, // used to designate characters that associated to a node
 } TraitFlags;
 
+typedef enum CharacterType{
+    CHARACTER_DEFAULT = 0,
+    CHARACTER_NODE
+}CharacterType;
+
 typedef struct Character{
+  CharacterType type;
   char name[32];
   Texture2D sprite;
   int dialogId;
   uint32_t default_trait_flags;
 } Character;
 
-typedef struct Inventory{
-  int itemIds[MAX_SLOTS];
-  int count;
-} Inventory;
-
 typedef struct EquipmentSet{
     int weapon_id;
     int accessory_ids[MAX_ACCESSORY_SLOTS];
 }EquipmentSet;
 
-typedef struct player{
-  Inventory inventory;
+typedef struct Player{
+  int item_inventory[100];
   int mineral_inventory[MINERAL_COUNT];
+  int plant_inventory[100];
   float speed;
   Texture2D sprite;     // How fast we move
   StatBlock stats;
   EquipmentSet gear;
 } Player;
 
+typedef enum ExchangeNodeType{
+    NODE_SHOP,
+    NODE_QUEST,
+    NODE_TEMPLE,
+    NODE_FORGE
+} ExchangeNodeType;
+
+typedef struct {
+    EntityType type;
+    int id;
+    int amount;
+} CostSlot;
+
+typedef struct Exchange{
+    int item_id;
+    CostSlot cost_slots[3];
+}Exchange;
+
+typedef struct ExchangeNode{
+    int id;
+    int character_id;
+    int reset_cycle;
+    char name[32];
+    int exchange_ids[10];
+    int quantities[10];
+    int count;
+    ExchangeNodeType type;
+}ExchangeNode;
 #endif
