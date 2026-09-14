@@ -11,6 +11,41 @@ void InitEquipmentSet(EquipmentSet* gear) {
     }
 }
 
+int CanAfford(Player* player, CostSlot slot){
+    switch(slot.type){
+        case ENTITY_ITEM:
+            return player->item_inventory[slot.id] >= slot.amount;
+        case ENTITY_PLANT:
+            return player->plant_inventory[slot.id] >= slot.amount;
+        case ENTITY_MINERAL:
+            return player->mineral_inventory[slot.id] >= slot.amount;
+        case ENTITY_NONE:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+// assumes each cost slot has been evaluated
+void ProcessRecipe(Player* player, Exchange e){
+    for(int i=0;i<3;i++){
+        switch(e.cost_slots[i].type){
+            case ENTITY_ITEM:
+                player->item_inventory[e.cost_slots[i].id] -= e.cost_slots[i].amount;
+                break;
+            case ENTITY_PLANT:
+                player->plant_inventory[e.cost_slots[i].id] -= e.cost_slots[i].amount;
+                break;
+            case ENTITY_MINERAL:
+                player->mineral_inventory[e.cost_slots[i].id] -= e.cost_slots[i].amount;
+                break;
+            default:
+                break;
+        }
+    }
+
+    player->item_inventory[e.item_id]++;
+}
 void SetDefaultStat(Player* player){
     player->stats.base[STAT_STR] = 8;
     player->stats.base[STAT_DEF] = 7;
@@ -55,11 +90,10 @@ void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
 
 Player Get_Default_Player(){
   Player player = {0};
-  InitInventory(&player.inventory);
-  player.inventory.itemIds[0]=9;
-  player.inventory.itemIds[1]=3;
-  player.inventory.itemIds[2]=4;
-  player.inventory.count = 3;
+  // InitInventory(&player.inventory);
+  player.item_inventory[9]++;
+  player.item_inventory[3]++;
+  player.item_inventory[4]++;
   player.speed = 250.0f;
   player.sprite = LoadTexture("data/sprites/sprite.png");
   SetDefaultStat(&player);
@@ -77,28 +111,14 @@ void GiveItem(Player* player,int id){
   if(id < 0){
     return;
   }
-
-  int currItem = player->inventory.count;
-  player->inventory.itemIds[currItem++] = id;
-  player->inventory.count = currItem;
+  player->item_inventory[id]++;
 }
 
-void RemoveItemAt(Player* player, int index) {
-    if (index < 0 || index >= player->inventory.count) {
+void RemoveItem(Player* player, int id) {
+    if (id < 0) {
         return; // Out of bounds check
     }
-
-    // Calculate how many elements need to be shifted down
-    int elements_to_move = player->inventory.count - index - 1;
-
-    if (elements_to_move > 0) {
-        // memmove safely handles overlapping memory blocks in the same array
-        memmove(
-            &player->inventory.itemIds[index],     // Destination
-            &player->inventory.itemIds[index + 1], // Source
-            elements_to_move * sizeof(int)         // Number of bytes to copy
-        );
+    if(player->item_inventory[id] > 0){
+        player->item_inventory[id]--;
     }
-
-    player->inventory.count--;
 }
