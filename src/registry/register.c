@@ -12,6 +12,9 @@ Character CHARACTER_REGISTRY[200] = {0};
 Texture2D SPRITE_OVERRIDE[10] = {0};
 Plant PLANT_REGISTRY[100] = {0};
 Portal PORTAL_REGISTRY[100] = {0};
+ExchangeNode NODE_REGISTRY[100] = {0};
+Exchange EXCHANGE_REGISTRY[1000] = {0};
+
 Player GLOBAL_PLAYER;
 Player* PLAYER;
 static int item_count = 0;
@@ -64,6 +67,9 @@ TileDefinition TILE_REGISTRY[28] = {
     { TILE_BURNT_SIENNA,false,1.0f,107,COLOR_BURNT_SIENNA, "Burnt Sienna"}
 };
 
+char* GetNodeName(int node_id){
+    return NODE_REGISTRY[node_id].name;
+}
 char* GetName(EntityType type, int id){
     switch (type){
         case ENTITY_PLANT:
@@ -88,6 +94,7 @@ char* GetName(EntityType type, int id){
 }
 
 StatBlock* GetStats(EntityType type, int id){
+    (void)id;
     switch(type){
         case ENTITY_PLAYER:
             return &GLOBAL_PLAYER.stats;
@@ -196,4 +203,9 @@ void SetEntityTypeCount(EntityType type, int count){
             return;
         default: return;
     }
+}
+
+
+int GetCharacterId(int node_id){
+    return NODE_REGISTRY[node_id].character_id;
 }

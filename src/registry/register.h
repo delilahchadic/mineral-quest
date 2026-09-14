@@ -21,8 +21,11 @@ extern Player* PLAYER;
 extern TileDefinition TILE_REGISTRY[28];
 extern Texture2D SPRITE_OVERRIDE[10];
 extern char* STATS_NAMES[STAT_COUNT];
+extern ExchangeNode NODE_REGISTRY[100];
+extern Exchange EXCHANGE_REGISTRY[1000];
 // 3. Get Functions
 char* GetName(EntityType type, int id);
+char* GetNodeName(int node_id);
 char* GetDescription(EntityType type, int id);
 Texture2D* GetSprite(EntityType type, int id);
 Texture2D* GetSpriteOverride(int id);
@@ -33,4 +36,5 @@ int GetEntityTypeCount(EntityType type);
 void SetEntityTypeCount(EntityType type, int count);
 int GetAccesorySlot(EntityType type, int id);
 int GetCharacterCount();
+int GetCharacterId(int node_id);
 #endif

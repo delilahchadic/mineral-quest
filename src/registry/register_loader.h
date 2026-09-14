@@ -15,10 +15,7 @@ int LoadPortalRegistry();
 void LoadCommandRegistry();
 int LoadEnemyRegistry();
 void CloseRegistries();
-void CloseCharacterRegistry();
-void ClosePlantRegistry();
-void CloseSpriteOverrideRegistry();
-
+void LoadNodeExchange();
 void ParseItemRow(char* line);
 void ParseDialogRow(char* line);
 void ParseCharacterRow(char* line);

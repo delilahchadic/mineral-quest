@@ -12,17 +12,27 @@ void InitRegistries(){
   SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
   LoadDialogRegistry();
   LoadSpriteOverrideRegistry();
-
+  LoadNodeExchange();
   LoadCommandRegistry();
   GLOBAL_PLAYER = Get_Default_Player();
   PLAYER = &GLOBAL_PLAYER;
 
 }
 
-void CloseRegistries(){
-  CloseCharacterRegistry();
-  ClosePlantRegistry();
-  CloseSpriteOverrideRegistry();
+void CloseEnemyRegistry(){
+  for(int i =0; i<100;i++){
+    if(ENEMY_REGISTRY[i].sprite.id > 0){
+      UnloadTexture(ENEMY_REGISTRY[i].sprite);
+    }
+  }
+}
+
+void ClosePortalRegistry(){
+  for(int i =0; i<100;i++){
+    if(PORTAL_REGISTRY[i].sprite.id > 0){
+      UnloadTexture(PORTAL_REGISTRY[i].sprite);
+    }
+  }
 }
 
 void CloseCharacterRegistry(){
@@ -45,6 +55,14 @@ void CloseSpriteOverrideRegistry(){
   for(int i =0; i<10;i++){
     UnloadTexture(SPRITE_OVERRIDE[i]);
   }
+}
+
+void CloseRegistries(){
+  CloseCharacterRegistry();
+  ClosePlantRegistry();
+  CloseSpriteOverrideRegistry();
+  ClosePortalRegistry();
+  CloseEnemyRegistry();
 }
 
 void ParseCommandRegistryRow(char* line){
@@ -101,6 +119,88 @@ void ParseSpriteOverrideRow(char* line){
   }
 }
 
+void ParseNodeInventory(char* line){
+    char* idToken = strtok(line, ",");
+    char* exchangeIdToken = strtok(NULL,",");
+    char* qtyToken  = strtok(NULL,",");
+
+  if(idToken && exchangeIdToken && qtyToken){
+
+    // grab the appropriate plant
+    int id = atoi(idToken);
+
+    ExchangeNode* n =&NODE_REGISTRY[id];
+    if(n->count <10){
+        n->exchange_ids[n->count] = atoi(exchangeIdToken);
+        n->quantities[n->count] = atoi(qtyToken);
+        n->count = n->count +1;
+    }
+  }
+}
+void ParseNodeRow(char* line) {
+    char* idToken = strtok(line, ",");
+    char* nameToken = strtok(NULL,",");
+    char* characterIdToken  = strtok(NULL,",");
+    char* resetCycleToken = strtok(NULL,",");
+    char* typeToken = strtok(NULL,",");
+
+  if(idToken && nameToken && characterIdToken && resetCycleToken && typeToken ){
+
+    // grab the appropriate plant
+    int id = atoi(idToken);
+    ExchangeNode* n =&NODE_REGISTRY[id];
+    //Load the sprit
+    n->id = atoi(idToken);
+    strncpy(n->name, nameToken, sizeof(n->name) - 1);
+    n->name[sizeof(n->name) - 1] = '\0';
+    n->character_id = atoi(characterIdToken);
+    n->reset_cycle = atoi(resetCycleToken);
+    n->type = atoi(typeToken);
+    n->count = 0;
+  }
+}
+
+void ParseExchangeRow(char* line) {
+    char* idToken = strtok(line, ",");
+    char* itemIdToken = strtok(NULL,",");
+    char* cost1TypeToken = strtok(NULL,",");
+    char* cost1IDToken = strtok(NULL,",");
+    char* cost1AmountToken = strtok(NULL,",");
+    char* cost2TypeToken = strtok(NULL,",");
+    char* cost2IDToken = strtok(NULL,",");
+    char* cost2AmountToken = strtok(NULL,",");
+    char* cost3TypeToken = strtok(NULL,",");
+    char* cost3IDToken = strtok(NULL,",");
+    char* cost3AmountToken = strtok(NULL,",");
+
+  if(idToken && itemIdToken && cost1TypeToken && cost1IDToken && cost1AmountToken &&
+      cost2TypeToken && cost2IDToken && cost2AmountToken &&
+      cost3TypeToken && cost3IDToken && cost3AmountToken ){
+
+    // grab the appropriate plant
+    int id = atoi(idToken);
+    Exchange* e =&EXCHANGE_REGISTRY[id];
+    //Load the sprit
+    e->item_id = atoi(itemIdToken);
+    // if(atoi(cost1TypeToken) > -1){
+        e->cost_slots[0].type =  atoi(cost1TypeToken);
+        e->cost_slots[0].id = atoi(cost1IDToken);
+        e->cost_slots[0].amount = atoi(cost1AmountToken);
+    // }
+
+    // if(atoi(cost2TypeToken) > -1){
+        e->cost_slots[1].type =  atoi(cost2TypeToken);
+        e->cost_slots[1].id = atoi(cost2IDToken);
+        e->cost_slots[1].amount = atoi(cost2AmountToken);
+    // }
+
+    // if(atoi(cost3TypeToken) > -1){
+        e->cost_slots[2].type =  atoi(cost3TypeToken);
+        e->cost_slots[2].id = atoi(cost3IDToken);
+        e->cost_slots[2].amount = atoi(cost3AmountToken);
+    // }
+  }
+}
 
 /// @brief parses line of the plant csv
 /// @param line
@@ -141,21 +241,27 @@ void ParsePlantRow(char* line) {
 
 void ParseCharacterRow(char* line) {
   char* idToken = strtok(line,",");
-
   char* nameToken = strtok(NULL,",");
   char* dialogToken = strtok(NULL,",");
-  char* textToken = strtok(NULL,",");
-  if(idToken && nameToken && dialogToken && textToken){
+  char* spriteToken = strtok(NULL,",");
+  char* typeToken = strtok(NULL,",");
+
+  if(idToken && nameToken && dialogToken && spriteToken){
     int id = atoi(idToken);
     Character* d =&CHARACTER_REGISTRY[id];
 
-    Image image = LoadImage(textToken);
+    Image image = LoadImage(spriteToken);
     d->sprite = LoadTextureFromImage(image);
     UnloadImage(image);
     d->dialogId = atoi(dialogToken);
     d->default_trait_flags = TRAIT_TALK;
     strncpy(d->name, nameToken, sizeof(d->name) - 1);
     d->name[sizeof(d->name) - 1] = '\0';
+
+    int type = atoi(typeToken);
+    if(type == CHARACTER_NODE){
+        d->default_trait_flags |= TRAIT_NODE;
+    }
 
   }
 }
@@ -255,7 +361,11 @@ int LoadEnemyRegistry(){
 void LoadSpriteOverrideRegistry(){
   LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
 }
-
+void LoadNodeExchange(){
+    LoadRegistry("data/tables/nodes.csv", ParseNodeRow);
+    LoadRegistry("data/tables/exchanges.csv", ParseExchangeRow);
+    LoadRegistry("data/tables/node_inventory.csv", ParseNodeInventory);
+}
 void LoadCommandRegistry(){
   LoadRegistry("data/tables/commands.csv", ParseCommandRegistryRow);
 }
