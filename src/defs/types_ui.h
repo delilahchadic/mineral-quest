@@ -1,5 +1,5 @@
-#ifndef TYPES_UI
-#define TYPES_UI
+#ifndef TYPES_UI_H
+#define TYPES_UI_H
 
 #include "defs/constants.h"
 #include "defs/types_entities.h"
@@ -119,4 +119,15 @@ typedef struct TileEditor{
     BuildingBuilder builder;
 }TileEditor;
 
+typedef enum NodeMenuState{
+    NODE_MENU_BROWSE,
+    NODE_MENU_CONFIRM
+}NodeMenuState;
+
+typedef struct NodeMenu{
+    int selected_index;
+    int node_id;
+    int confirm_index;
+    NodeMenuState state;
+}NodeMenu;
 #endif
