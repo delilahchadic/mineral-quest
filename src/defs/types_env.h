@@ -4,13 +4,13 @@
 #include "raylib.h"
 #include "defs/types_entities.h"
 
-#define MAP_WIDTH 256
-#define MAP_HEIGHT 256
+#define MAP_WIDTH 100
+#define MAP_HEIGHT 100
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
 
-typedef enum{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEnityType;
+typedef enum MapEntityType{MAP_ITEM,MAP_NPC,MAP_OBJECT,MAP_TRANSITION}MapEntityType;
 
 typedef enum State{
   NORMAL_STATE,
@@ -88,6 +88,8 @@ typedef struct Map{
   MapEntity* entities;
   MapEntity* player;
   int lastTileHeight;
+  int active_nodes[10];
+  int node_count;
   bool is_ready;
   float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
