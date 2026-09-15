@@ -9,7 +9,6 @@ void DrawSimpleGuitar(Vector2 position, float rotation) {
     float upperBoutRadius = 10.0f;
     float lowerBoutRadius = 12.0f;
     float handleLength = 12.0f;
-
     // Palette using your existing game colors
     Color woodBase = COLOR_GUITAR_AMBER;
     Color woodDark = ColorBrightness(COLOR_BURNT_SIENNA, -0.3f);
