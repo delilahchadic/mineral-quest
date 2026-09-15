@@ -8,11 +8,10 @@ int main(void) {
   //Begin Engine
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mineral Quest");
   SetTargetFPS(TARGET_FPS);
-
-  InitRegistries();
   Gamestate* gamestate = calloc(1, sizeof(Gamestate));
   InitGame(gamestate);
   InitAudioDevice();
+  InitRegistries();
   // Main game loop
   while (!WindowShouldClose()) {
     // --- 1. Update Logic ---
@@ -23,7 +22,7 @@ int main(void) {
       DrawScreen(gamestate);
     EndDrawing();
   }
-  UnloadSound(gamestate->session->mineral_sound);
+  UnloadSound(MINERAL_SOUND);
   CloseGame(gamestate);
   CloseRegistries();
   return 0;

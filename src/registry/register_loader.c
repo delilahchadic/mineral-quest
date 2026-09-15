@@ -5,17 +5,19 @@
 
 
 void InitRegistries(){
-  SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
-  SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
-  SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
-  SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
-  SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
-  LoadDialogRegistry();
-  LoadSpriteOverrideRegistry();
-  LoadNodeExchange();
-  LoadCommandRegistry();
-  GLOBAL_PLAYER = Get_Default_Player();
-  PLAYER = &GLOBAL_PLAYER;
+    MINERAL_SOUND =LoadSound("data/audio/mineral.wav");
+    SetSoundVolume(MINERAL_SOUND, 0.33);
+    SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
+    SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
+    SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
+    SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
+    SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
+    LoadDialogRegistry();
+    LoadSpriteOverrideRegistry();
+    LoadNodeExchange();
+    LoadCommandRegistry();
+    GLOBAL_PLAYER = Get_Default_Player();
+    PLAYER = &GLOBAL_PLAYER;
 
 }
 
@@ -289,7 +291,8 @@ void ParseItemRow(char* line) {
         // 2. Parse Equipment Slot (defaults to SLOT_NONE if missing/invalid)
         char* slotToken = strtok(NULL, ",");
         d->slot = slotToken ? (EquipSlot)atoi(slotToken) : SLOT_NONE;
-
+        char* hpBonus = strtok(NULL, ",");
+        d->hp_bonus = hpBonus ? atoi(hpBonus) : 0;
         // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
         for (int i = 0; i < STAT_COUNT; i++) {
             char* statToken = strtok(NULL, ",");

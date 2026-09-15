@@ -14,7 +14,7 @@ Plant PLANT_REGISTRY[100] = {0};
 Portal PORTAL_REGISTRY[100] = {0};
 ExchangeNode NODE_REGISTRY[100] = {0};
 Exchange EXCHANGE_REGISTRY[1000] = {0};
-
+Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
 Player* PLAYER;
 static int item_count = 0;

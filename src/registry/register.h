@@ -23,6 +23,7 @@ extern Texture2D SPRITE_OVERRIDE[10];
 extern char* STATS_NAMES[STAT_COUNT];
 extern ExchangeNode NODE_REGISTRY[100];
 extern Exchange EXCHANGE_REGISTRY[1000];
+extern Sound MINERAL_SOUND;
 // 3. Get Functions
 char* GetName(EntityType type, int id);
 char* GetNodeName(int node_id);
