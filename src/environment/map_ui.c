@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include "defs/types_env.h"
 #include "engine/palette.h"
 #include "systems/player.h"
@@ -68,34 +67,48 @@ void Draw_Tile(Map* map, int x, int y) {
     Vector2 t3 = { g3.x, g3.y - h };
     Vector2 t4 = { g4.x, g4.y - h };
 
-    // WALL DRAWING with strict neighbor checking
+    // WALL DRAWING - Only render wall faces exposed toward the camera viewer
     if (h > 0 && !blocking) {
         Color sideL = { (unsigned char)(base.r * 0.8f), (unsigned char)(base.g * 0.8f), (unsigned char)(base.b * 0.8f), base.a };
         Color sideR = { (unsigned char)(base.r * 0.6f), (unsigned char)(base.g * 0.6f), (unsigned char)(base.b * 0.6f), base.a };
         int currentH = map->grid[y][x].height;
 
-        // Check East Neighbor
-        if (x + 1 < map->columns) {
-            int targetH = map->grid[y][x+1].height;
-            if (targetH < currentH) {
-                float neighborH = map->grid[y][x+1].height * 8.0f;
-                Vector2 n2 = { g2.x, g2.y - neighborH };
-                Vector2 n3 = { g3.x, g3.y - neighborH };
-                DrawTriangleFan((Vector2[]){ t3, n3, n2, t2 }, 4, sideL);
-            }
-        }
-
-        // Check South Neighbor
+        // SOUTH-WEST FACE (Facing camera left/down):
+        // Only draw if the neighbor to the South (y+1) is lower than this tile!
         if (y + 1 < map->rows) {
-            if (map->grid[y+1][x].height < map->grid[y][x].height) {
-                float neighborH = map->grid[y+1][x].height * 8.0f;
+            int southH = map->grid[y+1][x].height;
+            if (southH < currentH) {
+                float neighborH = southH * 8.0f;
                 Vector2 n4 = { g4.x, g4.y - neighborH };
                 Vector2 n3 = { g3.x, g3.y - neighborH };
                 DrawTriangleFan((Vector2[]){ t4, n4, n3, t3 }, 4, sideR);
             }
+        } else if (currentH > 0) {
+            // Map boundary edge
+            Vector2 n4 = { g4.x, g4.y };
+            Vector2 n3 = { g3.x, g3.y };
+            DrawTriangleFan((Vector2[]){ t4, n4, n3, t3 }, 4, sideR);
+        }
+
+        // SOUTH-EAST FACE (Facing camera right/down):
+        // Only draw if the neighbor to the East (x+1) is lower than this tile!
+        if (x + 1 < map->columns) {
+            int eastH = map->grid[y][x+1].height;
+            if (eastH < currentH) {
+                float neighborH = eastH * 8.0f;
+                Vector2 n2 = { g2.x, g2.y - neighborH };
+                Vector2 n3 = { g3.x, g3.y - neighborH };
+                DrawTriangleFan((Vector2[]){ t3, n3, n2, t2 }, 4, sideL);
+            }
+        } else if (currentH > 0) {
+            // Map boundary edge
+            Vector2 n2 = { g2.x, g2.y };
+            Vector2 n3 = { g3.x, g3.y };
+            DrawTriangleFan((Vector2[]){ t3, n3, n2, t2 }, 4, sideL);
         }
     }
 
+    // TOP FACE DRAWING
     if (map->grid[y][x].type == TILE_WATER) {
         float pulse = sinf(GetTime()) * 20.0f;
         Color waterColor = COLOR_BEAVIS_SHIRT;
@@ -106,7 +119,7 @@ void Draw_Tile(Map* map, int x, int y) {
         gridColor.a = base.a;
         DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, gridColor);
 
-        // Draw the top face slightly inset
+        // Inset face
         float inset = 0.2f;
         Vector2 it1 = { t1.x, t1.y + inset };
         Vector2 it2 = { t2.x - inset, t2.y };
@@ -147,7 +160,6 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
             Vector2 g1 = map->grid[current_y][current_x].isoPos;
 
             // Floor coordinates (anchors)
-            // Vector2 f1 = { g1.x, g1.y - floorH };
             Vector2 f2 = { g1.x + TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) - floorH };
             Vector2 f4 = { g1.x - TILE_SIZE, g1.y + (TILE_SIZE / 2.0f) - floorH };
             Vector2 f3 = { g1.x, g1.y + TILE_SIZE - floorH };
@@ -162,12 +174,12 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
                 DrawTriangleFan((Vector2[]){ r4, f4, f3, r3 }, 4, wallSouth);
             }
 
-            // 3. Draw East Wall segment ONLY if this tile is on the right edge
+            // Draw East Wall segment ONLY if this tile is on the right edge
             if (current_x == b->x2) {
                 DrawTriangleFan((Vector2[]){ r3, f3, f2, r2 }, 4, wallEast);
             }
 
-            // 4. Draw Roof segment for this specific tile
+            // Draw Roof segment for this specific tile
             DrawTriangleFan((Vector2[]){ r1, r4, r3, r2 }, 4, roofColor);
         }
         b = b->next;
@@ -178,20 +190,20 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
     Vector2 position = GetWorldToIso(entity->position);
     position.y -= entity->altitude;
 
-    if(entity->type == ENTITY_MINERAL){
+    if (entity->type == ENTITY_MINERAL) {
         DrawMineral(entity->id, position);
-    }else{
+    } else {
         Texture2D* sprite = GetSprite(entity->type, entity->id);
         float renderHeight = (entity->type == ENTITY_ITEM) ? (sprite->height * 0.5f) : (float)sprite->height;
         float renderWidth = (entity->type == ENTITY_ITEM) ? (sprite->width * 0.5f) : (float)sprite->width;
         Vector2 drawPos = { position.x - (renderWidth / 2), position.y - renderHeight };
 
-        if(entity->type == ENTITY_ITEM ) {
+        if (entity->type == ENTITY_ITEM) {
             DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
         } else {
             DrawTextureV(*sprite, drawPos, WHITE);
             DrawText(GetName(entity->type, entity->id), drawPos.x+20, drawPos.y-20.0, 2.0, COLOR_SUNKEN_INK);
-            if(entity->type == ENTITY_ENEMY){
+            if (entity->type == ENTITY_ENEMY) {
                 char hpStr[10];
                 sprintf(hpStr,"hp:%d", entity->hp);
                 DrawText(hpStr, drawPos.x+20, drawPos.y-10.0, 1.0, COLOR_SUNKEN_INK);
@@ -213,11 +225,9 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
 
         if (entity->type == ENTITY_PLAYER) {
             Vector2 handPos = { drawPos.x + 12, drawPos.y + 48 };
-            DrawWeapon(GLOBAL_PLAYER.gear.weapon_id,handPos, map->player->combat.attackAngle);
+            DrawWeapon(GLOBAL_PLAYER.gear.weapon_id, handPos, map->player->combat.attackAngle);
         }
     }
-
-
 }
 
 void DrawWaterEffects(Map* map, int x, int y) {
@@ -227,7 +237,7 @@ void DrawWaterEffects(Map* map, int x, int y) {
     Vector2 g1 = map->grid[y][x].isoPos;
     Vector2 t1 = { g1.x, g1.y - h };
 
-    // 1. The Sparkle Logic (ONLY the effects)
+    // Sparkle Logic
     float tileSeed = (float)(x * 12.9898f + y * 78.233f);
     float sparkleTime = sinf(GetTime() * 2.5f + tileSeed);
 
@@ -235,25 +245,19 @@ void DrawWaterEffects(Map* map, int x, int y) {
         float offsetX = fmodf(tileSeed * 43758.5453f, (float)TILE_SIZE);
         float offsetY = fmodf(tileSeed * 12345.6789f, (float)TILE_SIZE / 2.0f);
 
-        // Adjusting sparklePos to stay within the diamond
         Vector2 sparklePos = { t1.x + offsetX - (int)(TILE_SIZE/2), t1.y + offsetY };
         float sizePulse = (sinf(GetTime() * 8.0f + tileSeed) + 1.0f) * 1.5f + 1.0f;
 
-        // Instead of just blue, pick a "glitter
         DrawSimpleSparkle(sparklePos, COLOR_INDANTHRONE_BLUE, sizePulse);
-        // DrawCircleV(sparklePos, sizePulse * 0.3f, WHITE);
     }
 }
 
 void DrawSimpleSparkle(Vector2 pos, Color color, float size) {
-    // 1. THE HALO (Very faint, very wide)
-    // This hides the 'edges' of the lines by pre-lighting the area
+    // Halo
     DrawCircleV(pos, size * 5.0f, Fade(color, 0.03f));
     DrawCircleV(pos, size * 3.0f, Fade(color, 0.08f));
 
-    // 2. THE FLARE (Softer lines)
-    // Instead of one thick line, we draw two:
-    // a thick faint one and a thin bright one.
+    // Flare
     float thin = size * 0.15f;
     float thick = size * 0.4f;
 
@@ -261,15 +265,13 @@ void DrawSimpleSparkle(Vector2 pos, Color color, float size) {
     DrawLineEx((Vector2){pos.x, pos.y - size}, (Vector2){pos.x, pos.y + size}, thick, Fade(color, 0.1f));
     DrawLineEx((Vector2){pos.x, pos.y - size}, (Vector2){pos.x, pos.y + size}, thin, Fade(color, 0.4f));
 
-    // Horizontal (Wide)
+    // Horizontal
     DrawLineEx((Vector2){pos.x - (size * 0.8f), pos.y}, (Vector2){pos.x + (size * 0.8f), pos.y}, thick, Fade(color, 0.1f));
     DrawLineEx((Vector2){pos.x - (size * 0.8f), pos.y}, (Vector2){pos.x + (size * 0.8f), pos.y}, thin, Fade(color, 0.4f));
 
-    // 3. THE HOT CORE (Gaussian-style stack)
-    // This makes the center feel like it's glowing from within
+    // Core
     DrawCircleV(pos, size * 0.8f, Fade(color, 0.5f));
     DrawCircleV(pos, size * 0.4f, ColorBrightness(color, 0.9f));
-    // Force a pure white additive strike at the center
     DrawCircleV(pos, size * 0.3f, (Color){ 255, 255, 255, 255 });
 
 }
@@ -291,23 +293,18 @@ void Draw_Map(Map* map, Camera2D* camera) {
     Vector2 g3 = GetIsoWorldToGrid(bl);
     Vector2 g4 = GetIsoWorldToGrid(br);
 
-    // 3. THE "BRUTE FORCE" PADDING
-    // We expand the bounds by 25 tiles in every direction.
-    // This ensures that even very tall tiles from "off-screen" are drawn.
+    // 3. PADDING & CLAMPING
     int min_x = (int)fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) - 25;
     int max_x = (int)fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x)) + 25;
     int min_y = (int)fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y)) - 25;
-    int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + 25; // Huge bottom buffer
+    int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + 25;
 
-    // 4. HARD CLAMPING TO ACTUAL MAP LIMITS
-    // This is the only way to ensure we don't crash but also don't stop at 48/50.
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
     if (max_x >= map->columns) max_x = map->columns - 1;
     if (max_y >= map->rows)    max_y = map->rows - 1;
 
-    // 5. Safe Bucket Allocation
-    // MapEntity** buckets = (MapEntity**)calloc(map->rows, sizeof(MapEntity*));
+    // 4. REPOPULATE BUCKETS
     memset(map->buckets, 0, sizeof(map->buckets));
     MapEntity* e = map->entities;
     while (e != NULL) {
@@ -318,45 +315,50 @@ void Draw_Map(Map* map, Camera2D* camera) {
         }
         e = e->next;
     }
-
-        // 6. THE LOOP: Use <= to ensure the last index (49) is hit.
-
-for (int y = min_y; y <= max_y; y++) {
+    // 5. THE LOOP: Row-by-Row rendering
+    for (int y = min_y; y <= max_y; y++) {
+        // Step 1: Render ALL tile ground/walls for the entire row first
         for (int x = min_x; x <= max_x; x++) {
             Draw_Tile(map, x, y);
-            MapEntity* curr = map->buckets[y];
-            while (curr != NULL) {
-                int tx = (int)(curr->position.x / TILE_SIZE);
-                if (tx == x) {
-                    Draw_MapEntity(curr, map);
-                }
-                curr = curr->next_in_bucket;
-            }
+        }
+
+        // Step 2: Render all static buildings on row y
+        for (int x = min_x; x <= max_x; x++) {
             Draw_Buildings(map, x, y);
         }
-    }
 
-    // Draw_Buildings(map, min_x, min_y,  max_x,  max_y);
-    BeginBlendMode(BLEND_ADDITIVE);
-    for (int y = min_y; y <= max_y; y++) {
-        for (int x = min_x; x <= max_x; x++) {
-            if(map->grid[y][x].type ==  TILE_WATER){
-                DrawWaterEffects(map,x,y);
+        // Step 3: Draw all entities belonging to row y ON TOP of row y's tiles/buildings
+        MapEntity* curr = map->buckets[y];
+        while (curr != NULL) {
+            int tx = (int)(curr->position.x / TILE_SIZE);
+            // Only draw entity if it falls within visible horizontal bounds
+            if (tx >= min_x && tx <= max_x) {
+                Draw_MapEntity(curr, map);
             }
+            curr = curr->next_in_bucket;
         }
     }
 
-    EndBlendMode();
+    // 6. WATER FX
+    BeginBlendMode(BLEND_ADDITIVE);
+        for (int y = min_y; y <= max_y; y++) {
+            for (int x = min_x; x <= max_x; x++) {
+                if (map->grid[y][x].type == TILE_WATER) {
+                    DrawWaterEffects(map, x, y);
+                }
+            }
+        }
+        EndBlendMode();
 
-    // --- PLAYER OCCLUSION SILHOUETTE PASS ---
-        if (map->player != NULL) {
-            int px = (int)(map->player->position.x / TILE_SIZE);
-            int py = (int)(map->player->position.y / TILE_SIZE);
+    // 7. PLAYER OCCLUSION SILHOUETTE PASS
+    if (map->player != NULL) {
+        int px = (int)(map->player->position.x / TILE_SIZE);
+        int py = (int)(map->player->position.y / TILE_SIZE);
 
             bool isOccluded = false;
             // Search surrounding tiles in front of the player for high geometry
-            for (int dy = 0; dy <= 4; dy++) {
-                for (int dx = 0; dx <= 4; dx++) {
+            for (int dy = 0; dy <= 2; dy++) {
+                for (int dx = 0; dx <= 2; dx++) {
                     int checkX = px + dx;
                     int checkY = py + dy;
                     if (checkX < map->columns && checkY < map->rows) {
@@ -382,7 +384,5 @@ for (int y = min_y; y <= max_y; y++) {
             }
         }
     EndMode2D();
-
-
     DrawFPS(10, 10);
 }
