@@ -18,8 +18,13 @@ typedef enum State{
 } State;
 
 typedef enum Behavior{
-    IMMOBILE,
-    WANDER
+    BEHAVIOR_IMMOBILE,
+    BEHAVIOR_WANDER,
+    BEHAVIOR_CHASE,
+    BEHAVIOR_WINDUP,
+    BEHAVIOR_ATTACK,
+    BEHAVIOR_RECOVERY,
+    BEHAVIOR_STAGGERED
 } Behavior;
 
 typedef enum ComboState{
@@ -44,6 +49,7 @@ typedef struct MapEntity {
   Vector2 position; // Pointer to the actual Character, Item, or Plant struct
   Vector2 target_position;
   Behavior behavior;
+  float behavior_timer;
   struct MapEntity* next;
   int hp;
   int id;
@@ -57,6 +63,7 @@ typedef struct MapEntity {
   struct MapEntity* next_in_bucket;
   CombatState combat;
   bool hitThisSwing;
+  bool isCollecting;
   StatBlock* stats;
 } MapEntity;
 
