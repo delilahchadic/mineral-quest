@@ -1,5 +1,5 @@
 #include "play/play_session.h"
-
+#include <math.h>
 #include <stdio.h>
 #include "defs/types_engine.h"
 #include "defs/types_ui.h"
@@ -31,7 +31,7 @@ void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
     session->player = PLAYER;
     session->menu = (Menu){0};
-    LoadMap("chill treasure room",&session->map);
+    LoadMap("dreamy treasure room",&session->map);
     InitMap(&session->map);
     InitScriptManager(&session->manager,100);
 
@@ -42,8 +42,7 @@ void InitPlaySession(PlaySession* session){
     //
     float startFloor = session->map.grid[ty][tx].height * 8.0f;
     session->map.player->altitude = startFloor;
-    session->mineral_sound = LoadSound("data/audio/mineral.wav");
-    SetSoundVolume(session->mineral_sound, 0.33);
+
     session->equip_menu.activeSlot = 0;
     session->equip_menu.activeItemSlot = 0;
     session->equip_menu.mode = SLOT_NONE;
@@ -61,9 +60,11 @@ void UpdateTalking(PlaySession* session, Input* input, float dt){
 }
 
 void UpdateAdventure(PlaySession* session, Input* input, float dt){
-
     // int worrld
-
+    if(PLAYER->stats.current_hp<=0){
+        session->state = GAME_OVER;
+        return;
+    }
     if(input->buttons_pressed & BACKSPACE_PRESSED){
         session->state = EQUIPMENT_MENU;
         return;
@@ -136,17 +137,14 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         UpdatePlayerCombatAnimation(session->map.player, dt);
         // Update facing direction based on movement
         if (input->buttons_pressed & (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
-            // Points Right (W/D) or Left (A/S) with an "Upward" bias (braced)
-            if (input->dir.x > 0 || input->dir.y < 0) {
-                session->map.player->combat.facing_direction = -1.2f; // Braced Up-Right
-            } else if (input->dir.x < 0 || input->dir.y > 0) {
-                session->map.player->combat.facing_direction = -1.94f; // Braced Up-Left
+            if (input->dir.x != 0.0f || input->dir.y != 0.0f) {
+                session->map.player->combat.facing_direction = atan2f(input->dir.y, input->dir.x);
             }
         }
 
         UpdatePhysics(&session->map, input);
         UpdateCombat(&session->map);
-        CheckForMineralCollision(session);
+        CheckAndCollectMinerals(&session->map);
         UpdateEntityMovement(&session->map, dt);
     }
     AdjustCamera(session, false,dt);

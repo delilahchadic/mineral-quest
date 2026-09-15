@@ -8,6 +8,5 @@
 
 void InitDialog(Map* map, ScriptManager* manager);
 int PollChest(Player* player, Map* map);
-bool CheckMineralPickup(Vector2 playerPos, Vector2 mineralPos, float radius);
-void CheckForMineralCollision(PlaySession* session);
+void CheckAndCollectMinerals(Map* map);
 #endif

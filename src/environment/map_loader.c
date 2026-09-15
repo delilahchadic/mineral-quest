@@ -121,7 +121,7 @@ void LoadMap(const char* mapName, Map* map) {
                 m->hp = ENEMY_REGISTRY[m->id].hp;
             }
             if (m->type == ENTITY_CHARACTER || m->type == ENTITY_ENEMY) {
-                m->behavior = WANDER;
+                m->behavior = BEHAVIOR_WANDER;
                 m->speed = 30.0f;
                 m->target_position = m->position;
             }
@@ -135,7 +135,7 @@ void LoadMap(const char* mapName, Map* map) {
             } else {
                 m->altitude = 0.0f;
             }
-
+            m->isCollecting = false;
             Add_Entity(map, m);
         }
 

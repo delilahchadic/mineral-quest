@@ -255,41 +255,152 @@ bool PickNewWanderTarget(Map* map, MapEntity* entity) {
     }
     return false;
 }
+void UpdateWanderBehavior(Map* map, MapEntity* entity, float dt) {
+    Vector2 diff = Vector2Subtract(entity->target_position, entity->position);
+    float distance = Vector2Length(diff);
+
+    if (distance > 1.0f) {
+        entity->position = Vector2Add(entity->position, Vector2Scale(Vector2Normalize(diff), entity->speed * dt));
+
+        // Hard clamp position to stay within map pixel boundaries
+        if (entity->position.x < 0.0f) entity->position.x = 0.0f;
+        if (entity->position.x > (float)map->pixel_width) entity->position.x = (float)map->pixel_width;
+        if (entity->position.y < 0.0f) entity->position.y = 0.0f;
+        if (entity->position.y > (float)map->pixel_height) entity->position.y = (float)map->pixel_height;
+
+        int tx = (int)(entity->position.x / TILE_SIZE);
+        int ty = (int)(entity->position.y / TILE_SIZE);
+
+        // Prevent array out-of-bounds if exactly on the right/bottom edge
+        if (tx >= map->columns) tx = map->columns - 1;
+        if (ty >= map->rows) ty = map->rows - 1;
+
+        if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
+            float targetAlt = map->grid[ty][tx].height * 8.0f;
+            entity->altitude += (targetAlt - entity->altitude) * 10.0f * dt;
+        }
+    } else if (!PickNewWanderTarget(map, entity)) {
+        entity->target_position = entity->position;
+    }
+}
+
+void UpdateEnemyCombat(Map* map, MapEntity* e, float dt) {
+    if (e->type != ENTITY_ENEMY) return;
+
+    MapEntity* player = map->player;
+    float distToPlayer = Vector2Distance(e->position, player->position);
+
+    switch (e->behavior) {
+        case BEHAVIOR_WANDER:
+            // Existing wander behavior, but poll for player proximity
+            if (distToPlayer < 140.0f) {
+                e->behavior = BEHAVIOR_CHASE;
+            } else {
+                // Run normal wander movement
+                UpdateWanderBehavior(map, e, dt);
+            }
+            break;
+
+        case BEHAVIOR_CHASE:
+                        if (distToPlayer > 220.0f) {
+                            e->behavior = BEHAVIOR_WANDER;
+                        } else if (distToPlayer < 80.0f) { // Widen from 50.0f to catch clustered group
+                            // Close enough to strike! Enter telegraph/windup
+                            e->behavior = BEHAVIOR_WINDUP;
+                            e->behavior_timer = 0.0f;
+                        } else {
+                            // Move smoothly toward player
+                            Vector2 dir = Vector2Normalize(Vector2Subtract(player->position, e->position));
+                            e->position = Vector2Add(e->position, Vector2Scale(dir, e->speed * 0.9f * dt));
+                        }
+                        break;
+
+        case BEHAVIOR_WINDUP:
+            e->behavior_timer += dt;
+            // 300ms visual telegraph window
+            if (e->behavior_timer >= 0.3f) {
+                e->behavior = BEHAVIOR_ATTACK;
+                e->behavior_timer = 0.0f;
+            }
+            break;
+
+        case BEHAVIOR_ATTACK: {
+                    // Give enemies a generous hit footprint matching their 64x64 transparent sprite bounds
+                    float enemyRadius = 26.0f;
+                    float playerRadius = 12.0f; // Adjust to your player core size
+                    Vector2 dir = Vector2Normalize(Vector2Subtract(player->position, e->position));
+                    e->position = Vector2Add(e->position, Vector2Scale(dir, e->speed * 0.9f * dt));
+                    // Check edge-to-edge distance instead of strict center-to-center
+                    if (distToPlayer < (enemyRadius + playerRadius + 10.0f)) {
+                        // Hurt player logic
+                        printf("Player hit by enemy!\n");
+                        map->hitstop_timer = 0.06f; // Impact hitstop
+                        DamagePlayer(35);
+
+                        // Apply knockback to player
+                        Vector2 kbDir = Vector2Normalize(Vector2Subtract(player->position, e->position));
+                        player->position = Vector2Add(player->position, Vector2Scale(kbDir, 25.0f));
+                        e->behavior = BEHAVIOR_RECOVERY;
+                        e->behavior_timer = 0.0f;
+                    }
+
+                    break;
+                }
+
+        case BEHAVIOR_RECOVERY:
+            e->behavior_timer += dt;
+            // 400ms recovery window where enemy is vulnerable
+            if (e->behavior_timer >= 0.4f) {
+                e->behavior = BEHAVIOR_CHASE;
+            }
+            break;
+
+        default:
+                e->behavior = BEHAVIOR_WANDER;
+            break;
+    }
+}
 
 void UpdateEntityMovement(Map* map, float dt) {
     MapEntity* entity = map->entities;
+    MapEntity* prev = NULL;
+
     while (entity) {
-        if (entity->behavior == WANDER) {
-            Vector2 diff = Vector2Subtract(entity->target_position, entity->position);
-            float distance = Vector2Length(diff);
+        if (entity->isCollecting) {
+            Vector2 targetPos = map->player->position;
+            entity->position = Vector2Lerp(entity->position, targetPos, 40.0f *dt);
 
-            if (distance > 1.0f) {
-                entity->position = Vector2Add(entity->position, Vector2Scale(Vector2Normalize(diff), entity->speed * dt));
+            if (Vector2DistanceSqr(entity->position, targetPos) < 10.0f) {
+                GLOBAL_PLAYER.mineral_inventory[entity->id]++;
+                float pitch = 0.95f + ((float)(entity->id % 10) / 100.0f);
+                SetSoundPitch(MINERAL_SOUND, pitch);
+                PlaySound(MINERAL_SOUND);
 
-                // Hard clamp position to stay within map pixel boundaries
-                if (entity->position.x < 0.0f) entity->position.x = 0.0f;
-                if (entity->position.x > (float)map->pixel_width) entity->position.x = (float)map->pixel_width;
-                if (entity->position.y < 0.0f) entity->position.y = 0.0f;
-                if (entity->position.y > (float)map->pixel_height) entity->position.y = (float)map->pixel_height;
-
-                int tx = (int)(entity->position.x / TILE_SIZE);
-                int ty = (int)(entity->position.y / TILE_SIZE);
-
-                // Prevent array out-of-bounds if exactly on the right/bottom edge
-                if (tx >= map->columns) tx = map->columns - 1;
-                if (ty >= map->rows) ty = map->rows - 1;
-
-                if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
-                    float targetAlt = map->grid[ty][tx].height * 8.0f;
-                    entity->altitude += (targetAlt - entity->altitude) * 10.0f * dt;
+                // Safely remove entity from linked list and free it
+                MapEntity* toFree = entity;
+                if (prev == NULL) {
+                    map->entities = entity->next;
+                    entity = map->entities;
+                } else {
+                    prev->next = entity->next;
+                    entity = entity->next;
                 }
-            } else if (!PickNewWanderTarget(map, entity)) {
-                entity->target_position = entity->position;
+                if (toFree->type != ENTITY_PLAYER) free(toFree);
+                continue; // Skip the default prev/entity advance since we already moved it
             }
         }
+
+        if (entity->type == ENTITY_ENEMY) {
+            UpdateEnemyCombat(map, entity, dt);
+        } else if (entity->behavior == BEHAVIOR_WANDER) {
+            UpdateWanderBehavior(map, entity, dt);
+        }
+
+        prev = entity;
         entity = entity->next;
     }
 }
+
 
 int getExchangeNodeByCharacterId(Map* map, int character_id){ // poll map->nodes for a node that has a matching character id
     if(map == NULL || map->node_count <0 || character_id < 0) return -1;
