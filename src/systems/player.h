@@ -11,4 +11,6 @@ void RecalculateStats(StatBlock* stats, EquipmentSet* gear);
 void RemoveItemAt(Player* player, int index);
 int CanAfford(Player* player, CostSlot slot);
 void ProcessRecipe(Player* player, Exchange e);
+void SetDefaultStat(Player* player);
+void DamagePlayer(int damage);
 #endif

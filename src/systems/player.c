@@ -4,8 +4,12 @@
 #include "registry/register.h"
 #include <string.h>
 
+void DamagePlayer(int damage){
+    int damageDealt = damage > GLOBAL_PLAYER.stats.current_hp ? GLOBAL_PLAYER.stats.current_hp : damage;
+    GLOBAL_PLAYER.stats.current_hp -= damageDealt;
+}
 void InitEquipmentSet(EquipmentSet* gear) {
-    gear->weapon_id = 12;// equip the iron sword
+    gear->weapon_id = 12;// equip the classical guitar
     for (int i = 0; i < MAX_ACCESSORY_SLOTS; i++) {
         gear->accessory_ids[i] = -1;
     }
@@ -47,6 +51,8 @@ void ProcessRecipe(Player* player, Exchange e){
     player->item_inventory[e.item_id]++;
 }
 void SetDefaultStat(Player* player){
+    player->stats.max_hp =100;
+    player->stats.current_hp = 100;
     player->stats.base[STAT_STR] = 8;
     player->stats.base[STAT_DEF] = 7;
     player->stats.base[STAT_MAG_OFF] = 5;
@@ -60,20 +66,22 @@ void SetDefaultStat(Player* player){
 }
 
 void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
-    // 1. Reset current stats to base stats
+    // 1. Reset base stats and baseline max HP
+    stats->max_hp = 100;
     for (int i = 0; i < STAT_COUNT; i++) {
         stats->current[i] = stats->base[i];
     }
 
-    // 2. Add Weapon Stats
+    // 2. Add Weapon Stats (Applied ONCE, outside the stat loop)
     if (gear->weapon_id != -1) {
         ItemDefinition* weapon = &ITEM_REGISTRY[gear->weapon_id];
+        stats->max_hp += weapon->hp_bonus;
         for (int s = 0; s < STAT_COUNT; s++) {
             stats->current[s] += weapon->stat_bonuses[s];
         }
     }
 
-    // 3. Add Accessory Stats (Only up to currently unlocked slots)
+    // 3. Add Accessory Stats (Only up to unlocked slots)
     int allowed_slots = stats->current[STAT_ACCESORY_COUNT];
     if (allowed_slots > MAX_ACCESSORY_SLOTS) allowed_slots = MAX_ACCESSORY_SLOTS;
 
@@ -81,10 +89,16 @@ void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
         int acc_id = gear->accessory_ids[i];
         if (acc_id != -1) {
             ItemDefinition* acc = &ITEM_REGISTRY[acc_id];
+            stats->max_hp += acc->hp_bonus; // Applied ONCE per accessory
             for (int s = 0; s < STAT_COUNT; s++) {
                 stats->current[s] += acc->stat_bonuses[s];
             }
         }
+    }
+
+    // 4. Ensure current HP doesn't exceed the newly calculated max HP
+    if (stats->current_hp > stats->max_hp) {
+        stats->current_hp = stats->max_hp;
     }
 }
 
