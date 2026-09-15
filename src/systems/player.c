@@ -5,7 +5,7 @@
 #include <string.h>
 
 void InitEquipmentSet(EquipmentSet* gear) {
-    gear->weapon_id = 5;// equip the iron sword
+    gear->weapon_id = 12;// equip the iron sword
     for (int i = 0; i < MAX_ACCESSORY_SLOTS; i++) {
         gear->accessory_ids[i] = -1;
     }

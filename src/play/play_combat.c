@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "environment/map.h"
+#include "registry/register.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -36,6 +37,7 @@ void InitCombat(Map* map){
 }
 
 void UpdateCombat(Map* map) {
+    if(PLAYER->gear.weapon_id==-1) return;
     MapEntity* player = map->player;
 
     if (!player->combat.isAttacking) return;
@@ -133,6 +135,7 @@ void UpdateCombat(Map* map) {
 }
 
 void UpdatePlayerCombatAnimation(MapEntity* player, float dt){
+    if(PLAYER->gear.weapon_id==-1) return;
     float baseAngle = player->combat.facing_direction;
     if (baseAngle == 0 && !player->combat.isAttacking) {
         baseAngle = -1.2f; // Default to braced Right

@@ -24,7 +24,7 @@
 #define COLOR_BLUE_OCHRE     (Color){ 128,136,160, 255 }
 #define COLOR_BASALT     (Color){ 60,59, 77, 255 }
 #define COLOR_PERIWINKLE_SLATE     (Color){ 128, 128, 191, 255 }
-
+#define COLOR_GUITAR_AMBER (Color){ 215, 150, 85, 255 }
 
 // --- THE CERULEAN CORE & HUE SHIFTS ---
 #define COLOR_CERULEAN_CORE     (Color){ 42, 82, 190, 255 }

@@ -13,6 +13,7 @@
 #include "systems/script_manager.h"
 #include "systems/input.h"
 #include "registry/register.h"
+#include "registry/weapon_register.h"
 #include "raymath.h"
 #include "defs/types_entities.h"
 #include "defs/types_systems.h"
@@ -173,57 +174,6 @@ void Draw_Buildings(Map* map, int current_x, int current_y) {
     }
 }
 
-
-void DrawSimpleSword(Vector2 position, float rotation) {
-    float bladeLength = 34.0f;
-    float tipLength = 12.0f;
-    float bladeWidth = 4.5f;
-    float guardWidth = 14.0f;
-    float guardThick = 2.5f;
-    float hiltLength = 14.0f;
-
-    // METALLIC PALETTE - Using Sunken Ink as the base
-    Color metalShadow = COLOR_SUNKEN_INK;
-    // Light side is Sunken Ink lightened up significantly
-    Color metalBase = ColorBrightness(COLOR_SUNKEN_INK, 0.4f);
-    Color highlight = WHITE;
-    Color gold = COLOR_PYRITE_BRASS;
-    Color leather = COLOR_BURNT_SIENNA;
-
-    float cosR = cosf(rotation);
-    float sinR = sinf(rotation);
-    float cosP = cosf(rotation + PI/2.0f);
-    float sinP = sinf(rotation + PI/2.0f);
-
-    // HILT & POMMEL
-    Vector2 hiltEnd = { position.x - cosR * hiltLength, position.y - sinR * hiltLength };
-    DrawLineEx(position, hiltEnd, 3.0f, leather);
-    DrawCircleV(hiltEnd, 2.5f, gold);
-
-    // THE GUARD
-    Vector2 gL = { position.x - cosP * guardWidth/2, position.y - sinP * guardWidth/2 };
-    Vector2 gR = { position.x + cosP * guardWidth/2, position.y + sinP * guardWidth/2 };
-    DrawLineEx(gL, gR, guardThick, gold);
-
-    // BLADE POINTS
-    Vector2 bL = { position.x - cosP * bladeWidth/2, position.y - sinP * bladeWidth/2 };
-    Vector2 bR = { position.x + cosP * bladeWidth/2, position.y + sinP * bladeWidth/2 };
-    Vector2 sL = { bL.x + cosR * bladeLength, bL.y + sinR * bladeLength };
-    Vector2 sR = { bR.x + cosR * bladeLength, bR.y + sinR * bladeLength };
-    Vector2 tip = { position.x + cosR * (bladeLength + tipLength), position.y + sinR * (bladeLength + tipLength) };
-
-    // BLADE GEOMETRY
-    DrawTriangle(sL, bL, position, metalShadow);
-    DrawTriangle(tip, sL, position, metalShadow);
-    DrawTriangle(bR, sR, position, metalBase);
-    DrawTriangle(sR, tip, position, metalBase);
-
-    // FINISHING SHINE
-    DrawLineV(position, tip, highlight);
-}
-
-
-
 void Draw_MapEntity(MapEntity* entity, Map* map) {
     Vector2 position = GetWorldToIso(entity->position);
     position.y -= entity->altitude;
@@ -261,13 +211,10 @@ void Draw_MapEntity(MapEntity* entity, Map* map) {
             DrawCircleGradient(shadowPos.x, shadowPos.y, 8, Fade(BLACK, 0.3f), BLANK);
         }
 
-            if(entity->type == ENTITY_PLAYER) {
-                // Adjusted offsets to align with the character's right arm (viewer's left-ish)
-                // Based on image_0f13da.png, his 'hand' area is about 32 pixels down and 8 pixels in.
-                Vector2 handPos = { drawPos.x + 12, drawPos.y + 48 };
-
-                DrawSimpleSword(handPos, map->player->combat.attackAngle);
-            }
+        if (entity->type == ENTITY_PLAYER) {
+            Vector2 handPos = { drawPos.x + 12, drawPos.y + 48 };
+            DrawWeapon(GLOBAL_PLAYER.gear.weapon_id,handPos, map->player->combat.attackAngle);
+        }
     }
 
 
