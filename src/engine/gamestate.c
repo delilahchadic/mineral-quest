@@ -1,5 +1,6 @@
 #include "engine/gamestate.h"
 
+#include "defs/types_engine.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "defs/constants.h"
@@ -12,6 +13,7 @@
 #include "registry/register.h"
 #include "registry/command_interface.h"
 #include "systems/input.h"
+#include "systems/player.h"
 #include "ui/menu.h"
 
 void InitGame(Gamestate* gamestate){
@@ -38,6 +40,13 @@ void UpdateScene(Gamestate* gamestate){
       break;
     }
     case GAMEPLAY:
+        if(gamestate->session->state ==  GAME_OVER){
+            gamestate->screen = TITLE;
+            Close_Map(&gamestate->session->map);
+            gamestate->session->state =0;
+            SetDefaultStat(PLAYER);
+            RecalculateStats(&PLAYER->stats, &PLAYER->gear);
+        }
       UpdatePlaySession(gamestate->session);
       break;
     case EDIT_SCREEN:
