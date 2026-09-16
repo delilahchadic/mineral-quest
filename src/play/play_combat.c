@@ -36,6 +36,36 @@ void InitCombat(Map* map){
     }
 }
 
+// Internal helper function (not exposed in header)
+static void ProcessHit(Map* map, MapEntity* player, MapEntity* target) {
+    target->hitThisSwing = true;
+
+    // Hitstop freeze frame
+    map->hitstop_timer = (player->combat.combo_state == COMBO_3) ? 0.12f : 0.05f;
+
+    // Instant destruction (Plants)
+    if (target->type == ENTITY_PLANT) {
+        Remove_Entity(map, target);
+        return;
+    }
+
+    // Damage dealing (Enemies)
+    if (target->type == ENTITY_ENEMY) {
+        target->hp -= PLAYER->stats.current[STAT_STR];
+        if (target->hp <= 0) {
+            Remove_Entity(map, target);
+            return;
+        }
+    }
+
+    // Unified Knockback for all remaining entities
+    Vector2 dir = Vector2Normalize(Vector2Subtract(target->position, player->position));
+    float knockbackForce = (player->combat.combo_state == COMBO_3) ? 40.0f : 20.0f;
+
+    target->position.x += dir.x * knockbackForce;
+    target->position.y += dir.y * knockbackForce;
+}
+
 void UpdateCombat(Map* map) {
     if(PLAYER->gear.weapon_id == -1) return;
     MapEntity* player = map->player;
@@ -90,31 +120,7 @@ void UpdateCombat(Map* map) {
             }
 
             if (hit && !e->hitThisSwing) {
-                printf("Hit entity!\n");
-                e->hitThisSwing = true;
-
-                if (player->combat.combo_state == COMBO_3) {
-                    map->hitstop_timer = 0.12f;
-                } else {
-                    map->hitstop_timer = 0.05f;
-                }
-
-                Vector2 dir = Vector2Normalize(
-                    Vector2Subtract(e->position, player->position)
-                );
-
-                if (e->type == ENTITY_PLANT) {
-                    Remove_Entity(map, e);
-                } else if (e->type == ENTITY_ENEMY) {
-                    e->hp = e->hp - PLAYER->stats.current[STAT_STR];
-                    if (e->hp <= 0) {
-                        Remove_Entity(map, e);
-                    }
-                } else {
-                    float knockbackForce = (player->combat.combo_state == COMBO_3) ? 40.0f : 20.0f;
-                    e->position.x += dir.x * knockbackForce;
-                    e->position.y += dir.y * knockbackForce;
-                }
+                ProcessHit(map, map->player, e);
             }
         }
         e = next;

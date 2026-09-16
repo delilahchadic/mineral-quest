@@ -8,6 +8,7 @@ void DamagePlayer(int damage){
     int damageDealt = damage > GLOBAL_PLAYER.stats.current_hp ? GLOBAL_PLAYER.stats.current_hp : damage;
     GLOBAL_PLAYER.stats.current_hp -= damageDealt;
 }
+
 void InitEquipmentSet(EquipmentSet* gear) {
     gear->weapon_id = 12;// equip the classical guitar
     for (int i = 0; i < MAX_ACCESSORY_SLOTS; i++) {
@@ -72,7 +73,7 @@ void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
         stats->current[i] = stats->base[i];
     }
 
-    // 2. Add Weapon Stats (Applied ONCE, outside the stat loop)
+    // 2. Add Weapon Stats
     if (gear->weapon_id != -1) {
         ItemDefinition* weapon = &ITEM_REGISTRY[gear->weapon_id];
         stats->max_hp += weapon->hp_bonus;
@@ -81,22 +82,21 @@ void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
         }
     }
 
-    // 3. Add Accessory Stats (Only up to unlocked slots)
-    int allowed_slots = stats->current[STAT_ACCESORY_COUNT];
-    if (allowed_slots > MAX_ACCESSORY_SLOTS) allowed_slots = MAX_ACCESSORY_SLOTS;
-
-    for (int i = 0; i < allowed_slots; i++) {
+    // 3. Add Accessory Stats dynamically
+    // Re-evaluating the condition (stats->current[STAT_ACCESORY_COUNT]) allows
+    // an earlier accessory to unlock subsequent accessory slots on the fly.
+    for (int i = 0; i < MAX_ACCESSORY_SLOTS && i < stats->current[STAT_ACCESORY_COUNT]; i++) {
         int acc_id = gear->accessory_ids[i];
         if (acc_id != -1) {
             ItemDefinition* acc = &ITEM_REGISTRY[acc_id];
-            stats->max_hp += acc->hp_bonus; // Applied ONCE per accessory
+            stats->max_hp += acc->hp_bonus;
             for (int s = 0; s < STAT_COUNT; s++) {
                 stats->current[s] += acc->stat_bonuses[s];
             }
         }
     }
 
-    // 4. Ensure current HP doesn't exceed the newly calculated max HP
+    // 4. Cap HP
     if (stats->current_hp > stats->max_hp) {
         stats->current_hp = stats->max_hp;
     }
