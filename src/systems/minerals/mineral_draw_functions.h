@@ -26,5 +26,6 @@ void DrawOlivine(Vector2 center);
 void DrawRawChunk(Vector2 center, Color baseColor);
 void DrawBeryl(Vector2 center);
 void DrawHalite(Vector2 center);
+void DrawLapisLazuli(Vector2 center);
 void DrawIsometricCube(Vector2 center, float width, float height, Color baseColor, float rotation, float transparency, bool isMetallic);
 #endif

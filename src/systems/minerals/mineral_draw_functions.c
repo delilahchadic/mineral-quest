@@ -633,3 +633,80 @@ void DrawRawChunk(Vector2 center, Color baseColor) {
     // 6. Subsurface Scattering Glow
     DrawCircleGradient(center.x, center.y, size * 1.2f, Fade(baseColor, 0.2f), BLANK);
 }
+
+// Lapis Lazuli: Deep Ultramarine Rock with Pyrite & Calcite Inclusions
+void DrawLapisLazuli(Vector2 center) {
+    float size = 8.5f;
+    float verticalScale = 6.5f;
+    float time = GetTime();
+    float rotation = time * 1.5f;
+    int points = 6; // Hexagonal-ish irregular rock chunk
+    Vector2 verts[6];
+
+    // 1. Base Ultramarine / Ultramarine Blue Base
+    Color lapisBase = (Color){ 20, 50, 160, 255 };
+    Color calciteWhite = (Color){ 230, 235, 245, 180 };
+    Color pyriteGold = (Color){ 240, 190, 40, 255 };
+
+    // 2. Deep Subsurface Ultramarine Glow
+    DrawCircleGradient((int)center.x, (int)center.y, size * 1.3f, Fade(lapisBase, 0.35f), BLANK);
+
+    // 3. Calculate "Waist" Vertices
+    for (int i = 0; i < points; i++) {
+        float angle = (i * (360.0f / points) * DEG2RAD) + rotation;
+        // Irregular jitter to feel like broken rough stone
+        float jitter = (i % 2 == 0) ? 1.15f : 0.85f;
+        verts[i] = (Vector2){
+            center.x + cosf(angle) * size * jitter,
+            center.y + sinf(angle) * (size * 0.5f) * jitter
+        };
+    }
+
+    Vector2 topPeak = { center.x, center.y - verticalScale };
+    Vector2 botPeak = { center.x, center.y + verticalScale };
+
+    // 4. Draw Dark Under-Faces (Shadowed bottom)
+    for (int i = 0; i < points; i++) {
+        int next = (i + 1) % points;
+        Color shadowCol = ColorBrightness(lapisBase, -0.45f);
+        DrawTriangle(botPeak, verts[i], verts[next], shadowCol);
+    }
+
+    // 5. Draw Faceted Top Faces & Inclusions
+    for (int i = 0; i < points; i++) {
+        int next = (i + 1) % points;
+
+        // Front-facing visibility check
+        if (verts[next].x < verts[i].x || (verts[i].y > center.y)) {
+            float faceAngle = (i * (360.0f / points) * DEG2RAD) + rotation;
+            float light = (cosf(faceAngle) * 0.25f);
+            Color faceCol = ColorBrightness(lapisBase, light);
+
+            // Core Face
+            DrawTriangle(topPeak, verts[next], verts[i], faceCol);
+
+            // Calcite Vein (White streak across certain facets)
+            if (i % 2 == 0) {
+                Vector2 veinStart = Vector2Lerp(topPeak, verts[i], 0.3f);
+                Vector2 veinEnd = Vector2Lerp(verts[next], verts[i], 0.6f);
+                DrawLineEx(veinStart, veinEnd, 1.2f, Fade(calciteWhite, 0.4f));
+            }
+
+            // Pyrite Specks (Golden Shimmering Flecks)
+            float speckSeed = sinf(i * 12.9898f + floorf(time * 3.0f));
+            if (speckSeed > 0.3f) {
+                Vector2 speckPos = Vector2Lerp(topPeak, verts[i], 0.5f);
+                // Tiny golden glint point
+                DrawPixelV(speckPos, pyriteGold);
+                if (speckSeed > 0.7f) {
+                    DrawCircleV(speckPos, 0.8f, Fade(WHITE, 0.7f)); // Specular flash
+                }
+            }
+
+            // Edge highlight on lit facets
+            if (light > 0.1f) {
+                DrawLineV(topPeak, verts[i], Fade(WHITE, 0.25f));
+            }
+        }
+    }
+}

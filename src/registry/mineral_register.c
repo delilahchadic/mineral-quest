@@ -91,6 +91,11 @@ MineralDefinition mineral_register[MINERAL_COUNT] = {
         .label = "Halite",
         .color = WHITE,
         .draw_function = DrawHalite
+    },
+    [MINERAL_LAPIS_LAZULI]={
+        .label = "Lapis Lazuli",
+        .color = COLOR_ULTRAMARINE,
+        .draw_function = DrawLapisLazuli
     }
 };
 

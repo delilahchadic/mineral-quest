@@ -20,6 +20,7 @@ typedef enum Mineral{
     MINERAL_OLIVINE,
     MINERAL_BERYL,
     MINERAL_HALITE,
+    MINERAL_LAPIS_LAZULI,
     MINERAL_COUNT
 }Mineral;
 
