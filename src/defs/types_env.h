@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "raylib.h"
 #include "defs/types_entities.h"
-
+#define TILE_SIZE 32
 #define MAP_WIDTH 100
 #define MAP_HEIGHT 100
 // Physical dimensions in pixels

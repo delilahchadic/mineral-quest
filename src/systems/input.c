@@ -40,6 +40,10 @@ Input CaptureInput(){
   }
 
   if(IsKeyDown(KEY_LEFT_SHIFT)){
+    i.buttons_pressed |= SHIFT_DOWN;
+  }
+
+  if(IsKeyPressed(KEY_LEFT_SHIFT)){
     i.buttons_pressed |= SHIFT_PRESSED;
   }
 

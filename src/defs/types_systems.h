@@ -21,11 +21,12 @@ typedef enum ButtonPressed{
   KEY_S_PRESSED = 1 <<4,
   ENTER_PRESSED = 1<<5,
   BACKSPACE_PRESSED = 1 <<6,
-  SHIFT_PRESSED = 1 << 7,
+  SHIFT_DOWN = 1 << 7, //used for edit
   CONTROL_PRESSED = 1 <<8,
   MINERAL_PRESSED = 1 << 9,
   LEVEL_PRESSED = 1 << 10,
   KEY_P_PRESSED = 1 <<11,
+  SHIFT_PRESSED = 1 <<12, // for use in play for press
   MOVEMENT_PRESSED = 1 <<15,
   LEFT_MOUSE_CLICKED = 1 <<16,
   LEFT_MOUSE_DOWN = 1 <<17,

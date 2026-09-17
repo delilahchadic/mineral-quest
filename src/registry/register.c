@@ -3,6 +3,7 @@
 #include "defs/types_entities.h"
 #include "defs/types_minerals.h"
 #include "engine/palette.h"
+#include "raylib.h"
 #include "registry/mineral_register.h"
 
 Enemy ENEMY_REGISTRY[100] = {0};
@@ -17,11 +18,18 @@ Exchange EXCHANGE_REGISTRY[1000] = {0};
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
 Player* PLAYER;
+
+int WORLD_COUNT = 0;
+World WORLD_REGISTER[100] = {};
 static int item_count = 0;
 static int plant_count = 0;
 static int charcter_count = 0;
-static int level_count = 0;
+static int portal_count = 0;
 static int enemy_count = 0;
+
+Texture2D PORTAL_TV_SPRITE;
+Texture2D PORTAL_CRYSTAL_SPRITE;
+
 
 char* STATS_NAMES[STAT_COUNT] = {
     "Strength",
@@ -82,7 +90,7 @@ char* GetName(EntityType type, int id){
             return ITEM_REGISTRY[id].name;
             break;
         case ENTITY_PORTAL:
-            return PORTAL_REGISTRY[id].level_name;
+            return PORTAL_REGISTRY[id].name;
             break;
         case ENTITY_ENEMY:
             return ENEMY_REGISTRY[id].species_name;
@@ -138,7 +146,10 @@ Texture2D* GetSprite(EntityType type, int id){
         case ENTITY_PLAYER:
             return &GLOBAL_PLAYER.sprite;
         case ENTITY_PORTAL:
-            return &PORTAL_REGISTRY[id].sprite;
+            switch (PORTAL_REGISTRY[id].type) {
+                case PORTAL_CRYSTAL: return &PORTAL_CRYSTAL_SPRITE;
+                case PORTAL_TV: return &PORTAL_TV_SPRITE;
+            }
         case ENTITY_ENEMY:
             return &ENEMY_REGISTRY[id].sprite;
         default:
@@ -176,7 +187,7 @@ int GetEntityTypeCount(EntityType type){
         case ENTITY_PLANT: return plant_count;
         case ENTITY_ITEM: return item_count;
         case ENTITY_CHARACTER: return charcter_count;
-        case ENTITY_PORTAL: return level_count;
+        case ENTITY_PORTAL: return portal_count;
         case ENTITY_ENEMY: return enemy_count;
         case ENTITY_MINERAL: return MINERAL_COUNT;
         case ENTITY_PLAYER: return 1;
@@ -196,7 +207,7 @@ void SetEntityTypeCount(EntityType type, int count){
             charcter_count = count;
             return;
         case ENTITY_PORTAL:
-            level_count = count;
+            portal_count = count;
             return;
         case ENTITY_ENEMY:
             enemy_count = count;
@@ -208,4 +219,31 @@ void SetEntityTypeCount(EntityType type, int count){
 
 int GetCharacterId(int node_id){
     return NODE_REGISTRY[node_id].character_id;
+}
+
+char* GetWorldName(int world_id){
+    if(world_id<0 || world_id >99 || world_id >= WORLD_COUNT){
+        return "invalid world name";
+    }
+    return WORLD_REGISTER[world_id].name;
+}
+char* GetWorldNameFromPortalId(int portal_id){
+    if(portal_id<0 || portal_id >99 || portal_id >= portal_count){
+        return "invalid world name";
+    }
+    return WORLD_REGISTER[PORTAL_REGISTRY[portal_id].world_id].name;
+}
+
+int GetWorldIDFromPortal(int portal_id){
+    if(portal_id<0 || portal_id >99 || portal_id >= portal_count){
+        return -1;
+    }
+    return PORTAL_REGISTRY[portal_id].world_id;
+}
+
+Vector2 GetDestination(EntityType type, int id){
+    switch (type) {
+        case ENTITY_PORTAL: return PORTAL_REGISTRY[id].destination;
+        default: return (Vector2){0,0};
+    }
 }

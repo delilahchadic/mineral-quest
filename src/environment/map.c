@@ -56,7 +56,6 @@ void Init_Player(Map* map){
   MapEntity* player = malloc(sizeof(MapEntity));
   player->type = ENTITY_PLAYER;
   player->state = NORMAL_STATE;
-  player->position = (Vector2){30,30};
   Add_Entity(map,player);
   map->player = player;
   player->jumpoffset = 0.0f;

@@ -78,10 +78,22 @@ typedef struct Plant{
   uint32_t default_trait_flags;
 } Plant;
 
+typedef enum PortalType{
+    PORTAL_TV,
+    PORTAL_CRYSTAL
+}PortalType;
+
+typedef struct World{
+    int id;
+    char name[32];
+}World;
+
 typedef struct Portal{
     int id;
-    char level_name[32];
-    Texture2D sprite;
+    char name[32];
+    int world_id;
+    PortalType type;
+    Vector2 destination;
 } Portal;
 
 typedef enum {

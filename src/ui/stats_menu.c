@@ -6,7 +6,7 @@
 #include "registry/register.h"
 
 void UpdateStatsMenu(PlaySession* session, Input* input){
-  if(input->buttons_pressed & KEY_P_PRESSED){
+  if(input->buttons_pressed & SHIFT_DOWN){
     session->state = ADVENTURE;
   }
 }

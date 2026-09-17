@@ -11,7 +11,7 @@ void UpdateSelectionBuffer(EditSession* session,Input *input){
 
         if(input->buttons_pressed & CONTROL_PRESSED){
             SetTileSelected(&session->buffer, selection.x, selection.y, !IsTileSelected(&session->buffer, selection.x, selection.y));
-        }else if(input->buttons_pressed & SHIFT_PRESSED && session->last_selected_tile.x >= 0){
+        }else if(input->buttons_pressed & SHIFT_DOWN && session->last_selected_tile.x >= 0){
             if(IsTileSelected(&session->buffer, session->last_selected_tile.x, session->last_selected_tile.y)){
                 SelectGridLine(session, selection );
             }
@@ -34,7 +34,7 @@ void UpdateSelectionBuffer(EditSession* session,Input *input){
                 ClearSelection(&session->buffer);
             }
 
-            if(input->buttons_pressed & SHIFT_PRESSED){
+            if(input->buttons_pressed & SHIFT_DOWN){
                 SelectRectangle(session, selection,true);
             }else{
                 SelectRectangle(session, selection, false);
@@ -48,7 +48,7 @@ void UpdateSelectionBuffer(EditSession* session,Input *input){
         if(! (input->buttons_pressed & CONTROL_PRESSED)){
             ClearSelection(&session->buffer);
         }
-        if(input->buttons_pressed & SHIFT_PRESSED){
+        if(input->buttons_pressed & SHIFT_DOWN){
             SelectRectangle(session, selection,true);
         }else{
             SelectRectangle(session, selection,false);

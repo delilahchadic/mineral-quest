@@ -31,9 +31,11 @@ void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
     session->player = PLAYER;
     session->menu = (Menu){0};
-    LoadMap("dreamy treasure room",&session->map);
+    int startPortalId = 10;// dreamy treasure room
+    LoadMap(GetWorldName(GetWorldIDFromPortal(startPortalId)),&session->map);
     InitMap(&session->map);
     InitScriptManager(&session->manager,100);
+    session->map.player->position = GetDestination(ENTITY_PORTAL, startPortalId);
 
     CenterCameraOn(&session->camera,session->map.player->position,3.0f, &session->map);
     int tx = (int)(session->map.player->position.x / TILE_SIZE);
@@ -48,9 +50,10 @@ void InitPlaySession(PlaySession* session){
     session->equip_menu.mode = SLOT_NONE;
 }
 
-void ChangeMap(PlaySession* session, char* map_name){
+void ChangeMap(PlaySession* session, char* map_name, Vector2 destination){
     LoadMap(map_name,&session->map);
     InitMap(&session->map);
+    session->map.player->position = destination;
 }
 
 void UpdateTalking(PlaySession* session, Input* input, float dt){
@@ -69,10 +72,6 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         session->state = EQUIPMENT_MENU;
         return;
     }
-    if(input->buttons_pressed & KEY_P_PRESSED){
-        session->state = STATS_MENU;
-        return;
-    }
 
     if(input->buttons_pressed & LEVEL_PRESSED){
         session->state = LEVEL_INVENTORY;
@@ -85,8 +84,9 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
     }
 
     if(input->buttons_pressed & SHIFT_PRESSED){
-        ChangeMap(session, "falls");
+        session->state = STATS_MENU;
     }
+
     if(input->buttons_pressed & INVENTORY_PRESSED){
             session->menu.type = ENTITY_ITEM;
 
@@ -151,7 +151,7 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
 
     MapEntity* entity = PollTrait(&session->map, TRAIT_TELEPORT, 20.0f);
     if(entity && entity->type ==  ENTITY_PORTAL){
-        ChangeMap(session, GetName(ENTITY_PORTAL, entity->id));
+        ChangeMap(session, GetWorldNameFromPortalId(entity->id),GetDestination(ENTITY_PORTAL, entity->id));
     }
 }
 

@@ -5,11 +5,6 @@
 #include "defs/types_env.h"
 #include "defs/constants.h"
 
-#define TILE_SIZE 32
-// Physical dimensions in pixels
-#define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
-#define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
-
 void InitNewMap(Map* map,char* name,int rows, int columns);
 void InitMap(Map* map);
 void Draw_MapEntity(MapEntity* entity, Map* map);

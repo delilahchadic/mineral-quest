@@ -1,25 +1,11 @@
 #include "registry/register_loader.h"
 #include "defs/types_entities.h"
+#include "defs/types_env.h"
 #include "raylib.h"
 #include "registry/register.h"
 
 
-void InitRegistries(){
-    MINERAL_SOUND =LoadSound("data/audio/mineral.wav");
-    SetSoundVolume(MINERAL_SOUND, 0.33);
-    SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
-    SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
-    SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
-    SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
-    SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
-    LoadDialogRegistry();
-    LoadSpriteOverrideRegistry();
-    LoadNodeExchange();
-    LoadCommandRegistry();
-    GLOBAL_PLAYER = Get_Default_Player();
-    PLAYER = &GLOBAL_PLAYER;
 
-}
 
 void CloseEnemyRegistry(){
   for(int i =0; i<100;i++){
@@ -30,11 +16,8 @@ void CloseEnemyRegistry(){
 }
 
 void ClosePortalRegistry(){
-  for(int i =0; i<100;i++){
-    if(PORTAL_REGISTRY[i].sprite.id > 0){
-      UnloadTexture(PORTAL_REGISTRY[i].sprite);
-    }
-  }
+  UnloadTexture(PORTAL_CRYSTAL_SPRITE);
+  UnloadTexture(PORTAL_TV_SPRITE);
 }
 
 void CloseCharacterRegistry(){
@@ -81,16 +64,33 @@ void ParseCommandRegistryRow(char* line){
   }
 }
 
+void ParseWorldRow(char* line){
+  char* idToken = strtok(line,",");
+  char* nameToken = strtok(NULL,",");
+  if(idToken && nameToken){
+    int id = atoi(idToken);
+    World* w = &WORLD_REGISTER[id];
+    strncpy(w->name, nameToken, sizeof(w->name) - 1);
+    w->name[sizeof(w->name) - 1] = '\0';
+  }
+}
+
 void ParsePortalRow(char* line){
   char* idToken = strtok(line,",");
   char* nameToken = strtok(NULL,",");
-  char* spriteToken = strtok(NULL,",");
-  if(idToken && nameToken){
+  char* worldIdToken = strtok(NULL,",");
+  char* typeToken = strtok(NULL,",");
+  char* startXToken = strtok(NULL,",");
+  char* startYToken = strtok(NULL,",");
+  if(idToken && nameToken && worldIdToken && typeToken && startXToken && startYToken){
     int id = atoi(idToken);
     Portal* p = &PORTAL_REGISTRY[id];
-    strncpy(p->level_name, nameToken, sizeof(p->level_name) - 1);
-    p->level_name[sizeof(p->level_name) - 1] = '\0';
-    p->sprite = LoadTexture(spriteToken);
+    strncpy(p->name, nameToken, sizeof(p->name) - 1);
+    p->name[sizeof(p->name) - 1] = '\0';
+    p->world_id = atoi(worldIdToken);
+    p->type = (PortalType)atoi(typeToken);
+    p->destination.x = atoi(startXToken) * TILE_SIZE;
+    p->destination.y = atoi(startYToken) * TILE_SIZE;
   }
 }
 
@@ -375,4 +375,25 @@ void LoadCommandRegistry(){
 
 int LoadPortalRegistry(){
     return LoadRegistry("data/tables/portals.csv", ParsePortalRow);
+}
+
+void InitRegistries(){
+    PORTAL_CRYSTAL_SPRITE = LoadTexture("data/sprites/portal_crystal.png");
+    PORTAL_TV_SPRITE = LoadTexture("data/sprites/tv_portal.png");
+    MINERAL_SOUND =LoadSound("data/audio/mineral.wav");
+
+    SetSoundVolume(MINERAL_SOUND, 0.33);
+    SetEntityTypeCount(ENTITY_ITEM,LoadItemRegistry());
+    SetEntityTypeCount(ENTITY_CHARACTER,LoadCharacterRegistry());
+    SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
+    SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
+    SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
+    WORLD_COUNT= LoadRegistry("data/tables/worlds.csv", ParseWorldRow);
+    LoadDialogRegistry();
+    LoadSpriteOverrideRegistry();
+    LoadNodeExchange();
+    LoadCommandRegistry();
+    GLOBAL_PLAYER = Get_Default_Player();
+    PLAYER = &GLOBAL_PLAYER;
+
 }

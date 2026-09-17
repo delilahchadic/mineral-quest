@@ -58,33 +58,33 @@ void LoadMap(const char* mapName, Map* map) {
         }
     }
 
-    // 3. Read Grid Heights (skip any potential blank separator lines if present)
+    // 3. Read Grid Heights (Fixed Row Count Loop)
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
-        if (strlen(line) > 0) {
-            // If it's not empty, assume it's the start of grid heights
-            // Put it back or handle row 0 right here:
-            char* colToken = strtok(line, ",");
+        if (strlen(line) == 0) continue; // Skip blank separator lines
+
+        // Parse Row 0
+        char* colToken = strtok(line, ",");
+        for (int col = 0; col < map->columns; col++) {
+            if (colToken != NULL) {
+                map->grid[0][col].height = atoi(colToken);
+                colToken = strtok(NULL, ",");
+            }
+        }
+
+        // Parse Remaining Rows (1 to map->rows - 1)
+        for (int row = 1; row < map->rows; row++) {
+            if (!fgets(line, sizeof(line), file)) break;
+            line[strcspn(line, "\n")] = 0;
+            colToken = strtok(line, ",");
             for (int col = 0; col < map->columns; col++) {
                 if (colToken != NULL) {
-                    map->grid[0][col].height = atoi(colToken);
+                    map->grid[row][col].height = atoi(colToken);
                     colToken = strtok(NULL, ",");
                 }
             }
-            // Read remaining rows for heights
-            for (int row = 1; row < map->rows; row++) {
-                if (!fgets(line, sizeof(line), file)) break;
-                line[strcspn(line, "\n")] = 0;
-                colToken = strtok(line, ",");
-                for (int col = 0; col < map->columns; col++) {
-                    if (colToken != NULL) {
-                        map->grid[row][col].height = atoi(colToken);
-                        colToken = strtok(NULL, ",");
-                    }
-                }
-            }
-            break;
         }
+        break; // Heights section complete
     }
 
     // Compute Isometric Positions
@@ -94,7 +94,7 @@ void LoadMap(const char* mapName, Map* map) {
         }
     }
 
-    // 4. Read Entities (look for section header or read until EOF)
+    // 4. Read Entities (Header updated to check grid_x/grid_y)
     map->entities = NULL;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
@@ -102,17 +102,22 @@ void LoadMap(const char* mapName, Map* map) {
         if (strlen(line) == 0 || strncmp(line, "type", 4) == 0) continue;
 
         char* typeToken = strtok(line, ",");
-        char* xToken = strtok(NULL, ",");
-        char* yToken = strtok(NULL, ",");
+        char* gxToken = strtok(NULL, ",");
+        char* gyToken = strtok(NULL, ",");
         char* idToken = strtok(NULL, ",");
 
-        if (typeToken && xToken && yToken && idToken) {
+        if (typeToken && gxToken && gyToken && idToken) {
             MapEntity* m = malloc(sizeof(MapEntity));
             if (m == NULL) continue;
 
             m->type = (EntityType)atoi(typeToken);
             m->jumpoffset = 0.0f;
-            m->position = (Vector2){atof(xToken), atof(yToken)};
+
+            // Parse grid coordinates and convert to world pixel units
+            int gx = atoi(gxToken);
+            int gy = atoi(gyToken);
+            m->position = (Vector2){ (float)(gx * TILE_SIZE), (float)(gy * TILE_SIZE) };
+
             m->next = NULL;
             m->id = atoi(idToken);
             m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
@@ -126,11 +131,8 @@ void LoadMap(const char* mapName, Map* map) {
                 m->target_position = m->position;
             }
 
-            int tx = (int)(m->position.x / TILE_SIZE);
-            int ty = (int)(m->position.y / TILE_SIZE);
-
-            if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
-                float startFloor = map->grid[ty][tx].height * 8.0f;
+            if (gx >= 0 && gx < map->columns && gy >= 0 && gy < map->rows) {
+                float startFloor = map->grid[gy][gx].height * 8.0f;
                 m->altitude = startFloor;
             } else {
                 m->altitude = 0.0f;
@@ -138,19 +140,16 @@ void LoadMap(const char* mapName, Map* map) {
             m->isCollecting = false;
             Add_Entity(map, m);
         }
-
-
-
     }
 
-    map->buildings =NULL;
+    // 5. Read Buildings
+    map->buildings = NULL;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
 
-        if (strncmp(line, "active_nodes", 12) == 0 ) break;
-        // Skip empty lines or header labels if you include them (like "type,positionx...")
+        if (strncmp(line, "active_nodes", 12) == 0) break;
         if (strlen(line) == 0 || strncmp(line, "buildingid", 10) == 0) continue;
-        // buildingid,x1, y1,x2, y2,min_height,max_height,total_floors,door_x,door_y
+
         char* buildingidToken = strtok(line, ",");
         char* x1Token = strtok(NULL, ",");
         char* y1Token = strtok(NULL, ",");
@@ -161,41 +160,41 @@ void LoadMap(const char* mapName, Map* map) {
         char* totalFloorsToken = strtok(NULL, ",");
         char* doorX = strtok(NULL, ",");
         char* doorY = strtok(NULL, ",");
-        if(buildingidToken && x1Token && y1Token && x2Token &&
-            y2Token && minHeightToken && maxHeightToken && doorX && doorY && totalFloorsToken){
-                BuildingZone* b = malloc(sizeof(BuildingZone));
-                if(b==NULL) continue;
-                b->id =atoi(buildingidToken);
-                b->x1 =atoi(x1Token);
-                b->y1 =atoi(y1Token);
-                b->x2 =atoi(x2Token);
-                b->y2 =atoi(y2Token);
-                b->min_height=atoi(minHeightToken);
-                b->max_height=atoi(maxHeightToken);
-                b->total_floors = atoi(totalFloorsToken);
-                b->door_pos = (Vector2){atoi(doorX),atoi(doorY)};
-                b->color = COLOR_SHELL_PINK;
-                AddBuilding(map, b);
-            }
+
+        if (buildingidToken && x1Token && y1Token && x2Token &&
+            y2Token && minHeightToken && maxHeightToken && doorX && doorY && totalFloorsToken) {
+            BuildingZone* b = malloc(sizeof(BuildingZone));
+            if (b == NULL) continue;
+            b->id = atoi(buildingidToken);
+            b->x1 = atoi(x1Token);
+            b->y1 = atoi(y1Token);
+            b->x2 = atoi(x2Token);
+            b->y2 = atoi(y2Token);
+            b->min_height = atoi(minHeightToken);
+            b->max_height = atoi(maxHeightToken);
+            b->total_floors = atoi(totalFloorsToken);
+            b->door_pos = (Vector2){ (float)atoi(doorX), (float)atoi(doorY) };
+            b->color = COLOR_SHELL_PINK;
+            AddBuilding(map, b);
+        }
     }
 
+    // 6. Read Active Nodes
     map->node_count = 0;
-    for(int i=0;i<10;i++) map->active_nodes[i] = -1;
+    for (int i = 0; i < 10; i++) map->active_nodes[i] = -1;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
         if (strlen(line) == 0 || strncmp(line, "active_nodes", 12) == 0) continue;
         int node_id = atoi(line);
-        if(node_id < 0) continue;
-        map->active_nodes[map->node_count] =  node_id;
+        if (node_id < 0) continue;
+        map->active_nodes[map->node_count] = node_id;
         map->node_count++;
-        if(map->node_count ==10) break;
+        if (map->node_count == 10) break;
     }
 
     fclose(file);
     map->hitstop_timer = 0.0f;
     map->is_ready = true;
-
-
 }
 
 void SaveMap(Map* map) {
@@ -234,31 +233,37 @@ void SaveMap(Map* map) {
 
     fprintf(file, "\n"); // Spacer line before entities
 
-    // 4. Write Entities Header & Rows
-    fprintf(file, "type,positionx,positiony,id\n");
+    // 4. Write Entities Header & Rows (CONVERTED TO GRID UNITS)
+    // Updated header from positionx,positiony to grid_x,grid_y
+    fprintf(file, "type,grid_x,grid_y,id\n");
     MapEntity* curr = map->entities;
     while (curr != NULL) {
-        fprintf(file, "%d,%f,%f,%d\n", curr->type, curr->position.x, curr->position.y, curr->id);
+        int gx = (int)(curr->position.x / TILE_SIZE);
+        int gy = (int)(curr->position.y / TILE_SIZE);
+
+        fprintf(file, "%d,%d,%d,%d\n", curr->type, gx, gy, curr->id);
         curr = curr->next;
     }
 
     fprintf(file, "\n"); // Spacer line before buildings
 
-        // 5. Write Buildings Header & Rows
-        fprintf(file, "buildingid,x1,y1,x2,y2,min_height,max_height,total_floors,door_x,door_y\n");
-        BuildingZone* b_curr = map->buildings;
-        while (b_curr != NULL) {
-            fprintf(file, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
-                b_curr->id,
-                b_curr->x1, b_curr->y1,
-                b_curr->x2, b_curr->y2,
-                b_curr->min_height, b_curr->max_height,
-                b_curr->total_floors,
-                (int)b_curr->door_pos.x, (int)b_curr->door_pos.y
-            );
-            b_curr = b_curr->next;
-        }
+    // 5. Write Buildings Header & Rows
+    fprintf(file, "buildingid,x1,y1,x2,y2,min_height,max_height,total_floors,door_x,door_y\n");
+    BuildingZone* b_curr = map->buildings;
+    while (b_curr != NULL) {
+        fprintf(file, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+            b_curr->id,
+            b_curr->x1, b_curr->y1,
+            b_curr->x2, b_curr->y2,
+            b_curr->min_height, b_curr->max_height,
+            b_curr->total_floors,
+            (int)b_curr->door_pos.x, (int)b_curr->door_pos.y
+        );
+        b_curr = b_curr->next;
+    }
+
     fprintf(file, "\n"); // Spacer line before active nodes
+
     // 6. Write Active Nodes Header & List
     fprintf(file, "active_nodes\n");
     for (int i = 0; i < map->node_count; i++) {
@@ -266,5 +271,6 @@ void SaveMap(Map* map) {
             fprintf(file, "%d\n", map->active_nodes[i]);
         }
     }
+
     fclose(file);
 }
