@@ -108,6 +108,7 @@ Player Get_Default_Player(){
   player.item_inventory[9]++;
   player.item_inventory[3]++;
   player.item_inventory[4]++;
+  player.item_inventory[13]++;
   player.speed = 250.0f;
   player.sprite = LoadTexture("data/sprites/sprite.png");
   SetDefaultStat(&player);
