@@ -1,3 +1,4 @@
-id,name,dialog,sprite
-0,henry,0,data/sprites/sprite_old.png
-1,kipo,2,data/sprites/kipo.png
+id,name,dialog,sprite,type
+0,henry,0,data/sprites/sprite_old.png,0
+1,kipo,2,data/sprites/kipo.png,0
+2,misty,4,data/sprites/misty.png,1

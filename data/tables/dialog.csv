@@ -1,5 +1,7 @@
 id,nextid,character,text
-0,2,henry,you can walk through rose bushes
+0,1,henry,you can walk through rose bushes
 1,-1,henry,you just have to find the way!
-2,4,kipo,im kipo
+2,3,kipo,im kipo
 3,-1,kipo,im bored
+4,5,misty,do you like living in rivers?
+5,-1,misty,its the biggest town ive ever seen!
