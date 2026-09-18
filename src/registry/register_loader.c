@@ -380,6 +380,7 @@ int LoadPortalRegistry(){
 void InitRegistries(){
     PORTAL_CRYSTAL_SPRITE = LoadTexture("data/sprites/portal_crystal.png");
     PORTAL_TV_SPRITE = LoadTexture("data/sprites/tv_portal.png");
+    RUSTY_HEADSHOT_SPRITE = LoadTexture("data/sprites/rusty_headshot.png");
     MINERAL_SOUND =LoadSound("data/audio/mineral.wav");
 
     SetSoundVolume(MINERAL_SOUND, 0.33);

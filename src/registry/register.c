@@ -29,7 +29,7 @@ static int enemy_count = 0;
 
 Texture2D PORTAL_TV_SPRITE;
 Texture2D PORTAL_CRYSTAL_SPRITE;
-
+Texture2D RUSTY_HEADSHOT_SPRITE;
 
 char* STATS_NAMES[STAT_COUNT] = {
     "Strength",
@@ -44,35 +44,65 @@ char* STATS_NAMES[STAT_COUNT] = {
     "Accessories"
 };
 
-TileDefinition TILE_REGISTRY[28] = {
-    { TILE_WATER, true,  0.5f, 101, COLOR_CERULEAN_DUSTY,"Water"},
-    { TILE_BUFF_TITANIUM,  false, 0.8f, 104, COLOR_BUFF_TITANIUM,"Buff Titanium"},
-    { TILE_STONE, false, 0.9f, 105, COLOR_TEXAS_HAZE,"Stone"},
-    { TILE_ROAD,  false, 1.0f, 106, COLOR_ASPHALT ,"Road"},
-    { TILE_GRASS, false,  1.0f, 102, COLOR_DUSTY_SAP,"Grass"},
-    { TILE_MAY_GREEN, false, 1.0f, 108, COLOR_GREEN_GOLD,"Green Gold"},
-    { TILE_DEEP_MOSS,false,1.0f,107,COLOR_DEEP_MOSS, "Deep Moss"},
-    { TILE_SAGE,  false, 0.8f, 104, COLOR_SAGE_BRUSH,"Sage"},
-    { TILE_CELADON,false,1.0f,107,COLOR_CELADON, "Celadon"},
-    { TILE_BERYL,false,1.0f,107,COLOR_CERULEAN_BERYL, "Beryl"},
-    { TILE_AMAZONITE,false,1.0f,107,COLOR_AMAZONITE, "Amazonite"},
-    { TILE_BASALT,  false, 1.0f, 106, COLOR_BASALT ,"Basalt"},
-    { TILE_MOON_STONE, false,  1.0f, 102, COLOR_MOONGLOW,"Moon Glow"},
-    { TILE_WITHERED_LILAC,false,1.0f,107,COLOR_WITHERED_LILAC, "Withered Lilac"},
-    { TILE_SHELL_PINK,false,1.0f,107,COLOR_SHELL_PINK, "Shell Pink"},
-    { TILE_BRILLIANT_JAUNE,false,1.0f,107,COLOR_BRILLIANT_JAUNE, "Brilliant Jaune"},
-    { TILE_NAPLES_YELLOW,false,1.0f,107,COLOR_NAPLES_YELLOW, "Naples Yellow"},
-    { TILE_NICKEL_TITANITE,  false, 0.8f, 104, COLOR_NICKEL_TITANITE,"Nickel Titanite"},
-    { TILE_SALMON,  false, 1.0f, 106, COLOR_DUSTY_SALMON ,"Salmon"},
-    { TILE_POTTERS_PINK, false, 0.9f, 105, COLOR_POTTERS_PINK,"Potters Pink"},
-    {TILE_TERRA_PALE,false,1.0f,107,COLOR_TERRA_PALE, "Terra Pale"},
-    {TILE_SILT, false, 1.0f, 108, COLOR_OCHRE_SILT,"Ochre Silt"},
-    { TILE_FIRED_GOLD_OCHRE, false, 0.9f, 105, COLOR_FIRED_GOLD_OCHRE,"Fired Gold Ochre"},
-    { TILE_YELLOW_OCHRE,  false, 0.4f, 103, COLOR_YELLOW_OCHRE,"Yellow Ochre"},
-    { TILE_RED_OCHRE, false, 1.0f, 108, COLOR_RED_OCHRE,"Red Ochre"},
-    { TILE_PURPLE_OCHRE,  false, 0.4f, 103, COLOR_PURPLE_OCHRE,"Purple Ochre"},
-    { TILE_BLUE_OCHRE,false,1.0f,107,COLOR_BLUE_OCHRE, "Blue Ochre"},
-    { TILE_BURNT_SIENNA,false,1.0f,107,COLOR_BURNT_SIENNA, "Burnt Sienna"}
+TileDefinition TILE_REGISTRY[42] = {
+    // --- ROW 1: LIGHTS, BUFFS & PALE YELLOWS ---
+    { TILE_LIMESTONE_CHALK,  false, 1.0f, 114, COLOR_LIMESTONE_CHALK, "Limestone" },
+    { TILE_SNOOT_PINK,       false, 1.0f, 115, COLOR_SNOOT_PINK,      "Snoot Pink" },
+    { TILE_BUFF_TITANIUM,    false, 0.8f, 104, COLOR_BUFF_TITANIUM,   "Buff Titanium" },
+    { TILE_STONE,            false, 0.9f, 105, COLOR_TEXAS_HAZE,      "Stone" },
+    { TILE_BRILLIANT_JAUNE,  false, 1.0f, 107, COLOR_BRILLIANT_JAUNE, "Brilliant Jaune" },
+    { TILE_NAPLES_YELLOW,    false, 1.0f, 107, COLOR_NAPLES_YELLOW,   "Naples Yellow" },
+    { TILE_NICKEL_TITANITE,  false, 0.8f, 104, COLOR_NICKEL_TITANITE, "Nickel Titanite" },
+
+
+
+    // --- ROW 2: ROSES, PINKS, SALMON & MAUVES ---
+    { TILE_RHYOLITE_TUFF,    false, 0.8f, 109, COLOR_RHYOLITE_TUFF,   "Rhyolite Tuff" },
+    { TILE_TERRA_PALE,       false, 1.0f, 107, COLOR_TERRA_PALE,      "Terra Pale" },
+    { TILE_SHELL_PINK,       false, 1.0f, 107, COLOR_SHELL_PINK,      "Shell Pink" },
+    { TILE_SALMON,           false, 1.0f, 106, COLOR_DUSTY_SALMON,    "Salmon" },
+    { TILE_POTTERS_PINK,     false, 0.9f, 105, COLOR_POTTERS_PINK,    "Potters Pink" },
+    { TILE_DUSTY_MAGENTA, false, 0.9f, 121, COLOR_DUSTY_MAGENTA,      "Dusty Magenta" },
+    { TILE_MUTED_FUSCHIA,    true,  0.6f, 116, COLOR_MUTED_FUCHSIA,   "Muted Fuschia" },
+    { TILE_WITHERED_LILAC,   false, 1.0f, 107, COLOR_WITHERED_LILAC,  "Withered Lilac" },
+    { TILE_CAPUT_MORTUUM,    false, 0.8f, 113, COLOR_CAPUT_MORTUUM,   "Caput Mortuum" },
+
+    // --- ROW 3: EARTHS, STONES, UMBER & SIENNA ---
+
+
+    { TILE_GRANITE,          false, 1.0f, 117, COLOR_GRANITE_MID,     "Granite" },
+    { TILE_RAW_UMBER,        false, 0.8f, 119, COLOR_RAW_UMBER,       "Raw Umber" },
+    { TILE_BURNT_SIENNA,     false, 1.0f, 107, COLOR_BURNT_SIENNA,    "Burnt Sienna" },
+    { TILE_HEMATITE_BASE,    false, 1.0f, 120, COLOR_HEMATITE_BASE,   "Hematite Base" },
+    { TILE_ROAD,             false, 1.0f, 106, COLOR_ASPHALT,        "Road" },
+
+    // --- ROW 4: OCHRES & KHMEAR SANDSTONE ---
+    { TILE_SILT,             false, 1.0f, 108, COLOR_OCHRE_SILT,      "Ochre Silt" },
+    { TILE_YELLOW_OCHRE,     false, 0.4f, 103, COLOR_YELLOW_OCHRE,    "Yellow Ochre" },
+    { TILE_FIRED_GOLD_OCHRE, false, 0.9f, 105, COLOR_FIRED_GOLD_OCHRE, "Fired Gold Ochre" },
+    { TILE_RED_OCHRE,        false, 1.0f, 108, COLOR_RED_OCHRE,       "Red Ochre" },
+    { TILE_PURPLE_OCHRE,     false, 0.4f, 103, COLOR_PURPLE_OCHRE,    "Purple Ochre" },
+    { TILE_BLUE_OCHRE,       false, 1.0f, 107, COLOR_BLUE_OCHRE,      "Blue Ochre" },
+    { TILE_KHMER_SANDSTONE,  false, 1.0f, 112, COLOR_KHMER_SANDSTONE, "Khmer Sandstone" },
+
+    // --- ROW 5: GREENS, SAGE & MOSS ---
+    { TILE_GREEN_GOLD,        false, 1.0f, 108, COLOR_GREEN_GOLD,     "Green Gold" },
+    { TILE_SAGE,             false, 0.8f, 104, COLOR_SAGE_BRUSH,     "Sage" },
+    { TILE_CELADON,          false, 1.0f, 107, COLOR_CELADON,         "Celadon" },
+    { TILE_WITHERED_VIRIDIAN,false, 1.0f, 122, COLOR_WITHERED_VIRIDIAN, "Withered Viridian" },
+    { TILE_GRASS,            false, 1.0f, 102, COLOR_DUSTY_SAP,       "Grass" },
+    { TILE_OLIVE_DRAB,       false, 0.9f, 118, COLOR_OLIVE_DRAB,      "Olive Drab" },
+    { TILE_DEEP_MOSS,        false, 1.0f, 107, COLOR_DEEP_MOSS,       "Deep Moss" },
+    { TILE_AMAZONITE,        false, 1.0f, 107, COLOR_AMAZONITE,       "Amazonite" },
+
+    // --- ROW 6: BLUES, TEALS, SLATES & DARK INORGANICS ---
+    { TILE_COBALT_TEAL_PALE, false, 0.7f, 110, COLOR_COBALT_TEAL_PALE,"Cobalt Teal Pale" },
+    { TILE_BERYL,            false, 1.0f, 107, COLOR_CERULEAN_BERYL,  "Beryl" },
+
+    { TILE_LIVID_SLATE,      false, 0.9f, 111, COLOR_LIVID_SLATE,     "Livid Slate" },
+    { TILE_MOON_STONE,       false, 1.0f, 102, COLOR_MOONGLOW,        "Moon Glow" },
+    { TILE_BASALT,           false, 1.0f, 106, COLOR_BASALT,         "Basalt" },
+    { TILE_WATER,            true,  0.5f, 101, COLOR_BEAVIS_SHIRT,  "Water" }
 };
 
 char* GetNodeName(int node_id){

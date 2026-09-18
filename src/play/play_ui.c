@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include "core/camera_tools.h"
+#include "defs/constants.h"
 #include "defs/types_engine.h"
 #include "defs/types_entities.h"
 #include "defs/types_minerals.h"
@@ -53,6 +54,16 @@ void AdjustCamera(PlaySession* session, bool dialog, float dt){
   }
 }
 
+void DrawHUD(){
+    Vector2 hud_start = (Vector2){SCREEN_WIDTH * 0.9, SCREEN_HEIGHT * 0.78};
+    Vector2 max_hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5))-PLAYER->stats.max_hp,(hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5))+10};
+    Vector2 hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5))-PLAYER->stats.current_hp,(hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5))+10};
+
+    DrawTextureEx(RUSTY_HEADSHOT_SPRITE, hud_start, 0.0, 0.5, WHITE);
+    DrawRectangle(max_hp_start.x, max_hp_start.y, PLAYER->stats.max_hp, 6, COLOR_SUNKEN_INK);
+    DrawRectangle(hp_start.x, hp_start.y, PLAYER->stats.current_hp, 6, COLOR_MAY_GREEN);
+}
+
 void DrawPlaySession(PlaySession* session){
     if(session->state==NODE_MENU){
         DrawNodeSession(session);
@@ -68,6 +79,7 @@ void DrawPlaySession(PlaySession* session){
     DrawLevelInventory();
   }else {
     Draw_Map(&session->map,&session->camera);
+    DrawHUD();
     if(session->state == TALKING){
       DrawMessage(&session->manager);
     }

@@ -21,7 +21,7 @@ extern Portal PORTAL_REGISTRY[100];
 extern Message DIALOG_REGISTRY[500];
 extern Player GLOBAL_PLAYER;
 extern Player* PLAYER;
-extern TileDefinition TILE_REGISTRY[28];
+extern TileDefinition TILE_REGISTRY[42];
 
 //play register
 extern int WORLD_COUNT;
@@ -33,6 +33,7 @@ extern Exchange EXCHANGE_REGISTRY[1000];
 //Media Register
 extern Texture2D PORTAL_TV_SPRITE;
 extern Texture2D PORTAL_CRYSTAL_SPRITE;
+extern Texture2D RUSTY_HEADSHOT_SPRITE;
 extern Texture2D SPRITE_OVERRIDE[10];
 extern Sound MINERAL_SOUND;
 

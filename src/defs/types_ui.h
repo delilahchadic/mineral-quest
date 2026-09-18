@@ -44,10 +44,10 @@ typedef struct EditorForm{
 }EditorForm;
 
 typedef struct TilePalette{
-    Rectangle tile_type_buttons[28];
+    Rectangle tile_type_buttons[42];
     Rectangle execute_button;
     int selected_tile_type;
-    Color colors[28];
+    Color colors[35];
 } TilePalette;
 
 typedef struct HeightAdjuster{

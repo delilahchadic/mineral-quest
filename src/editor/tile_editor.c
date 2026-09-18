@@ -19,10 +19,10 @@
 void InitTileEditor(TileEditor* tile_editor){
     int s = (int)(SCREEN_WIDTH  * 0.66f);
     int startX = s + 40;
-    int startY = 240;
+    int startY = 160;
 
     tile_editor->panel = (Rectangle){s,20,(s/2),(SCREEN_HEIGHT *2 /3) };
-    tile_editor->save_button = (Rectangle){startX, startY+340, 100, 40};
+    tile_editor->save_button = (Rectangle){SCREEN_WIDTH * 0.10, SCREEN_HEIGHT*.9, 100, 40};
 
     int tool_selector_x = s+40;
     int tool_selector_y = 40;

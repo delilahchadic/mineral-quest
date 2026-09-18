@@ -110,9 +110,25 @@ void Draw_Tile(Map* map, int x, int y) {
 
     // TOP FACE DRAWING
     if (map->grid[y][x].type == TILE_WATER) {
-        float pulse = sinf(GetTime()) * 20.0f;
+        // Layer two sine waves for a smooth, organic breath effect
+        double t = GetTime();
+        float primaryWave = sinf((float)t * 1.5f) * 35.0f;  // Slow overall swell (+/- 35 alpha)
+        float secondaryWave = sinf((float)t * 3.8f) * 10.0f; // Faster subtle micro-ripple
+        float pulse = primaryWave + secondaryWave;          // Range: approx +/- 45
         Color waterColor = COLOR_BEAVIS_SHIRT;
-        waterColor.a = occluding ? 50 : (100 + (unsigned char)pulse);
+
+        if (occluding) {
+            waterColor.a = 50;
+        } else {
+            // Start from base shirt alpha, apply signed pulse float, then clamp bounds
+            float calculatedAlpha = (float)waterColor.a + pulse;
+
+            if (calculatedAlpha < 0.0f)   calculatedAlpha = 0.0f;
+            if (calculatedAlpha > 255.0f) calculatedAlpha = 255.0f;
+
+            waterColor.a = (unsigned char)calculatedAlpha;
+        }
+
         DrawTriangleFan((Vector2[]){ t1, t4, t3, t2 }, 4, waterColor);
     } else {
         Color gridColor = ColorBrightness(base, -0.2f);
