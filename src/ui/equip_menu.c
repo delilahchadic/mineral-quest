@@ -25,7 +25,7 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu){
       DrawText(weaponName, 250,120,15,weaponTextColor);
 
       DrawText("Current Accesories", 450,90,15,COLOR_BONE_WHITE);
-      for(int i = 0; i < session->player->stats.base[STAT_ACCESORY_COUNT]; i++){
+      for(int i = 0; i < session->player->stats.current[STAT_ACCESORY_COUNT]; i++){
           Color accesoryTextColor = (equipMenu->mode == SLOT_NONE && equipMenu->activeSlot == i + 1) ? COLOR_RED_OCHRE : COLOR_BONE_WHITE;
           if(session->player->gear.accessory_ids[i] == -1){
               DrawText("------------", 450, 120 + (i * 30), 20, accesoryTextColor);
@@ -55,14 +55,14 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
     if (menu->mode == SLOT_NONE) {
         if (input->buttons_pressed & KEY_W_PRESSED) {
             menu->activeSlot--;
-            int max_slots = session->player->stats.base[STAT_ACCESORY_COUNT];
+            int max_slots = session->player->stats.current[STAT_ACCESORY_COUNT];
             if (menu->activeSlot < 0) {
                 menu->activeSlot = max_slots; // wrap to last accessory slot
             }
         }
         if (input->buttons_pressed & KEY_S_PRESSED) {
             menu->activeSlot++;
-            int max_slots = session->player->stats.base[STAT_ACCESORY_COUNT];
+            int max_slots = session->player->stats.current[STAT_ACCESORY_COUNT];
             if (menu->activeSlot > max_slots) {
                 menu->activeSlot = 0; // wrap back to weapon
             }
@@ -168,8 +168,13 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
                 }
             }
 
-            // Recalculate stats and return to slot-browsing mode
+            // Right after RecalculateStats in State 2:
             RecalculateStats(&session->player->stats, &session->player->gear);
+
+            // Clamp activeSlot so cursor doesn't get stuck on a hidden accessory slot
+            if (menu->activeSlot > session->player->stats.current[STAT_ACCESORY_COUNT]) {
+                menu->activeSlot = session->player->stats.current[STAT_ACCESORY_COUNT];
+            }
             menu->mode = SLOT_NONE;
         }
 
