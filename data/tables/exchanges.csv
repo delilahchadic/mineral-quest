@@ -1,3 +1,4 @@
 id,itemid, cost 1 type, cost 1 id, cost 1 qty,cost 2 type, cost 2 id, cost 2 qty,cost 3 type, cost 3 id, cost 3 qty
 0,10,4,12,2,-1,-1,-1,-1,-1,-1
 1,11,4,12,5,-1,-1,-1,-1,-1,-1
+2,15,4,2,6,-1,-1,-1,-1,-1,-1
