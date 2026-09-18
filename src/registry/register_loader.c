@@ -288,6 +288,10 @@ void ParseItemRow(char* line) {
         strncpy(d->description, descToken, sizeof(d->description) - 1);
         d->description[sizeof(d->description) - 1] = '\0';
 
+        char* useToken = strtok(NULL, ",");
+        d->use_type = atoi(useToken);
+        char* useDurationToken = strtok(NULL,",");
+        d->use_duration = atof(useDurationToken);
         // 2. Parse Equipment Slot (defaults to SLOT_NONE if missing/invalid)
         char* slotToken = strtok(NULL, ",");
         d->slot = slotToken ? (EquipSlot)atoi(slotToken) : SLOT_NONE;

@@ -5,5 +5,5 @@
 
 void InitPlaySession(PlaySession* session);
 void UpdatePlaySession(PlaySession* session);
-
+void RebindItemMenu(PlaySession* session);
 #endif

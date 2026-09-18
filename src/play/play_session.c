@@ -31,7 +31,7 @@ void InitPlaySession(PlaySession* session){
     session->state = ADVENTURE;
     session->player = PLAYER;
     session->menu = (Menu){0};
-    int startPortalId = 10;// dreamy treasure room
+    int startPortalId = 12;// romantic treasure room
     LoadMap(GetWorldName(GetWorldIDFromPortal(startPortalId)),&session->map);
     InitMap(&session->map);
     InitScriptManager(&session->manager,100);
@@ -62,6 +62,23 @@ void UpdateTalking(PlaySession* session, Input* input, float dt){
     AdjustCamera(session,true,dt);
 }
 
+void RebindItemMenu(PlaySession* session){
+    session->menu.type = ENTITY_ITEM;
+    session->menu.exit_button = INVENTORY_PRESSED;
+    // Gather all non-zero item IDs from the frequency map into a temporary list for the menu
+    int active_item_ids[100];
+    int active_count = 0;
+    for (int i = 0; i < 100; i++) {
+        if (session->player->item_inventory[i] > 0) {
+            active_item_ids[active_count++] = i;
+        }
+    }
+
+    FillMenu(&session->menu, active_item_ids, active_count);
+    session->state = INVENTORY;
+    return;
+}
+
 void UpdateAdventure(PlaySession* session, Input* input, float dt){
     // int worrld
     if(PLAYER->stats.current_hp<=0){
@@ -85,24 +102,14 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
 
     if(input->buttons_pressed & SHIFT_PRESSED){
         session->state = STATS_MENU;
+        return;
     }
 
     if(input->buttons_pressed & INVENTORY_PRESSED){
-            session->menu.type = ENTITY_ITEM;
+        RebindItemMenu(session);
+        return;
+    }
 
-            // Gather all non-zero item IDs from the frequency map into a temporary list for the menu
-            int active_item_ids[100];
-            int active_count = 0;
-            for (int i = 0; i < 100; i++) {
-                if (session->player->item_inventory[i] > 0) {
-                    active_item_ids[active_count++] = i;
-                }
-            }
-
-            FillMenu(&session->menu, active_item_ids, active_count);
-            session->state = INVENTORY;
-            return;
-        }
     if(input->buttons_pressed & INTERACT_PRESSED){
         int item = PollChest(session->player,&session->map);
         if(item >= 0){
@@ -122,8 +129,8 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
 
             }else{
                 InitDialog(&session->map, &session->manager);
-            if(session->manager.active) session->state = TALKING;
-            else InitCombat(&session->map);
+                if(session->manager.active) session->state = TALKING;
+                else InitCombat(&session->map);
             }
 
         }
@@ -143,6 +150,7 @@ void UpdateAdventure(PlaySession* session, Input* input, float dt){
         }
 
         UpdatePhysics(&session->map, input);
+        UpdateBuffs(session->player, dt);
         UpdateCombat(&session->map);
         CheckAndCollectMinerals(&session->map);
         UpdateEntityMovement(&session->map, dt);

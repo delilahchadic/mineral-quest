@@ -6,6 +6,8 @@
 #include "defs/constants.h"
 #include "defs/types_minerals.h"
 
+#define MAX_ACTIVE_BUFFS 8
+
 typedef enum {
     STAT_STR,
     STAT_DEF,
@@ -20,9 +22,18 @@ typedef enum {
     STAT_COUNT
 } StatType;
 
+typedef struct {
+    int id;
+    int hpBonus;
+    int modifiers[STAT_COUNT];   // Holds +2 Aerobics, +1 Grace, -1 Defense, etc.
+    float duration;              // Remaining time in seconds
+    bool active;
+} ActiveBuff;
+
 typedef struct StatBlock {
     int base[STAT_COUNT];
     int current[STAT_COUNT];
+    ActiveBuff buffs[MAX_ACTIVE_BUFFS];
     int max_hp;
     int current_hp;
 } StatBlock;
@@ -38,6 +49,13 @@ typedef enum ItemType{
 } ItemType;
 
 typedef enum {
+    USE_NONE = 0,
+    USE_RESTORE_HP,
+    USE_TEMP_BUFF,
+    USE_PERM_BOOST
+} UseType;
+
+typedef enum {
     SLOT_NONE = -1,     // Non-equipables (Consumables, Minerals, Key Items)
     SLOT_WEAPON = 0,    // Primary weapon
     SLOT_ACCESSORY,     // Accessories (capped by player stats)
@@ -49,6 +67,8 @@ typedef struct ItemDefinition {
     char name[32];
     char description[128];
     int type;
+    UseType use_type;
+    float use_duration;
     EquipSlot slot;                   // Explicit enum type instead of raw int
     int hp_bonus;
     int stat_bonuses[STAT_COUNT];     // Matches all 9 stats (STR through AEROBICS)

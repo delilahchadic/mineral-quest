@@ -8,9 +8,11 @@ Player Get_Default_Player();
 void Close_Player(Player* player);
 void GiveItem(Player* player,int id);
 void RecalculateStats(StatBlock* stats, EquipmentSet* gear);
-void RemoveItemAt(Player* player, int index);
 int CanAfford(Player* player, CostSlot slot);
 void ProcessRecipe(Player* player, Exchange e);
 void SetDefaultStat(Player* player);
 void DamagePlayer(int damage);
+void UseItem(Player* player, ItemDefinition* item);
+void UpdateBuffs(Player* player, float dt) ;
+void RemoveOneFromInventory(Player* player, int id);
 #endif

@@ -17,12 +17,35 @@ typedef struct SystemMenu{
   int selected;
 }SystemMenu;
 
+typedef enum {
+    ITEM_MENU_BROWSE,       // Normal inventory navigation
+    ITEM_MENU_PROMPT_WEAPON, // "Weapon equipped. Swap?" (YES / NO)
+    ITEM_MENU_PROMPT_ACC     // "Choose slot to replace" (SLOT 1, SLOT 2, ...)
+} ItemMenuSubState;
+
+typedef struct {
+    const char* title;
+    const char* empty_message;
+    int count;
+    int selected;
+    const char** item_labels; // Array of formatted list strings (e.g., "Pickaxe x2")
+    const char* lore_title;
+    const char* lore_body;
+    const char* context_tag;   // e.g., "[WEAPON]"
+    const char** effect_lines; // Array of formatted effect strings
+    int effect_count;
+} MenuRenderData;
+
 typedef struct Menu{
-  int itemIds[MAX_SLOTS];
-  int count;
-  int selected;
-  int functionId;
-  EntityType type;
+    int itemIds[MAX_SLOTS];
+    int count;
+    int selected;
+    int functionId;
+    EntityType type;
+    ItemMenuSubState sub_state;
+    int pending_item_id;      // Item awaiting equip/swap decision
+    int prompt_selected;
+    ButtonPressed exit_button;
 }Menu;
 
 typedef struct EquipMenu{

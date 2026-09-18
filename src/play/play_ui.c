@@ -73,6 +73,7 @@ void DrawPlaySession(PlaySession* session){
       DrawStatsMenu(session);
   }else if(session->state == INVENTORY){
     DrawInventory(&session->menu);
+    DrawHUD();
   }else if(session->state==MINERAL_INVENTORY){
     DrawMineralInventory(session->player);
   }else if(session->state == LEVEL_INVENTORY){

@@ -56,4 +56,41 @@ void DrawStatsMenu(PlaySession* session){
 
         current_y += 30; // Advance row cleanly
     }
+
+    // 6. Active Buffs Section
+    current_y += 10;
+    DrawText("Active Buffs", margin_x, current_y, 20, COLOR_BONE_WHITE);
+    current_y += 25;
+
+    bool found_buff = false;
+    for(int b = 0; b < MAX_ACTIVE_BUFFS; b++) {
+        ActiveBuff* buff = &session->map.player->stats->buffs[b];
+        if(!buff->active) continue;
+
+        found_buff = true;
+
+        // Display Item Name from Registry along with remaining duration
+        ItemDefinition* item = &ITEM_REGISTRY[buff->id];
+        char buff_info[64];
+        snprintf(buff_info, sizeof(buff_info), "%s (%.1fs)", item->name, buff->duration);
+        DrawText(buff_info, margin_x, current_y, 15, COLOR_BONE_WHITE);
+
+        // Display individual non-zero stat modifiers for this exact buff
+        int offset_x = margin_x + 200;
+        for(int s = 0; s < STAT_COUNT; s++) {
+            int mod = buff->modifiers[s];
+            if(mod != 0) {
+                char mod_text[32];
+                snprintf(mod_text, sizeof(mod_text), "%s %s%d", STATS_NAMES[s], (mod > 0) ? "+" : "", mod);
+                DrawText(mod_text, offset_x, current_y, 15, COLOR_BONE_WHITE);
+                offset_x += 120;
+            }
+        }
+
+        current_y += 22;
+    }
+
+    if(!found_buff) {
+        DrawText("None", margin_x, current_y, 15, COLOR_BONE_WHITE);
+    }
 }
