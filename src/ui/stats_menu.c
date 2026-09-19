@@ -1,5 +1,6 @@
 #include "ui/stats_menu.h"
 #include <stdio.h>
+#include "defs/types_engine.h"
 #include "defs/types_systems.h"
 #include "engine/palette.h"
 #include "defs/types_entities.h"
@@ -11,7 +12,7 @@ void UpdateStatsMenu(PlaySession* session, Input* input){
   }
 }
 
-void DrawStatsMenu(PlaySession* session){
+void DrawStatsMenu(Gamestate* gamestate){
     // 1. Background - The Aged Paper
     ClearBackground(COLOR_CERULEAN_COBALT);
 
@@ -32,8 +33,8 @@ void DrawStatsMenu(PlaySession* session){
     current_y += 20; // Move down for values
 
     char current_hp[16], max_hp[16];
-    snprintf(current_hp, sizeof(current_hp), "%d", session->map.player->stats->current_hp);
-    snprintf(max_hp, sizeof(max_hp), "%d", session->map.player->stats->max_hp);
+    snprintf(current_hp, sizeof(current_hp), "%d", gamestate->map.player.stats->current_hp);
+    snprintf(max_hp, sizeof(max_hp), "%d", gamestate->map.player.stats->max_hp);
 
     DrawText(current_hp, text_start_x, current_y, 20, COLOR_BONE_WHITE);
     DrawText(max_hp, text_start_x + 200, current_y, 20, COLOR_BONE_WHITE);
@@ -47,8 +48,8 @@ void DrawStatsMenu(PlaySession* session){
     // 5. Stat Loop
     for(int i = 0; i < STAT_COUNT; i++) {
         char base[16], current[16];
-        snprintf(current, sizeof(current), "%d", session->map.player->stats->current[i]);
-        snprintf(base, sizeof(base), "%d", session->map.player->stats->base[i]);
+        snprintf(current, sizeof(current), "%d", gamestate->map.player.stats->current[i]);
+        snprintf(base, sizeof(base), "%d", gamestate->map.player.stats->base[i]);
 
         DrawText(STATS_NAMES[i], margin_x, current_y, 15, COLOR_BONE_WHITE);
         DrawText(base, text_start_x, current_y, 20, COLOR_BONE_WHITE);
@@ -64,7 +65,7 @@ void DrawStatsMenu(PlaySession* session){
 
     bool found_buff = false;
     for(int b = 0; b < MAX_ACTIVE_BUFFS; b++) {
-        ActiveBuff* buff = &session->map.player->stats->buffs[b];
+        ActiveBuff* buff = &gamestate->map.player.stats->buffs[b];
         if(!buff->active) continue;
 
         found_buff = true;

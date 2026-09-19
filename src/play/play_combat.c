@@ -14,30 +14,31 @@ float EaseOutCubic(float x) {
 }
 
 void InitCombat(Map* map){
-    if (!map->player->combat.isAttacking) {
-        if (map->player->combat.combo_state == COMBO_NONE || map->player->combat.combo_timer <= 0) {
-            map->player->combat.combo_state = COMBO_1;
-            map->player->combat.attackDuration = 0.20f; // Slipped down from 0.25f for speed
-        } else if (map->player->combat.combo_state == COMBO_1) {
-            map->player->combat.combo_state = COMBO_2;
-            map->player->combat.attackDuration = 0.20f; // Slipped down from 0.25f for speed
-        } else if (map->player->combat.combo_state == COMBO_2) {
-            map->player->combat.combo_state = COMBO_3;
-            map->player->combat.attackDuration = 0.35f; // Slipped down from 0.45f for speed
+    if (!map->player.combat.isAttacking) {
+        if (map->player.combat.combo_state == COMBO_NONE || map->player.combat.combo_timer <= 0) {
+            map->player.combat.combo_state = COMBO_1;
+            map->player.combat.attackDuration = 0.20f; // Slipped down from 0.25f for speed
+        } else if (map->player.combat.combo_state == COMBO_1) {
+            map->player.combat.combo_state = COMBO_2;
+            map->player.combat.attackDuration = 0.20f; // Slipped down from 0.25f for speed
+        } else if (map->player.combat.combo_state == COMBO_2) {
+            map->player.combat.combo_state = COMBO_3;
+            map->player.combat.attackDuration = 0.35f; // Slipped down from 0.45f for speed
         } else {
-            map->player->combat.combo_state = COMBO_1;
-            map->player->combat.attackDuration = 0.20f;
+            map->player.combat.combo_state = COMBO_1;
+            map->player.combat.attackDuration = 0.20f;
         }
 
-        map->player->combat.isAttacking = true;
-        map->player->combat.attackTimer = 0;
-        map->player->combat.combo_timer = 0.5f;
+        map->player.combat.isAttacking = true;
+        map->player.combat.attackTimer = 0;
+        map->player.combat.combo_timer = 0.5f;
         ResetAllHitFlags(map);
     }
 }
 
 // Internal helper function (not exposed in header)
-static void ProcessHit(Map* map, MapEntity* player, MapEntity* target) {
+static bool ProcessHit(Map* map, MapEntity* player, int index) {
+    MapEntity* target = &map->entities[index];
     target->hitThisSwing = true;
 
     // Hitstop freeze frame
@@ -45,16 +46,16 @@ static void ProcessHit(Map* map, MapEntity* player, MapEntity* target) {
 
     // Instant destruction (Plants)
     if (target->type == ENTITY_PLANT) {
-        Remove_Entity(map, target);
-        return;
+        RemoveEntityAt(map, index);
+        return true;
     }
 
     // Damage dealing (Enemies)
     if (target->type == ENTITY_ENEMY) {
         target->hp -= PLAYER->stats.current[STAT_STR];
         if (target->hp <= 0) {
-            Remove_Entity(map, target);
-            return;
+            RemoveEntityAt(map, index);
+            return true;
         }
     }
 
@@ -64,11 +65,12 @@ static void ProcessHit(Map* map, MapEntity* player, MapEntity* target) {
 
     target->position.x += dir.x * knockbackForce;
     target->position.y += dir.y * knockbackForce;
+    return false;
 }
 
 void UpdateCombat(Map* map) {
     if(PLAYER->gear.weapon_id == -1) return;
-    MapEntity* player = map->player;
+    MapEntity* player = &map->player;
 
     if (!player->combat.isAttacking) return;
 
@@ -100,9 +102,8 @@ void UpdateCombat(Map* map) {
     float arcEndRad = arcEndDeg * DEG2RAD;
     float arcStep = 0.1f;
 
-    MapEntity* e = map->entities;
-    while (e != NULL) {
-        MapEntity* next = e->next;
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *e = &map->entities[i];
         if (e != player) {
             bool hit = false;
             float entityRadius = e->type == ENTITY_ENEMY ? 16.0f : 5.0f;
@@ -120,10 +121,11 @@ void UpdateCombat(Map* map) {
             }
 
             if (hit && !e->hitThisSwing) {
-                ProcessHit(map, map->player, e);
+                if(ProcessHit(map, &map->player, i)){
+                    i--;
+                }
             }
         }
-        e = next;
     }
 }
 

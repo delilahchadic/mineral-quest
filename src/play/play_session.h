@@ -3,7 +3,7 @@
 
 #include "defs/types_engine.h"
 
-void InitPlaySession(PlaySession* session);
-void UpdatePlaySession(PlaySession* session);
+void InitPlaySession(Gamestate* gamestate);
+void UpdatePlaySession(Gamestate* gamestate);
 void RebindItemMenu(PlaySession* session);
 #endif

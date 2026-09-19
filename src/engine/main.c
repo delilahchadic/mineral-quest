@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "registry/register.h"
 #include "registry/register_loader.h"
+#include <time.h>
 
 int main(void) {
   //Begin Engine
@@ -12,6 +13,7 @@ int main(void) {
   InitGame(gamestate);
   InitAudioDevice();
   InitRegistries();
+  srand(time(NULL));
   // Main game loop
   while (!WindowShouldClose()) {
     // --- 1. Update Logic ---

@@ -5,9 +5,9 @@
 #include "core/selection_buffer.h"
 #include "defs/types_systems.h"
 
-void InitEditSession(EditSession* session);
-bool UpdateEditSession(EditSession* session, Input* input);
-void CloseEditor(EditSession* session);
+void InitEditSession(Gamestate* gamestate);
+bool UpdateEditSession(Gamestate *gamestate, Input *input) ;
+void CloseEditor(Gamestate *gamestate);
 void InitEditSessionMouseTracking(EditSession* session);
 void SetSelectionTileType(EditSession* session);
 void AdjustSelectionHeight(EditSession* session);

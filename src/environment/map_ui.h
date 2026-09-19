@@ -4,6 +4,6 @@
 #include "map.h"
 #include "raylib.h"
 
-void Draw_Map(Map* map, Camera2D* camera);
+void Draw_Map(Map* map, Camera2D* camera,bool drawPlayer);
 
 #endif

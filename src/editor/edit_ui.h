@@ -10,7 +10,7 @@
 #include "defs/types_core.h"
 #include "core/selection_buffer.h"
 
-void DrawEditSession(EditSession* session);
-void UpdateEditorCamera(EditSession* session,Input *input);
+void DrawEditSession(Gamestate* gamestate);
+void UpdateEditorCamera(Gamestate* gamestate,Input *input);
 
 #endif

@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 Player Get_Default_Player();
-void Close_Player(Player* player);
+void ClosePlayer(Player* player);
 void GiveItem(Player* player,int id);
 void RecalculateStats(StatBlock* stats, EquipmentSet* gear);
 int CanAfford(Player* player, CostSlot slot);

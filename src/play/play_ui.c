@@ -22,21 +22,21 @@
 #include "systems/script_manager.h"
 #include "systems/player.h"
 
-void AdjustCamera(PlaySession* session, bool dialog, float dt){
-    float max_w = (session->map.columns - 1) * TILE_SIZE;
-    float max_h = (session->map.rows - 1) * TILE_SIZE;
+void AdjustCamera(Gamestate* gamestate, bool dialog, float dt){
+    float max_w = (gamestate->map.columns - 1) * TILE_SIZE;
+    float max_h = (gamestate->map.rows - 1) * TILE_SIZE;
 
-    if (session->map.player->position.x < 0) session->map.player->position.x = 0;
-    if (session->map.player->position.y < 0) session->map.player->position.y = 0;
-    if (session->map.player->position.x > max_w) session->map.player->position.x = max_w;
-    if (session->map.player->position.y > max_h) session->map.player->position.y = max_h;
+    if (gamestate->map.player.position.x < 0) gamestate->map.player.position.x = 0;
+    if (gamestate->map.player.position.y < 0) gamestate->map.player.position.y = 0;
+    if (gamestate->map.player.position.x > max_w) gamestate->map.player.position.x = max_w;
+    if (gamestate->map.player.position.y > max_h) gamestate->map.player.position.y = max_h;
     // 2. FIND THE EXACT POSITION OF THE PLAYER'S FEET
-    Vector2 playerIso = GetWorldToIso(session->map.player->position);
+    Vector2 playerIso = GetWorldToIso(gamestate->map.player.position);
 
     // The player is drawn at playerIso.y - altitude.
     // We want the camera to center on the player's sprite, not the floor.
     Vector2 targetPos = playerIso;
-    targetPos.y -= session->map.player->altitude; // ONLY subtract altitude
+    targetPos.y -= gamestate->map.player.altitude; // ONLY subtract altitude
 
     // 3. ONE SINGLE LERP
     float camSpeed = 15.0f;
@@ -44,13 +44,13 @@ void AdjustCamera(PlaySession* session, bool dialog, float dt){
     if (dt > 0.1f) dt = 0.1f;
     float lerpFactor = 1.0f - expf(-camSpeed * dt);
 
-    session->camera.target.x += (targetPos.x - session->camera.target.x) * lerpFactor;
-    session->camera.target.y += (targetPos.y - session->camera.target.y) * lerpFactor;
+    gamestate->camera.target.x += (targetPos.x - gamestate->camera.target.x) * lerpFactor;
+    gamestate->camera.target.y += (targetPos.y - gamestate->camera.target.y) * lerpFactor;
 
   if(dialog){
-    session->camera.zoom += (3.2f - session->camera.zoom) * 0.05f;
+    gamestate->camera.zoom += (3.2f - gamestate->camera.zoom) * 0.05f;
   }else{
-    session->camera.zoom += (3.0f - session->camera.zoom) * 0.05f;
+    gamestate->camera.zoom += (3.0f - gamestate->camera.zoom) * 0.05f;
   }
 }
 
@@ -64,13 +64,14 @@ void DrawHUD(){
     DrawRectangle(hp_start.x, hp_start.y, PLAYER->stats.current_hp, 6, COLOR_MAY_GREEN);
 }
 
-void DrawPlaySession(PlaySession* session){
+void DrawPlaySession(Gamestate* gamestate){
+    PlaySession* session = &gamestate->session;
     if(session->state==NODE_MENU){
         DrawNodeSession(session);
     }else if(session->state==EQUIPMENT_MENU){
         DrawEquipmentMenu(session,&session->equip_menu);
     }else if(session->state == STATS_MENU){
-      DrawStatsMenu(session);
+      DrawStatsMenu(gamestate);
   }else if(session->state == INVENTORY){
     DrawInventory(&session->menu);
     DrawHUD();
@@ -79,7 +80,7 @@ void DrawPlaySession(PlaySession* session){
   }else if(session->state == LEVEL_INVENTORY){
     DrawLevelInventory();
   }else {
-    Draw_Map(&session->map,&session->camera);
+    Draw_Map(&gamestate->map,&gamestate->camera,true);
     DrawHUD();
     if(session->state == TALKING){
       DrawMessage(&session->manager);

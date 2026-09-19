@@ -200,7 +200,6 @@ void UpdateInventory(PlaySession* session, Input* input) {
             if (menu->prompt_selected == 0) { // Confirmed Swap
                 int old_weapon = gear->weapon_id;
                 gear->weapon_id = menu->pending_item_id;
-
                 RemoveOneFromInventory(player, menu->pending_item_id);
                 if (old_weapon != -1) {
                     GiveItem(player, old_weapon);
@@ -241,6 +240,8 @@ void UpdateInventory(PlaySession* session, Input* input) {
 
             // Perform swap
             gear->accessory_ids[target_slot] = menu->pending_item_id;
+
+
             RemoveOneFromInventory(player, menu->pending_item_id);
             if (current_acc_id != -1) {
                 GiveItem(player, current_acc_id);
@@ -285,6 +286,7 @@ void UpdateInventory(PlaySession* session, Input* input) {
                 // Direct equip if slot is empty
                 gear->weapon_id = itemId;
                 RemoveOneFromInventory(player, itemId);
+                RecalculateStats(&player->stats, &player->gear);
                 RebindItemMenu(session);
             }
             return;
@@ -306,6 +308,7 @@ void UpdateInventory(PlaySession* session, Input* input) {
                 // Direct equip into open slot
                 gear->accessory_ids[empty_slot] = itemId;
                 RemoveOneFromInventory(player, itemId);
+                RecalculateStats(&player->stats, &player->gear);
                 RebindItemMenu(session);
             } else {
                 // All slots full: switch sub-state to select target slot

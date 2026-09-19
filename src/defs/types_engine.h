@@ -15,12 +15,10 @@ typedef enum EditState {EDITOR_MENU = 0, EDITOR, EDITOR_PROMPT, LOAD_PROMPT}Edit
 
 typedef struct PlaySession{
   Player* player;
-  Map map;
   ScriptManager manager;
   PlayState state;
   Menu menu;
   char pendingItemName[100];
-  Camera2D camera;
   EquipMenu equip_menu;
   NodeMenu node_menu;
 } PlaySession;
@@ -33,8 +31,6 @@ typedef struct EditLoader{
 }EditLoader;
 
 typedef struct EditSession{
-  Map map;
-  Camera2D camera;
   SystemMenu menu;
   EditorForm form;
   EditState state;
@@ -51,8 +47,11 @@ typedef struct Gamestate{
   GameScreen screen;
   int framesCounter;
   SystemMenu main_menu;
-  EditSession* edit_session;
-  PlaySession* session;
+  EditSession edit_session;
+  PlaySession session;
+  Map map;
+  Camera2D camera;
+  bool editUsed;
 } Gamestate;
 
 typedef struct Command{

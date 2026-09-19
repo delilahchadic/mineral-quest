@@ -1,91 +1,85 @@
 #include "map.h"
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "defs/types_systems.h"
 #include "engine/palette.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "registry/mineral_register.h"
+#include "registry/register.h"
+#include "systems/input.h"
 #include "systems/player.h"
 #include "systems/script_manager.h"
-#include "systems/input.h"
-#include "registry/register.h"
-#include "raymath.h"
-#include "defs/types_entities.h"
-#include "defs/types_systems.h"
-#include "raylib.h"
-#include "registry/mineral_register.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-typedef enum ElementType{
+typedef enum ElementType {
     ELEMENT_NONE,
     ELEMENT_FIRE,
     ELEMENT_WATER
-}ElementType;
+} ElementType;
 
-void InitMap(Map* map){
-  Init_Player(map);
-  map->lastTileHeight = -1;
-  map->pixel_width = map->columns * TILE_SIZE;
-  map->pixel_height = map->rows * TILE_SIZE;
-  map->is_ready = true;
+void InitMap(Map *map) {
+    InitPlayer(map);
+    map->lastTileHeight = -1;
+    map->pixel_width = map->columns * TILE_SIZE;
+    map->pixel_height = map->rows * TILE_SIZE;
+    map->is_ready = true;
 }
 
-void InitNewMap(Map* map,char* name,int columns, int rows){
-  memset(map, 0, sizeof(Map));
-  snprintf(map->name, sizeof(map->name),"%s", name);
-  map->name[sizeof(map->name) - 1] = '\0';
-  map->rows = rows;
-  map->columns = columns;
-  for(int i =0;i<map->rows;i++){
-    for(int j =0;j<map->columns;j++){
-      map->grid[i][j].height = 0;
-      map->grid[i][j].type = TILE_GRASS;
-      map->grid[i][j].isoPos = GetWorldToIso((Vector2){ j * TILE_SIZE, i * TILE_SIZE });
+void InitNewMap(Map *map, char *name, int columns, int rows) {
+    memset(map, 0, sizeof(Map));
+    snprintf(map->name, sizeof(map->name), "%s", name);
+    map->name[sizeof(map->name) - 1] = '\0';
+    map->rows = rows;
+    map->columns = columns;
+    for (int i = 0; i < map->rows; i++) {
+        for (int j = 0; j < map->columns; j++) {
+            map->grid[i][j].height = 0;
+            map->grid[i][j].type = TILE_GRASS;
+            map->grid[i][j].isoPos =
+                GetWorldToIso((Vector2){j * TILE_SIZE, i * TILE_SIZE});
+        }
     }
-  }
 
-  map->pixel_width = map->columns * TILE_SIZE;
-  map->pixel_height = map->rows * TILE_SIZE;
-  map->is_ready = true;
+    map->pixel_width = map->columns * TILE_SIZE;
+    map->pixel_height = map->rows * TILE_SIZE;
+    map->is_ready = true;
 }
 
-void Init_Player(Map* map){
-  MapEntity* player = malloc(sizeof(MapEntity));
-  player->type = ENTITY_PLAYER;
-  player->state = NORMAL_STATE;
-  Add_Entity(map,player);
-  map->player = player;
-  player->jumpoffset = 0.0f;
+void InitPlayer(Map *map) {
 
-  player->combat.isAttacking = false;
-  player->combat.attackTimer = 0;
-  player->combat.attackDuration = 0.25f;
-  player->stats = GetStats(ENTITY_PLAYER, 0);
+    MapEntity *player = &map->player;
+    if (player == NULL)
+        return;
+
+    player->type = ENTITY_PLAYER;
+    player->state = NORMAL_STATE;
+    player->jumpoffset = 0.0f;
+    player->combat.isAttacking = false;
+    player->combat.attackTimer = 0;
+    player->combat.attackDuration = 0.25f;
+    player->stats = GetStats(ENTITY_PLAYER, 0);
+    // map->player = player;
 }
 
-void Close_Map(Map* map){
-  if(map == NULL){
-    return;
-  }
+void Close_Map(Map *map) {
+    if (map == NULL) {
+        return;
+    }
 
-  MapEntity* e = NULL;
-  e = map->entities;
-  while(e != NULL){
-    map->entities = e->next;
-    free(e);
-    e = map->entities;
-  }
-
-  BuildingZone* b = NULL;
-  b = map->buildings;
-  while(b != NULL){
-    map->buildings = b->next;
-    free(b);
+    BuildingZone *b = NULL;
     b = map->buildings;
-  }
+    while (b != NULL) {
+        map->buildings = b->next;
+        free(b);
+        b = map->buildings;
+    }
 }
 // 1. Converts World Coordinates (e.g. Player position) to Screen Isometric
 Vector2 GetWorldToIso(Vector2 worldPos) {
@@ -111,10 +105,10 @@ Vector2 GetGridToIsoWorld(int x, int y) {
     // FIXED: X-axis now uses TILE_SIZE to perfectly match GetWorldToIso
     float worldX = (x - y) * (float)TILE_SIZE;
     float worldY = (x + y) * ((float)TILE_SIZE / 2.0f);
-    return (Vector2){ worldX, worldY };
+    return (Vector2){worldX, worldY};
 }
 
-Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
+Vector2 GetIsoWorldToGridWithHeight(Map *map, Vector2 screenWorldPos) {
     // 1. Define your max height (matches your grid limits)
     // If your max height is 10, start there.
     const int MAX_HEIGHT = 150;
@@ -124,7 +118,7 @@ Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
         // 2. Offset the Y coordinate to 'drop' the screen click
         // to the level of the current height slice.
         float pixelOffset = h * HEIGHT_STEP;
-        Vector2 testPos = { screenWorldPos.x, screenWorldPos.y + pixelOffset };
+        Vector2 testPos = {screenWorldPos.x, screenWorldPos.y + pixelOffset};
 
         // 3. Use your existing math to find what grid cell that corresponds to
         Vector2 grid = GetIsoWorldToGrid(testPos);
@@ -134,10 +128,11 @@ Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
 
         // 4. Validate the grid index
         if (ix >= 0 && ix < map->columns && iy >= 0 && iy < map->rows) {
-            // 5. Check: Is the tile at this grid coordinate actually at this height?
-            // We check >= because you might be clicking the "side" of a tall block.
+            // 5. Check: Is the tile at this grid coordinate actually at this
+            // height? We check >= because you might be clicking the "side" of a
+            // tall block.
             if (map->grid[iy][ix].height >= h) {
-                return (Vector2){ (float)ix, (float)iy };
+                return (Vector2){(float)ix, (float)iy};
             }
         }
     }
@@ -146,86 +141,96 @@ Vector2 GetIsoWorldToGridWithHeight(Map* map, Vector2 screenWorldPos) {
     return GetIsoWorldToGrid(screenWorldPos);
 }
 
-void ResetAllHitFlags(Map* map) {
-    MapEntity* e = map->entities;
-    while (e != NULL) {
+void ResetAllHitFlags(Map *map) {
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *e = &map->entities[i];
         e->hitThisSwing = false;
-        e = e->next;
     }
 }
 
-void Remove_Entity(Map* map, MapEntity* entity){
-  if(map==NULL || entity == NULL) return;
-
-  if(map->entities == entity){
-    map->entities = entity->next;
-    entity->next =  NULL;
-    return;
-  }
-
-  MapEntity* curr = map->entities;
-  while(curr->next != NULL && curr->next != entity){
-    curr = curr->next;
-  }
-  if(curr->next == entity){
-    curr->next = entity->next;
-    entity->next = NULL;
-    if(entity->type != ENTITY_PLAYER) free(entity);
-    return;
-  }
-}
-
-void AddBuilding(Map* map, BuildingZone* building){
-    if(building == NULL) return;
-    building->next=map->buildings;
-    map->buildings=building;
+void AddBuilding(Map *map, BuildingZone *building) {
+    if (building == NULL)
+        return;
+    building->next = map->buildings;
+    map->buildings = building;
     map->building_id++;
 }
-void Remove_Building(Map* map, BuildingZone* building){
-  if(map==NULL || building == NULL) return;
 
-  if(map->buildings == building){
-    map->buildings = building->next;
-    building->next =  NULL;
-    return;
-  }
+void Remove_Building(Map *map, BuildingZone *building) {
+    if (map == NULL || building == NULL)
+        return;
 
-  BuildingZone* curr = map->buildings;
-  while(curr->next != NULL && curr->next != building){
-    curr = curr->next;
-  }
-  if(curr->next == building){
-    curr->next = building->next;
-    building->next = NULL;
-    free(building);
-    return;
-  }
-}
-
-void Add_Entity(Map* map, MapEntity* entity){
-  entity->next = map->entities;
-  map->entities = entity;
-  return;
-}
-
-MapEntity* PollTrait(Map* map, TraitFlags trait, float distance){
-  MapEntity* tmp = map->entities;
-  while (tmp != NULL) {
-    if(tmp->trait_flags & trait){
-      if(Vector2Distance(map->player->position, tmp->position) < distance){
-        return tmp;
-      }
+    if (map->buildings == building) {
+        map->buildings = building->next;
+        building->next = NULL;
+        return;
     }
-    tmp = tmp->next;
-  }
-  return NULL;
+
+    BuildingZone *curr = map->buildings;
+    while (curr->next != NULL && curr->next != building) {
+        curr = curr->next;
+    }
+    if (curr->next == building) {
+        curr->next = building->next;
+        building->next = NULL;
+        free(building);
+        return;
+    }
 }
 
-bool PickNewWanderTarget(Map* map, MapEntity* entity) {
+void RemoveEntityAt(Map *map, int index) {
+    if (index < 0 || index >= map->entity_count)
+        return;
+
+    // If the entity being removed isn't already the last one,
+    // overwrite its slot with the last entity in the array.
+    if (index < map->entity_count - 1) {
+        map->entities[index] = map->entities[map->entity_count - 1];
+    }
+
+    // Shrink the active count by 1
+    map->entity_count--;
+}
+
+MapEntity *AddEntity(Map *map) {
+    // Check if your array is full
+    if (map->entity_count >= MAX_ENTITIES) {
+        return NULL; // Array capacity reached!
+    }
+    // Grab a pointer directly to the next empty slot in the array
+    MapEntity *slot = &map->entities[map->entity_count];
+
+    // Clear out old garbage data from that slot (like memset)
+    memset(slot, 0, sizeof(MapEntity));
+
+    // Bump up your active count–––
+    map->entity_count++;
+
+    return slot; // Return the pointer so you can set its fields
+}
+
+int PollTrait(Map *map, TraitFlags trait, float distance) {
+
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *tmp = &map->entities[i];
+        if (tmp->trait_flags & trait) {
+            if (Vector2Distance(map->player.position, tmp->position) <
+                distance) {
+                return i;
+            }
+        }
+        // tmp = tmp->next;
+    }
+    return -1;
+}
+
+bool PickNewWanderTarget(Map *map, MapEntity *entity) {
     int cur_tx = (int)(entity->position.x / TILE_SIZE);
     int cur_ty = (int)(entity->position.y / TILE_SIZE);
 
-    if (cur_tx < 0 || cur_tx >= map->columns || cur_ty < 0 || cur_ty >= map->rows) return false;
+    if (cur_tx < 0 || cur_tx >= map->columns || cur_ty < 0 ||
+        cur_ty >= map->rows)
+        return false;
     int cur_h = map->grid[cur_ty][cur_tx].height;
 
     for (int i = 0; i < 10; i++) {
@@ -233,17 +238,24 @@ bool PickNewWanderTarget(Map* map, MapEntity* entity) {
         float cx = entity->position.x + ((rand() % 128) - 64);
         float cy = entity->position.y + ((rand() % 128) - 64);
 
-        // Clamp to map boundaries so it never goes into negative space or off-screen
-        if (cx < 0.0f) cx = 0.0f;
-        if (cx > (float)map->pixel_width) cx = (float)map->pixel_width;
-        if (cy < 0.0f) cy = 0.0f;
-        if (cy > (float)map->pixel_height) cy = (float)map->pixel_height;
+        // Clamp to map boundaries so it never goes into negative space or
+        // off-screen
+        if (cx < 0.0f)
+            cx = 0.0f;
+        if (cx > (float)map->pixel_width)
+            cx = (float)map->pixel_width;
+        if (cy < 0.0f)
+            cy = 0.0f;
+        if (cy > (float)map->pixel_height)
+            cy = (float)map->pixel_height;
 
         int t_tx = (int)(cx / TILE_SIZE);
         int t_ty = (int)(cy / TILE_SIZE);
 
-        if (t_tx >= map->columns) t_tx = map->columns - 1;
-        if (t_ty >= map->rows) t_ty = map->rows - 1;
+        if (t_tx >= map->columns)
+            t_tx = map->columns - 1;
+        if (t_ty >= map->rows)
+            t_ty = map->rows - 1;
 
         if (t_tx >= 0 && t_tx < map->columns && t_ty >= 0 && t_ty < map->rows) {
             if (abs(map->grid[t_ty][t_tx].height - cur_h) <= 2) {
@@ -254,25 +266,33 @@ bool PickNewWanderTarget(Map* map, MapEntity* entity) {
     }
     return false;
 }
-void UpdateWanderBehavior(Map* map, MapEntity* entity, float dt) {
+void UpdateWanderBehavior(Map *map, MapEntity *entity, float dt) {
     Vector2 diff = Vector2Subtract(entity->target_position, entity->position);
     float distance = Vector2Length(diff);
 
     if (distance > 1.0f) {
-        entity->position = Vector2Add(entity->position, Vector2Scale(Vector2Normalize(diff), entity->speed * dt));
+        entity->position =
+            Vector2Add(entity->position, Vector2Scale(Vector2Normalize(diff),
+                                                      entity->speed * dt));
 
         // Hard clamp position to stay within map pixel boundaries
-        if (entity->position.x < 0.0f) entity->position.x = 0.0f;
-        if (entity->position.x > (float)map->pixel_width) entity->position.x = (float)map->pixel_width;
-        if (entity->position.y < 0.0f) entity->position.y = 0.0f;
-        if (entity->position.y > (float)map->pixel_height) entity->position.y = (float)map->pixel_height;
+        if (entity->position.x < 0.0f)
+            entity->position.x = 0.0f;
+        if (entity->position.x > (float)map->pixel_width)
+            entity->position.x = (float)map->pixel_width;
+        if (entity->position.y < 0.0f)
+            entity->position.y = 0.0f;
+        if (entity->position.y > (float)map->pixel_height)
+            entity->position.y = (float)map->pixel_height;
 
         int tx = (int)(entity->position.x / TILE_SIZE);
         int ty = (int)(entity->position.y / TILE_SIZE);
 
         // Prevent array out-of-bounds if exactly on the right/bottom edge
-        if (tx >= map->columns) tx = map->columns - 1;
-        if (ty >= map->rows) ty = map->rows - 1;
+        if (tx >= map->columns)
+            tx = map->columns - 1;
+        if (ty >= map->rows)
+            ty = map->rows - 1;
 
         if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
             float targetAlt = map->grid[ty][tx].height * 8.0f;
@@ -283,91 +303,103 @@ void UpdateWanderBehavior(Map* map, MapEntity* entity, float dt) {
     }
 }
 
-void UpdateEnemyCombat(Map* map, MapEntity* e, float dt) {
-    if (e->type != ENTITY_ENEMY) return;
+void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
+    if (e->type != ENTITY_ENEMY)
+        return;
 
-    MapEntity* player = map->player;
+    MapEntity *player = &map->player;
     float distToPlayer = Vector2Distance(e->position, player->position);
 
     switch (e->behavior) {
-        case BEHAVIOR_WANDER:
-            // Existing wander behavior, but poll for player proximity
-            if (distToPlayer < 140.0f) {
-                e->behavior = BEHAVIOR_CHASE;
-            } else {
-                // Run normal wander movement
-                UpdateWanderBehavior(map, e, dt);
-            }
-            break;
+    case BEHAVIOR_WANDER:
+        // Existing wander behavior, but poll for player proximity
+        if (distToPlayer < 140.0f) {
+            e->behavior = BEHAVIOR_CHASE;
+        } else {
+            // Run normal wander movement
+            UpdateWanderBehavior(map, e, dt);
+        }
+        break;
 
-        case BEHAVIOR_CHASE:
-                        if (distToPlayer > 220.0f) {
-                            e->behavior = BEHAVIOR_WANDER;
-                        } else if (distToPlayer < 80.0f) { // Widen from 50.0f to catch clustered group
-                            // Close enough to strike! Enter telegraph/windup
-                            e->behavior = BEHAVIOR_WINDUP;
-                            e->behavior_timer = 0.0f;
-                        } else {
-                            // Move smoothly toward player
-                            Vector2 dir = Vector2Normalize(Vector2Subtract(player->position, e->position));
-                            e->position = Vector2Add(e->position, Vector2Scale(dir, e->speed * 0.9f * dt));
-                        }
-                        break;
+    case BEHAVIOR_CHASE:
+        if (distToPlayer > 220.0f) {
+            e->behavior = BEHAVIOR_WANDER;
+        } else if (distToPlayer <
+                   80.0f) { // Widen from 50.0f to catch clustered group
+            // Close enough to strike! Enter telegraph/windup
+            e->behavior = BEHAVIOR_WINDUP;
+            e->behavior_timer = 0.0f;
+        } else {
+            // Move smoothly toward player
+            Vector2 dir = Vector2Normalize(
+                Vector2Subtract(player->position, e->position));
+            e->position = Vector2Add(e->position,
+                                     Vector2Scale(dir, e->speed * 0.9f * dt));
+        }
+        break;
 
-        case BEHAVIOR_WINDUP:
-            e->behavior_timer += dt;
-            // 300ms visual telegraph window
-            if (e->behavior_timer >= 0.3f) {
-                e->behavior = BEHAVIOR_ATTACK;
-                e->behavior_timer = 0.0f;
-            }
-            break;
+    case BEHAVIOR_WINDUP:
+        e->behavior_timer += dt;
+        // 300ms visual telegraph window
+        if (e->behavior_timer >= 0.3f) {
+            e->behavior = BEHAVIOR_ATTACK;
+            e->behavior_timer = 0.0f;
+        }
+        break;
 
-        case BEHAVIOR_ATTACK: {
-                    // Give enemies a generous hit footprint matching their 64x64 transparent sprite bounds
-                    float enemyRadius = 26.0f;
-                    float playerRadius = 12.0f; // Adjust to your player core size
-                    Vector2 dir = Vector2Normalize(Vector2Subtract(player->position, e->position));
-                    e->position = Vector2Add(e->position, Vector2Scale(dir, e->speed * 0.9f * dt));
-                    // Check edge-to-edge distance instead of strict center-to-center
-                    if (distToPlayer < (enemyRadius + playerRadius + 10.0f)) {
-                        // Hurt player logic
-                        printf("Player hit by enemy!\n");
-                        map->hitstop_timer = 0.06f; // Impact hitstop
-                        DamagePlayer(35);
+    case BEHAVIOR_ATTACK: {
+        // Give enemies a generous hit footprint matching their 64x64
+        // transparent sprite bounds
+        float enemyRadius = 26.0f;
+        float playerRadius = 12.0f; // Adjust to your player core size
+        Vector2 dir =
+            Vector2Normalize(Vector2Subtract(player->position, e->position));
+        e->position =
+            Vector2Add(e->position, Vector2Scale(dir, e->speed * 0.9f * dt));
+        // Check edge-to-edge distance instead of strict center-to-center
+        if (distToPlayer < (enemyRadius + playerRadius + 10.0f)) {
+            // Hurt player logic
+            printf("Player hit by enemy!\n");
+            map->hitstop_timer = 0.06f; // Impact hitstop
+            DamagePlayer(35);
 
-                        // Apply knockback to player
-                        Vector2 kbDir = Vector2Normalize(Vector2Subtract(player->position, e->position));
-                        player->position = Vector2Add(player->position, Vector2Scale(kbDir, 25.0f));
-                        e->behavior = BEHAVIOR_RECOVERY;
-                        e->behavior_timer = 0.0f;
-                    }
+            // Apply knockback to player
+            Vector2 kbDir = Vector2Normalize(
+                Vector2Subtract(player->position, e->position));
+            player->position =
+                Vector2Add(player->position, Vector2Scale(kbDir, 25.0f));
+            e->behavior = BEHAVIOR_RECOVERY;
+            e->behavior_timer = 0.0f;
+        }
 
-                    break;
-                }
+        break;
+    }
 
-        case BEHAVIOR_RECOVERY:
-            e->behavior_timer += dt;
-            // 400ms recovery window where enemy is vulnerable
-            if (e->behavior_timer >= 0.4f) {
-                e->behavior = BEHAVIOR_CHASE;
-            }
-            break;
+    case BEHAVIOR_RECOVERY:
+        e->behavior_timer += dt;
+        // 400ms recovery window where enemy is vulnerable
+        if (e->behavior_timer >= 0.4f) {
+            e->behavior = BEHAVIOR_CHASE;
+        }
+        break;
 
-        default:
-                e->behavior = BEHAVIOR_WANDER;
-            break;
+    default:
+        e->behavior = BEHAVIOR_WANDER;
+        break;
     }
 }
 
-void UpdateEntityMovement(Map* map, float dt) {
-    MapEntity* entity = map->entities;
-    MapEntity* prev = NULL;
+void UpdateEntityMovement(Map *map, float dt) {
+    if (map == NULL)
+        return;
 
-    while (entity) {
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *entity = &map->entities[i];
+
         if (entity->isCollecting) {
-            Vector2 targetPos = map->player->position;
-            entity->position = Vector2Lerp(entity->position, targetPos, 40.0f *dt);
+            Vector2 targetPos = map->player.position;
+            entity->position =
+                Vector2Lerp(entity->position, targetPos, 40.0f * dt);
 
             if (Vector2DistanceSqr(entity->position, targetPos) < 10.0f) {
                 GLOBAL_PLAYER.mineral_inventory[entity->id]++;
@@ -375,17 +407,11 @@ void UpdateEntityMovement(Map* map, float dt) {
                 SetSoundPitch(MINERAL_SOUND, pitch);
                 PlaySound(MINERAL_SOUND);
 
-                // Safely remove entity from linked list and free it
-                MapEntity* toFree = entity;
-                if (prev == NULL) {
-                    map->entities = entity->next;
-                    entity = map->entities;
-                } else {
-                    prev->next = entity->next;
-                    entity = entity->next;
-                }
-                if (toFree->type != ENTITY_PLAYER) free(toFree);
-                continue; // Skip the default prev/entity advance since we already moved it
+                // Remove it using your flat-array helper, then step i back
+                // so the newly shifted element at this index isn't skipped!
+                RemoveEntityAt(map, i);
+                i--;
+                continue;
             }
         }
 
@@ -394,19 +420,19 @@ void UpdateEntityMovement(Map* map, float dt) {
         } else if (entity->behavior == BEHAVIOR_WANDER) {
             UpdateWanderBehavior(map, entity, dt);
         }
-
-        prev = entity;
-        entity = entity->next;
     }
 }
 
+int getExchangeNodeByCharacterId(
+    Map *map, int character_id) { // poll map->nodes for a node that has a
+                                  // matching character id
+    if (map == NULL || map->node_count < 0 || character_id < 0)
+        return -1;
 
-int getExchangeNodeByCharacterId(Map* map, int character_id){ // poll map->nodes for a node that has a matching character id
-    if(map == NULL || map->node_count <0 || character_id < 0) return -1;
-
-    for(int i =0;i <map->node_count;i++){
+    for (int i = 0; i < map->node_count; i++) {
         int owner_id = GetCharacterId(map->active_nodes[i]);
-        if(owner_id == character_id) return map->active_nodes[i];
+        if (owner_id == character_id)
+            return map->active_nodes[i];
     }
     return -1;
 }

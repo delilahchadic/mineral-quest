@@ -4,7 +4,6 @@
 #include "ui/menu.h"
 #include <stdbool.h>
 
-void AdjustCamera(PlaySession* session, bool dialog, float dt);
-
-void DrawPlaySession(PlaySession* session);
+void AdjustCamera(Gamestate* gamestate, bool dialog, float dt);
+void DrawPlaySession(Gamestate* gamestate);
 #endif

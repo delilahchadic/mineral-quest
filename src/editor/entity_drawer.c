@@ -81,7 +81,7 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
         int ix = (int)gridCoords.x;
         int iy = (int)gridCoords.y;
 
-        MapEntity* newEntity = malloc(sizeof(MapEntity));
+        MapEntity* newEntity = AddEntity(map);
         newEntity->type = drawer->current_type;
         newEntity->id = drawer->selected_id;
 
@@ -92,8 +92,6 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
         newEntity->jumpoffset = 0.0f;
         newEntity->position.x = gridCoords.x * TILE_SIZE + (TILE_SIZE / 2.0f);
         newEntity->position.y = gridCoords.y * TILE_SIZE + (TILE_SIZE / 2.0f);
-
-        Add_Entity(map, newEntity);
         return true;
     }
     return false;

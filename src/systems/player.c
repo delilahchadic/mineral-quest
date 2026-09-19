@@ -1,6 +1,7 @@
 #include "systems/player.h"
 #include "defs/types_entities.h"
 #include "defs/types_minerals.h"
+#include "raylib.h"
 #include "registry/register.h"
 #include <string.h>
 
@@ -123,7 +124,7 @@ Player Get_Default_Player() {
     return player;
 }
 
-void Close_Player(Player* player) {
+void ClosePlayer(Player* player) {
     UnloadTexture(player->sprite);
 }
 

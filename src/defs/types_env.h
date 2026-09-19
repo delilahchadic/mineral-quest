@@ -6,6 +6,7 @@
 #define TILE_SIZE 32
 #define MAP_WIDTH 100
 #define MAP_HEIGHT 100
+#define MAX_ENTITIES 500
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX  (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
@@ -50,7 +51,6 @@ typedef struct MapEntity {
   Vector2 target_position;
   Behavior behavior;
   float behavior_timer;
-  struct MapEntity* next;
   int hp;
   int id;
   State state;
@@ -92,14 +92,15 @@ typedef struct Map{
   int rows;
   int columns;
   char name[32];
-  MapEntity* entities;
-  MapEntity* player;
+  MapEntity player;
   int lastTileHeight;
   int active_nodes[10];
   int node_count;
   bool is_ready;
   float hitstop_timer;
   MapEntity* buckets[MAP_HEIGHT];
+  MapEntity entities[MAX_ENTITIES];
+  int entity_count;
   BuildingZone* buildings;
   int building_id; // used to guarantee any new building has a unique id
 }Map;

@@ -48,6 +48,7 @@ void CloseRegistries(){
   CloseSpriteOverrideRegistry();
   ClosePortalRegistry();
   CloseEnemyRegistry();
+  ClosePlayer(PLAYER);
 }
 
 void ParseCommandRegistryRow(char* line){

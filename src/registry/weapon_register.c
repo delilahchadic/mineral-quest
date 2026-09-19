@@ -168,7 +168,6 @@ void DrawSimpleBat(Vector2 position, float rotation) {
     float knobRadius   = 2.2f;
 
     Color woodBase   = COLOR_GUITAR_AMBER;
-    Color woodShadow = ColorBrightness(COLOR_BURNT_SIENNA, -0.3f);
     Color tapeGrip   = COLOR_PULP_PAPER;
     Color knobColor  = COLOR_BURNT_SIENNA;
 

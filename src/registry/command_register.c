@@ -16,15 +16,14 @@ void(*callbacks[100]) (void*) = {
 // Used in Main menu to set the gsme state to bein game
 void AdventureMode(void* context){
   Gamestate* gamestate = (Gamestate*)context;
-  gamestate->session = calloc(1, sizeof(PlaySession));
-  InitPlaySession(gamestate->session);
+  InitPlaySession(gamestate);
   gamestate->screen = GAMEPLAY;
 }
 
 void EditMode(void* context){
   Gamestate* gamestate = (Gamestate*)context;
-  gamestate->edit_session = calloc(1, sizeof(EditSession));
-  InitEditSession(gamestate->edit_session);
+  InitEditSession(gamestate);
+  gamestate->editUsed = true;
   gamestate->screen = EDIT_SCREEN;
 }
 

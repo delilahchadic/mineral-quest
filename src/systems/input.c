@@ -26,7 +26,7 @@ Input CaptureInput(){
     i.buttons_pressed |= INVENTORY_PRESSED;
   }
   if(IsKeyPressed(KEY_E)){
-    i.buttons_pressed |= INTERACT_PRESSED;
+    i.buttons_pressed |= KEY_E_PRESSED;
   }
   if(IsKeyDown(KEY_SPACE)){
     i.buttons_pressed |= JUMP_PRESSED;

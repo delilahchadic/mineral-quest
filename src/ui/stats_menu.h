@@ -3,5 +3,5 @@
 #include "defs/types_engine.h"
 
 void UpdateStatsMenu(PlaySession* session, Input* input);
-void DrawStatsMenu(PlaySession* session);
+void DrawStatsMenu(Gamestate* gamestate);
 #endif

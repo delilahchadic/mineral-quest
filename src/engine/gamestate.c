@@ -19,7 +19,6 @@
 void InitGame(Gamestate* gamestate){
   gamestate->screen= LOGO;
   gamestate->framesCounter = 0;
-  gamestate->edit_session = NULL;
   FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
 }
 
@@ -40,17 +39,17 @@ void UpdateScene(Gamestate* gamestate){
       break;
     }
     case GAMEPLAY:
-        if(gamestate->session->state ==  GAME_OVER){
+        if(gamestate->session.state ==  GAME_OVER){
             gamestate->screen = TITLE;
-            Close_Map(&gamestate->session->map);
-            gamestate->session->state =0;
+            Close_Map(&gamestate->map);
+            gamestate->session.state =0;
             SetDefaultStat(PLAYER);
             RecalculateStats(&PLAYER->stats, &PLAYER->gear);
         }
-      UpdatePlaySession(gamestate->session);
+      UpdatePlaySession(gamestate);
       break;
     case EDIT_SCREEN:
-      if(!UpdateEditSession(gamestate->edit_session, &input)){
+      if(!UpdateEditSession(gamestate, &input)){
         gamestate->screen = MENU;
       }
       break;
@@ -92,19 +91,20 @@ void DrawScreen(Gamestate* gamestate){
             DrawSystemMenu(&gamestate->main_menu);
             break;
         case GAMEPLAY:
-            DrawPlaySession(gamestate->session);
+            DrawPlaySession(gamestate);
             break;
         case EDIT_SCREEN:
-            DrawEditSession(gamestate->edit_session);
+            DrawEditSession(gamestate);
             break;
     }
 }
 
 void CloseGame(Gamestate* gamestate){
-  Close_Player(PLAYER);
-  Close_Map(&gamestate->session->map);
-  CloseEditor(gamestate->edit_session);
-  free(gamestate->session);
+  Close_Map(&gamestate->map);
+  if(gamestate->editUsed){
+      CloseEditor(gamestate);
+  }
+
   free(gamestate);
   CloseWindow();
 }

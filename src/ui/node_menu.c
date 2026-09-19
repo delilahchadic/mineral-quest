@@ -1,5 +1,6 @@
 #include "ui/node_menu.h"
 
+#include "defs/types_systems.h"
 #include "registry/register.h"
 void UpdateNodeMenu(PlaySession* session, Input* input){
     if(session->node_menu.state == NODE_MENU_BROWSE){
@@ -35,7 +36,7 @@ void UpdateNodeMenu(PlaySession* session, Input* input){
             }
         }
 
-        if(input->buttons_pressed & INTERACT_PRESSED){
+        if(input->buttons_pressed & KEY_E_PRESSED){
             session->state = ADVENTURE;
             return;
         }

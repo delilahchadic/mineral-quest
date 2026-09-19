@@ -23,7 +23,7 @@ void DrawMessage(ScriptManager* manager){
 }
 
 void UpdateScriptManager(ScriptManager* manager, Input* input){
-  if (manager->active && (input->buttons_pressed & INTERACT_PRESSED)) {
+  if (manager->active && (input->buttons_pressed & KEY_E_PRESSED)) {
     // For now, let's just close it.
     // Later, this will call Advance_Dialogue to check for nextId
     if(manager->active_messsage->nextid != -1){
