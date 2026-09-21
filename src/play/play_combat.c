@@ -6,6 +6,7 @@
 #include "environment/map.h"
 #include "registry/register.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 float EaseOutCubic(float x) {
@@ -54,7 +55,11 @@ static bool ProcessHit(Map* map, MapEntity* player, int index) {
     if (target->type == ENTITY_ENEMY) {
         target->hp -= PLAYER->stats.current[STAT_STR];
         if (target->hp <= 0) {
+            if(PLAYER->targeting.locked && PLAYER->targeting.target_id ==target->instance_id){
+                PLAYER->targeting.locked=false;
+            }
             RemoveEntityAt(map, index);
+
             return true;
         }
     }
@@ -102,19 +107,23 @@ void UpdateCombat(Map* map) {
     float arcEndRad = arcEndDeg * DEG2RAD;
     float arcStep = 0.1f;
 
+    // Calculate player center from sprite dimensions
+    Vector2 playerCenter = GetEntityCenter(player);
+
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *e = &map->entities[i];
-        if (e != player) {
+        if (e != player && e->type != ENTITY_MINERAL) {
             bool hit = false;
             float entityRadius = e->type == ENTITY_ENEMY ? 16.0f : 5.0f;
+            Vector2 eCenter = GetEntityCenter(e);
 
             for (float offset = arcStartRad; offset <= arcEndRad; offset += arcStep) {
                 Vector2 checkPos = {
-                    player->position.x + cosf(baseAngle + offset) * reachDistance,
-                    player->position.y + sinf(baseAngle + offset) * reachDistance
+                    playerCenter.x + cosf(baseAngle + offset) * reachDistance,
+                    playerCenter.y + sinf(baseAngle + offset) * reachDistance
                 };
 
-                if (Vector2Distance(checkPos, e->position) < (hitRadius + entityRadius)) {
+                if (Vector2Distance(checkPos, eCenter) < (hitRadius + entityRadius)) {
                     hit = true;
                     break;
                 }
@@ -143,17 +152,23 @@ void UpdatePlayerCombatAnimation(MapEntity* player, float dt){
         float easeT = EaseOutCubic(t);
 
         // LUNGE / STEP-IN MOMENTUM (slightly scaled up to match the extra reach)
-        if (t < 0.4f) {
-            float lungeSpeed = 0.0f;
-            switch (player->combat.combo_state) {
-                case COMBO_1: lungeSpeed = 75.0f; break;
-                case COMBO_2: lungeSpeed = 30.0f; break;
-                case COMBO_3: lungeSpeed = 160.0f; break;
-                default: break;
-            }
-            player->position.x += cosf(baseAngle) * lungeSpeed * dt;
-            player->position.y += sinf(baseAngle) * lungeSpeed * dt;
-        }
+        // LUNGE / STEP-IN MOMENTUM (Rusty-style smooth dash)
+                if (t < 0.5f) {
+                    float maxLungeSpeed = 0.0f;
+                    switch (player->combat.combo_state) {
+                        case COMBO_1: maxLungeSpeed = 500.0f; break;
+                        case COMBO_2: maxLungeSpeed = 700.0f; break;
+                        case COMBO_3: maxLungeSpeed = 900.0f; break; // Heavy finisher lunge!
+                        default: break;
+                    }
+
+                    // Decaying speed curve: starts blazing fast, smoothly slows down as t approaches 0.5f
+                    float dashProgress = t / 0.5f;
+                    float currentSpeed = maxLungeSpeed * (1.0f - (dashProgress * dashProgress));
+
+                    player->position.x += cosf(baseAngle) * currentSpeed * dt;
+                    player->position.y += sinf(baseAngle) * currentSpeed * dt;
+                }
 
         if (t >= 1.0f) {
             player->combat.isAttacking = false;

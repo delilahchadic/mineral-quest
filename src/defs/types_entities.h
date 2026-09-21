@@ -221,6 +221,13 @@ typedef struct EquipmentSet{
     int accessory_ids[MAX_ACCESSORY_SLOTS];
 }EquipmentSet;
 
+typedef struct PlayerTargeting{
+    int target_id;       // The unique ID of the locked entity (-1 if none)
+    int potential_targets[8]; // Array of nearby target IDs for tab-targeting
+    int potential_count;
+    bool locked;
+} PlayerTargeting;
+
 typedef struct Player{
   int item_inventory[100];
   int mineral_inventory[MINERAL_COUNT];
@@ -229,6 +236,7 @@ typedef struct Player{
   Texture2D sprite;     // How fast we move
   StatBlock stats;
   EquipmentSet gear;
+  PlayerTargeting targeting;
 } Player;
 
 typedef enum ExchangeNodeType{

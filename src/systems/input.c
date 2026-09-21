@@ -18,13 +18,31 @@ Input CaptureInput(){
     i.buttons_pressed |= KEY_S_PRESSED;
   }
 
+  if(IsKeyPressed(KEY_L)){
+    i.buttons_pressed |= KEY_L_PRESSED;
+  }
+
+  if(IsKeyPressed(KEY_I)){
+    i.buttons_pressed |= KEY_I_PRESSED;
+  }
+  if(IsKeyPressed(KEY_J)){
+    i.buttons_pressed |= KEY_J_PRESSED;
+  }
+  if(IsKeyPressed(KEY_K)){
+    i.buttons_pressed |= KEY_K_PRESSED;
+  }
+
+  if(IsKeyPressed(KEY_O)){
+    i.buttons_pressed |= KEY_O_PRESSED;
+  }
+  if(IsKeyPressed(KEY_U)){
+    i.buttons_pressed |= KEY_U_PRESSED;
+  }
+
   if(IsKeyPressed(KEY_P)){
     i.buttons_pressed |= KEY_P_PRESSED;
   }
 
-  if(IsKeyPressed(KEY_I)){
-    i.buttons_pressed |= INVENTORY_PRESSED;
-  }
   if(IsKeyPressed(KEY_E)){
     i.buttons_pressed |= KEY_E_PRESSED;
   }
@@ -32,11 +50,11 @@ Input CaptureInput(){
     i.buttons_pressed |= JUMP_PRESSED;
   }
   if(IsKeyPressed(KEY_M)){
-    i.buttons_pressed |= MINERAL_PRESSED;
+    i.buttons_pressed |= KEY_M_PRESSED;
   }
 
-  if(IsKeyPressed(KEY_L)){
-    i.buttons_pressed |= LEVEL_PRESSED;
+  if(IsKeyPressed(KEY_N)){
+    i.buttons_pressed |= KEY_N_PRESSED;
   }
 
   if(IsKeyDown(KEY_LEFT_SHIFT)){
@@ -76,5 +94,9 @@ Input CaptureInput(){
     i.buttons_pressed |= MOVEMENT_PRESSED;
   }
 
+  if (i.buttons_pressed & KEY_I_PRESSED) i.attack_dir.y -= 1.0f; // Up
+  if (i.buttons_pressed & KEY_K_PRESSED) i.attack_dir.y += 1.0f; // Down
+  if (i.buttons_pressed & KEY_J_PRESSED) i.attack_dir.x -= 1.0f; // Left
+  if (i.buttons_pressed & KEY_L_PRESSED) i.attack_dir.x += 1.0f; // Right
   return i;
 }

@@ -83,7 +83,7 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
 
         MapEntity* newEntity = AddEntity(map);
         newEntity->type = drawer->current_type;
-        newEntity->id = drawer->selected_id;
+        newEntity->entity_id = drawer->selected_id;
 
         // FIX: Capture the height of the tile and convert to pixels (8.0f step)
         newEntity->altitude = map->grid[iy][ix].height * 8.0f;

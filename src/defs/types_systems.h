@@ -8,13 +8,14 @@
 
 typedef struct Input{
   Vector2 dir;
+  Vector2 attack_dir;
   Vector2 mouse;
   uint32_t buttons_pressed;
 } Input;
 
 typedef enum ButtonPressed{
   NONE_PRESSED = 0,
-  INVENTORY_PRESSED = 1 << 0,
+  KEY_U_PRESSED = 1 << 0,
   KEY_E_PRESSED = 1 << 1,
   JUMP_PRESSED = 1 << 2,
   KEY_W_PRESSED = 1 <<3,
@@ -23,14 +24,19 @@ typedef enum ButtonPressed{
   BACKSPACE_PRESSED = 1 <<6,
   SHIFT_DOWN = 1 << 7, //used for edit
   CONTROL_PRESSED = 1 <<8,
-  MINERAL_PRESSED = 1 << 9,
-  LEVEL_PRESSED = 1 << 10,
+  KEY_M_PRESSED = 1 << 9,
+  KEY_N_PRESSED = 1 << 10,
   KEY_P_PRESSED = 1 <<11,
   SHIFT_PRESSED = 1 <<12, // for use in play for press
+  KEY_L_PRESSED = 1<<13,
+  KEY_I_PRESSED = 1<<14,
   MOVEMENT_PRESSED = 1 <<15,
   LEFT_MOUSE_CLICKED = 1 <<16,
   LEFT_MOUSE_DOWN = 1 <<17,
   LEFT_MOUSE_RELEASED = 1 <<18,
+  KEY_K_PRESSED = 1<<19,
+  KEY_J_PRESSED = 1<<20,
+  KEY_O_PRESSED = 1<<21,
 } ButtonPressed;
 
 typedef struct ScriptManager{

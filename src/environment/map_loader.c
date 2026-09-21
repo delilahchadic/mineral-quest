@@ -97,6 +97,7 @@ void LoadMap(const char *mapName, Map *map) {
           GetWorldToIso((Vector2){j * TILE_SIZE, i * TILE_SIZE});
     }
   }
+  map->entitity_id=0;
 
   // 4. Read Entities (Header updated to check grid_x/grid_y)
   // map->entities = NULL;
@@ -117,7 +118,7 @@ void LoadMap(const char *mapName, Map *map) {
       MapEntity *m = AddEntity(map);
       if (m == NULL)
         continue;
-
+      m->instance_id = map->entitity_id++;
       m->type = (EntityType)atoi(typeToken);
       m->jumpoffset = 0.0f;
 
@@ -125,11 +126,11 @@ void LoadMap(const char *mapName, Map *map) {
       int gx = atoi(gxToken);
       int gy = atoi(gyToken);
       m->position = (Vector2){(float)(gx * TILE_SIZE), (float)(gy * TILE_SIZE)};
-      m->id = atoi(idToken);
-      m->trait_flags = GetDefaultTraitFlags(m->type, m->id);
+      m->entity_id = atoi(idToken);
+      m->trait_flags = GetDefaultTraitFlags(m->type, m->entity_id);
 
       if (m->type == ENTITY_ENEMY) {
-        m->hp = ENEMY_REGISTRY[m->id].hp;
+        m->hp = ENEMY_REGISTRY[m->entity_id].hp;
       }
       if (m->type == ENTITY_CHARACTER || m->type == ENTITY_ENEMY) {
         m->behavior = BEHAVIOR_WANDER;
@@ -146,7 +147,7 @@ void LoadMap(const char *mapName, Map *map) {
       m->isCollecting = false;
     }
   }
-
+  TraceLog(LOG_INFO,"Loaded %d enities from %s.map", map->entity_count, map->name);
   // 5. Read Buildings
   map->buildings = NULL;
   while (fgets(line, sizeof(line), file)) {
@@ -256,8 +257,7 @@ void SaveMap(Map *map) {
       int gx = (int)(curr->position.x / TILE_SIZE);
       int gy = (int)(curr->position.y / TILE_SIZE);
 
-      fprintf(file, "%d,%d,%d,%d\n", curr->type, gx, gy, curr->id);
-      // curr = curr->next;
+      fprintf(file, "%d,%d,%d,%d\n", curr->type, gx, gy, curr->entity_id);
   }
 
   fprintf(file, "\n"); // Spacer line before buildings

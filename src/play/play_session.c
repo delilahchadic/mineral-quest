@@ -13,6 +13,7 @@
 #include "play/play_inventory.h"
 #include "play/play_ui.h"
 #include "raylib.h"
+#include "raymath.h"
 #include "registry/mineral_register.h"
 #include "registry/register.h"
 #include "systems/input.h"
@@ -25,6 +26,8 @@
 #include "ui/node_menu.h"
 #include "ui/stats_menu.h"
 #include <math.h>
+#include <stdbool.h>
+#include "systems/targeting.h"
 #include <stdio.h>
 
 void InitPlaySession(Gamestate *gamestate) {
@@ -39,10 +42,12 @@ void InitPlaySession(Gamestate *gamestate) {
     gamestate->map.player.position =
         GetDestination(ENTITY_PORTAL, startPortalId);
 
-    CenterCameraOn(&gamestate->camera, gamestate->map.player.position, 3.0f,
+    Vector2 player_center = GetEntityCenter(&gamestate->map.player);
+
+    CenterCameraOn(&gamestate->camera, player_center, 3.0f,
                    &gamestate->map);
-    int tx = (int)(gamestate->map.player.position.x / TILE_SIZE);
-    int ty = (int)(gamestate->map.player.position.y / TILE_SIZE);
+    int tx = (int)(player_center.x / TILE_SIZE);
+    int ty = (int)(player_center.y / TILE_SIZE);
     // Set the altitude to the floor height immediately
     //
     float startFloor = gamestate->map.grid[ty][tx].height * 8.0f;
@@ -68,7 +73,7 @@ void UpdateTalking(Gamestate *gamestate, Input *input, float dt) {
 
 void RebindItemMenu(PlaySession *session) {
     session->menu.type = ENTITY_ITEM;
-    session->menu.exit_button = INVENTORY_PRESSED;
+    session->menu.exit_button = KEY_N_PRESSED;
     // Gather all non-zero item IDs from the frequency map into a temporary list
     // for the menu
     int active_item_ids[100];
@@ -84,24 +89,37 @@ void RebindItemMenu(PlaySession *session) {
     return;
 }
 
-void UpdateAdventure(Gamestate* gamestate, Input *input, float dt) {
+
+
+void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     PlaySession *session = &gamestate->session;
+    // Refresh nearby targets every frame
+    UpdatePlayerTargets(&gamestate->map, &gamestate->session.player->targeting);
     // int worrld
     if (PLAYER->stats.current_hp <= 0) {
         session->state = GAME_OVER;
         return;
     }
     if (input->buttons_pressed & BACKSPACE_PRESSED) {
+        session->state = GAME_OVER;
+        return;
+    }
+    if (input->attack_dir.x != 0.0f || input->attack_dir.y != 0.0f) {
+        // 1. Update facing direction immediately to match the IJKL input
+        gamestate->map.player.combat.facing_direction =
+            atan2f(input->attack_dir.y, input->attack_dir.x);
 
+        // 2. Trigger the attack combo (InitCombat handles combo states 1, 2,
+        // and 3)
+        InitCombat(&gamestate->map);
+    }
+
+    if (input->buttons_pressed & KEY_N_PRESSED) {
+        RebindItemMenu(session);
         return;
     }
 
-    if (input->buttons_pressed & LEVEL_PRESSED) {
-        session->state = LEVEL_INVENTORY;
-        return;
-    }
-
-    if (input->buttons_pressed & MINERAL_PRESSED) {
+    if (input->buttons_pressed & KEY_M_PRESSED) {
         session->state = MINERAL_INVENTORY;
         return;
     }
@@ -111,13 +129,34 @@ void UpdateAdventure(Gamestate* gamestate, Input *input, float dt) {
         return;
     }
 
-    if (input->buttons_pressed & INVENTORY_PRESSED) {
-        RebindItemMenu(session);
+    if (input->buttons_pressed & KEY_U_PRESSED) {
+        PLAYER->targeting.locked = !PLAYER->targeting.locked;
         return;
     }
-
+    if (input->buttons_pressed & KEY_O_PRESSED) {
+        if (PLAYER->targeting.locked) {
+            CycleTarget(&PLAYER->targeting);
+            return;
+        }
+    }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        InitCombat(&gamestate->map);
+        // session->state = LEVEL_INVENTORY;
+        if (PLAYER->targeting.target_id != -1) {
+            MapEntity *target =
+                GetTargetEntity(&gamestate->map, PLAYER->targeting.target_id);
+            if (target) {
+                // Point player straight at the target
+                Vector2 diff = Vector2Subtract(GetEntityCenter(target),
+                                               GetEntityCenter(&gamestate->map.player));
+                gamestate->map.player.combat.facing_direction =
+                    atan2f(diff.y, diff.x);
+
+                // Trigger a combat swing/lunge immediately
+                InitCombat(&gamestate->map);
+            }
+        }else{
+            InitCombat(&gamestate->map);
+        }
         return;
     }
 
@@ -133,7 +172,7 @@ void UpdateAdventure(Gamestate* gamestate, Input *input, float dt) {
                 MapEntity *nodecharacter = &gamestate->map.entities[node_index];
                 for (int i = 0; i < gamestate->map.node_count; i++) {
                     if (GetCharacterId(gamestate->map.active_nodes[i]) ==
-                        nodecharacter->id) {
+                        nodecharacter->entity_id) {
                         session->node_menu.node_id =
                             gamestate->map.active_nodes[i];
                         session->state = NODE_MENU;
@@ -147,8 +186,7 @@ void UpdateAdventure(Gamestate* gamestate, Input *input, float dt) {
                 if (session->manager.active)
                     session->state = TALKING;
                 else
-                 session->state = EQUIPMENT_MENU;
-
+                    session->state = EQUIPMENT_MENU;
             }
         }
     }
@@ -178,9 +216,13 @@ void UpdateAdventure(Gamestate* gamestate, Input *input, float dt) {
 
     int portal_index = PollTrait(&gamestate->map, TRAIT_TELEPORT, 20.0f);
     if (portal_index > -1) {
+
         MapEntity *entity = &gamestate->map.entities[portal_index];
-        ChangeMap(gamestate, GetWorldNameFromPortalId(entity->id),
-                  GetDestination(ENTITY_PORTAL, entity->id));
+        if (GetPortalType(entity->entity_id) == PORTAL_CRYSTAL) {
+            PLAYER->stats.current_hp = PLAYER->stats.max_hp;
+        }
+        ChangeMap(gamestate, GetWorldNameFromPortalId(entity->entity_id),
+                  GetDestination(ENTITY_PORTAL, entity->entity_id));
     }
 }
 
@@ -190,8 +232,8 @@ void UpdateItemPopup(PlaySession *session, Input *input) {
     }
 }
 
-void UpdatePlaySession(Gamestate* gamestate) {
-    PlaySession* session = &gamestate->session;
+void UpdatePlaySession(Gamestate *gamestate) {
+    PlaySession *session = &gamestate->session;
     Input input = CaptureInput();
     float dt = GetFrameTime();
     if (dt > 0.1f)

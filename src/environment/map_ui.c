@@ -212,6 +212,39 @@ void Draw_Buildings(Map *map, int current_x, int current_y) {
         b = b->next;
     }
 }
+void DrawTargetReticle(Vector2 position, EntityType type) {
+    // if (!position) return;
+
+    // 1. Create a pulsing glow effect based on real-time
+    float pulse = sinf(GetTime() * 8.0f) * 3.0f;
+    float radius = 24.0f + pulse;
+
+    // 2. Color-code by entity type (replace these with your custom color names)
+    Color reticleColor = WHITE;
+    if(PLAYER->targeting.locked){
+        switch (type) {
+            case ENTITY_ENEMY:
+                reticleColor = COLOR_RED_OCHRE;       // Swap with your custom enemy color (e.g., COLOR_ENEMY_RED)
+                break;
+            case ENTITY_PLANT:
+                reticleColor = COLOR_SAP_GREEN;     // Swap with your custom harvest color
+                break;
+            case ENTITY_PORTAL:
+                reticleColor = COLOR_SNOOT_PINK;
+                break;
+            default:
+                reticleColor = COLOR_CERULEAN_WISTFUL;    // Swap with your default/interactive color
+                break;
+        }
+    }
+
+
+    // 3. Draw an outer glowing, semi-transparent ring
+    DrawRing(position, radius - 3.0f, radius + 1.0f, 0.0f, 360.0f, 16, Fade(reticleColor, 0.35f));
+
+    // 4. Draw the crisp main reticle ring
+    DrawCircleLines(position.x, position.y, radius, reticleColor);
+}
 
 void Draw_MapEntity(MapEntity *entity, Map *map) {
 
@@ -219,9 +252,9 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
     position.y -= entity->altitude;
 
     if (entity->type == ENTITY_MINERAL) {
-        DrawMineral(entity->id, position);
+        DrawMineral(entity->entity_id, position);
     } else {
-        Texture2D *sprite = GetSprite(entity->type, entity->id);
+        Texture2D *sprite = GetSprite(entity->type, entity->entity_id);
         float renderHeight = (entity->type == ENTITY_ITEM)
                                  ? (sprite->height * 0.5f)
                                  : (float)sprite->height;
@@ -235,7 +268,7 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
         } else {
             DrawTextureV(*sprite, drawPos, WHITE);
-            DrawText(GetName(entity->type, entity->id), drawPos.x + 20,
+            DrawText(GetName(entity->type, entity->entity_id), drawPos.x + 20,
                      drawPos.y - 20.0, 2.0, COLOR_SUNKEN_INK);
             if (entity->type == ENTITY_ENEMY) {
                 char hpStr[16];
@@ -259,10 +292,15 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
                                BLANK);
         }
 
+        if(entity->instance_id==PLAYER->targeting.target_id){
+            Texture2D *sprite = GetSprite(entity->type, entity->entity_id);
+            DrawTargetReticle((Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height/2.0),} , entity->type);
+        }
         if (entity == &map->player) {
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
             DrawWeapon(GLOBAL_PLAYER.gear.weapon_id, handPos,
                        map->player.combat.attackAngle);
+
         }
     }
 }
@@ -344,9 +382,9 @@ void Draw_Map(Map *map, Camera2D *camera, bool drawPlayer) {
     if (altitudePadding > 100) altitudePadding = 100;
 
     int min_y = (int)fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y)) - altitudePadding;
-    int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + 25;
-    int min_x = (int)fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) - 25;
-    int max_x = (int)fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x)) + 25;
+    int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + altitudePadding;
+    int min_x = (int)fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) - altitudePadding;
+    int max_x = (int)fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x)) + altitudePadding;
 
     if (min_x < 0)
         min_x = 0;
@@ -439,7 +477,7 @@ void Draw_Map(Map *map, Camera2D *camera, bool drawPlayer) {
     if (isOccluded) {
         Vector2 pPos = GetWorldToIso(map->player.position);
         pPos.y -= map->player.altitude;
-        Texture2D *sprite = GetSprite(map->player.type, map->player.id);
+        Texture2D *sprite = GetSprite(map->player.type, 0);
         Vector2 drawPos = {pPos.x - (sprite->width / 2.0f),
                            pPos.y - sprite->height};
 

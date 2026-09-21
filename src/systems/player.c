@@ -118,6 +118,7 @@ Player Get_Default_Player() {
     player.item_inventory[13]++;
     player.speed = 250.0f;
     player.sprite = LoadTexture("data/sprites/sprite.png");
+    player.targeting.target_id = -1;
     SetDefaultStat(&player);
     InitEquipmentSet(&player.gear);
     RecalculateStats(&player.stats, &player.gear);

@@ -15,6 +15,7 @@
 #include "systems/input.h"
 #include "systems/player.h"
 #include "ui/menu.h"
+#include <stdbool.h>
 
 void InitGame(Gamestate* gamestate){
   gamestate->screen= LOGO;
@@ -45,6 +46,9 @@ void UpdateScene(Gamestate* gamestate){
             gamestate->session.state =0;
             SetDefaultStat(PLAYER);
             RecalculateStats(&PLAYER->stats, &PLAYER->gear);
+            PLAYER->targeting.locked = false;
+            PLAYER->targeting.target_id = -1;
+            PLAYER->targeting.potential_count=0;
         }
       UpdatePlaySession(gamestate);
       break;

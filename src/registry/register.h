@@ -3,7 +3,9 @@
 #include "raylib.h"
 
 #include "defs/types_entities.h"
+#include "defs/types_env.h"
 #include "systems/player.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -55,4 +57,6 @@ int GetCharacterId(int node_id);
 int GetWorldIDFromPortal(int portal_id);
 Vector2 GetDestination(EntityType type, int id);
 char* GetWorldNameFromPortalId(int portal_id);
+PortalType GetPortalType(int id);
+Vector2 GetEntityCenter(MapEntity* entity);
 #endif

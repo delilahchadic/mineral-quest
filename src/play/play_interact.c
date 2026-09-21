@@ -14,7 +14,7 @@ void InitDialog(Map* map, ScriptManager* manager){
   int characterIndex = PollTrait(map, TRAIT_TALK, 50.0f);
   if(characterIndex >-1){
     MapEntity* p = &map->entities[characterIndex];
-    int dialogID = GetDialogID(ENTITY_CHARACTER, p->id);
+    int dialogID = GetDialogID(ENTITY_CHARACTER, p->entity_id);
     SetActiveMessage(manager, dialogID);
     manager->active = true;
   }
@@ -41,7 +41,7 @@ int PollChest(Player* player,Map* map){
 
   if(index>-1){
     MapEntity* p = &map->entities[index];
-    int item_id = p->id;
+    int item_id = p->entity_id;
     GiveItem(player, item_id);
     RemoveEntityAt(map, index);
     return item_id;
