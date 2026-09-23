@@ -15,16 +15,4 @@ void DamagePlayer(int damage);
 void UseItem(Player* player, ItemDefinition* item);
 void UpdateBuffs(Player* player, float dt) ;
 void RemoveOneFromInventory(Player* player, int id);
-// systems/player.h
-
-void PlayerEquipWeapon(Player* player, int new_item_id);
-void PlayerUnequipWeapon(Player* player);
-
-void PlayerEquipAccessory(Player* player, int slot_index, int new_item_id);
-void PlayerUnequipAccessory(Player* player, int slot_index);
-
-void PlayerEquipTarot(Player* player, int slot_index, int new_item_id);
-void PlayerUnequipTarot(Player* player, int slot_index);
-
-void PlayerCycleActiveTarot(Player* player);
 #endif

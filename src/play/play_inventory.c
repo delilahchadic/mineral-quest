@@ -7,6 +7,7 @@
 #include "registry/register.h"
 #include "systems/player.h"
 #include "ui/menu.h"
+#include "systems/gear.h"
 #include <stdio.h>
 
 void DrawInventory(Menu* menu) {

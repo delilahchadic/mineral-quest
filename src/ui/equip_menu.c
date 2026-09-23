@@ -6,6 +6,7 @@
 #include "engine/palette.h"
 #include "registry/register.h"
 #include "systems/player.h"
+#include "systems/gear.h"
 
 #include <stdio.h>
 
