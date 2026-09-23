@@ -7,18 +7,6 @@
 #include "registry/register.h"
 #include "systems/player.h"
 
-#include "ui/equip_menu.h"
-#include <stdio.h>
-
-#include "ui/equip_menu.h"
-
-#include "defs/types_entities.h"
-#include "defs/types_systems.h"
-#include "defs/types_ui.h"
-#include "engine/palette.h"
-#include "registry/register.h"
-#include "systems/player.h"
-
 #include <stdio.h>
 
 void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
@@ -33,18 +21,16 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
     DrawRectangle(margin, 80, uiWidth, 2, COLOR_BONE_WHITE);
 
     // --- Column Setup for Stats Alignment ---
-    // Col A (x: 40)  -> Stat Labels ("HP", "STR", "DEF", etc.)
-    // Col B (x: 180) -> Total Gear Bonuses
-    // Col C (x: 300) -> Selected Item Bonuses
     int stat_label_x = margin;
     int total_col_x  = 180;
     int select_col_x = 300;
     int base_y       = 100;
 
-    // --- Aggregate Total Gear Bonuses ---
+    // --- Aggregate Total Gear Bonuses (Weapons & Accessories only) ---
     int total_hp_bonus = 0;
     int total_stat_bonuses[STAT_COUNT] = {0};
 
+    // Weapon Bonuses
     if (session->player->gear.weapon_id != -1) {
         ItemDefinition* weapon = &ITEM_REGISTRY[session->player->gear.weapon_id];
         total_hp_bonus += weapon->hp_bonus;
@@ -53,7 +39,9 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
         }
     }
 
-    for (int i = 0; i < session->player->stats.current[STAT_ACCESORY_COUNT]; i++) {
+    // Accessory Bonuses
+    int acc_count = session->player->stats.current[STAT_ACCESORY_COUNT];
+    for (int i = 0; i < acc_count; i++) {
         int acc_id = session->player->gear.accessory_ids[i];
         if (acc_id != -1) {
             ItemDefinition* acc = &ITEM_REGISTRY[acc_id];
@@ -63,17 +51,19 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
             }
         }
     }
+    // Note: Tarot card bonuses are excluded here for now as they govern behavior rather than player stats.
 
     // --- Determine Currently Selected Item ---
     int selected_item_id = -1;
     if (equipMenu->mode == SLOT_NONE) {
         if (equipMenu->activeSlot == 0) {
             selected_item_id = session->player->gear.weapon_id;
-        } else {
+        } else if (equipMenu->activeSlot <= acc_count) {
             int acc_index = equipMenu->activeSlot - 1;
-            if (acc_index < session->player->stats.current[STAT_ACCESORY_COUNT]) {
-                selected_item_id = session->player->gear.accessory_ids[acc_index];
-            }
+            selected_item_id = session->player->gear.accessory_ids[acc_index];
+        } else {
+            int tarot_index = equipMenu->activeSlot - (acc_count + 1);
+            selected_item_id = session->player->gear.tarot_ids[tarot_index];
         }
     } else {
         if (equipMenu->activeItemSlot > 0 && (equipMenu->activeItemSlot - 1) < equipMenu->count) {
@@ -92,17 +82,16 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
 
     // --- HP Row ---
     DrawText("HP", stat_label_x, current_y, 16, COLOR_BONE_WHITE);
-
-    // Total HP Bonus
     char total_hp_buf[16];
     snprintf(total_hp_buf, sizeof(total_hp_buf), "%s%d", (total_hp_bonus > 0) ? "+" : "", total_hp_bonus);
     DrawText(total_hp_buf, total_col_x, current_y, 16, COLOR_BONE_WHITE);
 
-    // Selected Item HP Bonus
     if (selected_item_id != -1) {
         ItemDefinition* item = &ITEM_REGISTRY[selected_item_id];
+        // If viewing a tarot card, its stat/HP modifiers are ignored in preview for now
+        int preview_hp = (equipMenu->mode == SLOT_TAROT) ? 0 : item->hp_bonus;
         char sel_hp_buf[16];
-        snprintf(sel_hp_buf, sizeof(sel_hp_buf), "%s%d", (item->hp_bonus > 0) ? "+" : "", item->hp_bonus);
+        snprintf(sel_hp_buf, sizeof(sel_hp_buf), "%s%d", (preview_hp > 0) ? "+" : "", preview_hp);
         DrawText(sel_hp_buf, select_col_x, current_y, 16, COLOR_BONE_WHITE);
     } else {
         DrawText("+0", select_col_x, current_y, 16, Fade(COLOR_BONE_WHITE, 0.4f));
@@ -112,19 +101,17 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
 
     // --- Stat Rows ---
     for (int s = 0; s < STAT_COUNT; s++) {
-        // Label Column
         DrawText(STATS_NAMES[s], stat_label_x, current_y, 16, COLOR_BONE_WHITE);
 
-        // Total Column
         char total_buf[16];
         snprintf(total_buf, sizeof(total_buf), "%s%d", (total_stat_bonuses[s] > 0) ? "+" : "", total_stat_bonuses[s]);
         DrawText(total_buf, total_col_x, current_y, 16, COLOR_BONE_WHITE);
 
-        // Selected Item Column
         if (selected_item_id != -1) {
             ItemDefinition* item = &ITEM_REGISTRY[selected_item_id];
+            int preview_stat = (equipMenu->mode == SLOT_TAROT) ? 0 : item->stat_bonuses[s];
             char sel_buf[16];
-            snprintf(sel_buf, sizeof(sel_buf), "%s%d", (item->stat_bonuses[s] > 0) ? "+" : "", item->stat_bonuses[s]);
+            snprintf(sel_buf, sizeof(sel_buf), "%s%d", (preview_stat > 0) ? "+" : "", preview_stat);
             DrawText(sel_buf, select_col_x, current_y, 16, COLOR_BONE_WHITE);
         } else {
             DrawText("+0", select_col_x, current_y, 16, Fade(COLOR_BONE_WHITE, 0.4f));
@@ -133,28 +120,39 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
         current_y += 22;
     }
 
-    // --- Column 3 (x: 480): Weapon & Accessory Slots ---
+    // --- Column 3 (x: 480): Weapon, Accessory & Tarot Slots ---
     int col3_x = 480;
     int col3_y = 100;
 
+    // Weapon Slot
     Color weaponTextColor = (equipMenu->mode == SLOT_NONE && equipMenu->activeSlot == 0) ? COLOR_RED_OCHRE : COLOR_BONE_WHITE;
     DrawText("Weapon", col3_x, col3_y, 15, COLOR_BONE_WHITE);
     char* weaponName = session->player->gear.weapon_id == -1 ? "------------" : GetName(ENTITY_ITEM, session->player->gear.weapon_id);
     DrawText(weaponName, col3_x, col3_y + 22, 16, weaponTextColor);
 
+    // Accessory Slots
     col3_y += 65;
     DrawText("Accessories", col3_x, col3_y, 15, COLOR_BONE_WHITE);
-    for (int i = 0; i < session->player->stats.current[STAT_ACCESORY_COUNT]; i++) {
-        Color accessoryTextColor = (equipMenu->mode == SLOT_NONE && equipMenu->activeSlot == i + 1) ? COLOR_RED_OCHRE : COLOR_BONE_WHITE;
-        if (session->player->gear.accessory_ids[i] == -1) {
-            DrawText("------------", col3_x, col3_y + 22 + (i * 26), 16, accessoryTextColor);
-            continue;
-        }
-        DrawText(GetName(ENTITY_ITEM, session->player->gear.accessory_ids[i]), col3_x, col3_y + 22 + (i * 26), 16, accessoryTextColor);
+    for (int i = 0; i < acc_count; i++) {
+        int slot_idx = i + 1;
+        Color accessoryTextColor = (equipMenu->mode == SLOT_NONE && equipMenu->activeSlot == slot_idx) ? COLOR_RED_OCHRE : COLOR_BONE_WHITE;
+        char* accName = session->player->gear.accessory_ids[i] == -1 ? "------------" : GetName(ENTITY_ITEM, session->player->gear.accessory_ids[i]);
+        DrawText(accName, col3_x, col3_y + 22 + (i * 26), 16, accessoryTextColor);
+    }
+
+    // Tarot Slots
+    col3_y += 22 + (acc_count * 26) + 15;
+    DrawText("Tarot Cards", col3_x, col3_y, 15, COLOR_BONE_WHITE);
+    for (int i = 0; i < 3; i++) {
+        int slot_idx = acc_count + 1 + i;
+        Color tarotTextColor = (equipMenu->mode == SLOT_NONE && equipMenu->activeSlot == slot_idx) ? COLOR_RED_OCHRE : COLOR_BONE_WHITE;
+        int tarot_id = session->player->gear.tarot_ids[i];
+        char* tarotName = tarot_id == -1 ? "------------" : GetName(ENTITY_ITEM, tarot_id);
+        DrawText(tarotName, col3_x, col3_y + 22 + (i * 26), 16, tarotTextColor);
     }
 
     // --- Column 4 (x: 680): Item Picker (State 2) ---
-    if (equipMenu->mode == SLOT_WEAPON || equipMenu->mode == SLOT_ACCESSORY) {
+    if (equipMenu->mode == SLOT_WEAPON || equipMenu->mode == SLOT_ACCESSORY || equipMenu->mode == SLOT_TAROT) {
         int col4_x = 680;
         int col4_y = 100;
 
@@ -171,19 +169,19 @@ void DrawEquipmentMenu(PlaySession* session, EquipMenu* equipMenu) {
 
 void UpdateEquipMenu(PlaySession* session, Input* input) {
     EquipMenu* menu = &session->equip_menu;
+    int acc_count = session->player->stats.current[STAT_ACCESORY_COUNT];
+    int max_slots = acc_count + 3; // Weapon (0) + Accessories (1..acc_count) + Tarot (acc_count+1 .. acc_count+3)
 
-    // State 1: Browsing the equip slots (Weapon or Accessories)
+    // State 1: Browsing the equip slots
     if (menu->mode == SLOT_NONE) {
         if (input->buttons_pressed & KEY_W_PRESSED) {
             menu->activeSlot--;
-            int max_slots = session->player->stats.current[STAT_ACCESORY_COUNT];
             if (menu->activeSlot < 0) {
-                menu->activeSlot = max_slots; // wrap to last accessory slot
+                menu->activeSlot = max_slots; // wrap to last tarot slot
             }
         }
         if (input->buttons_pressed & KEY_S_PRESSED) {
             menu->activeSlot++;
-            int max_slots = session->player->stats.current[STAT_ACCESORY_COUNT];
             if (menu->activeSlot > max_slots) {
                 menu->activeSlot = 0; // wrap back to weapon
             }
@@ -192,28 +190,32 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
         // Press Enter to open the inventory filter for the active slot
         if (input->buttons_pressed & ENTER_PRESSED) {
             menu->count = 0;
-            menu->activeItemSlot = 0; // Reset item selection cursor to top ("------------")
+            menu->activeItemSlot = 0; // Reset item selection cursor
 
-            // When pressing ENTER on a slot (State 1)
             if (menu->activeSlot == 0) {
                 menu->mode = SLOT_WEAPON;
-                // Filter item_inventory for weapons
                 for (int i = 0; i < 100; i++) {
                     if (session->player->item_inventory[i] > 0) {
-                        // i represents the item_id directly now!
                         if (GetAccesorySlot(ENTITY_ITEM, i) == SLOT_WEAPON) {
                             menu->itemIds[menu->count++] = i;
                         }
                     }
                 }
-            } else {
+            } else if (menu->activeSlot <= acc_count) {
                 menu->mode = SLOT_ACCESSORY;
-                // Filter item_inventory for accessories
                 for (int i = 0; i < 100; i++) {
                     if (session->player->item_inventory[i] > 0) {
-                        int item_id = i;
-                        if (GetAccesorySlot(ENTITY_ITEM, item_id) == SLOT_ACCESSORY) {
-                            menu->itemIds[menu->count++] = item_id;
+                        if (GetAccesorySlot(ENTITY_ITEM, i) == SLOT_ACCESSORY) {
+                            menu->itemIds[menu->count++] = i;
+                        }
+                    }
+                }
+            } else {
+                menu->mode = SLOT_TAROT;
+                for (int i = 0; i < 100; i++) {
+                    if (session->player->item_inventory[i] > 0) {
+                        if (GetAccesorySlot(ENTITY_ITEM, i) == SLOT_TAROT) {
+                            menu->itemIds[menu->count++] = i;
                         }
                     }
                 }
@@ -225,8 +227,7 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
         }
     }
     // State 2: Selecting an item from the filtered list (or unequipping)
-    else if (menu->mode == SLOT_WEAPON || menu->mode == SLOT_ACCESSORY) {
-        // Max index is menu->count because index 0 is "------------" and 1..count are items
+    else if (menu->mode == SLOT_WEAPON || menu->mode == SLOT_ACCESSORY || menu->mode == SLOT_TAROT) {
         int max_item_slot = menu->count;
 
         if (input->buttons_pressed & KEY_W_PRESSED) {
@@ -243,58 +244,36 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
         }
 
         if (input->buttons_pressed & ENTER_PRESSED) {
-            // Inside State 2 (when you select an item to equip)
             if (menu->mode == SLOT_WEAPON) {
                 if (menu->activeItemSlot == 0) {
-                    // Unequip weapon entirely
-                    if (session->player->gear.weapon_id != -1) {
-                        GiveItem(session->player, session->player->gear.weapon_id); // Increments count
-                        session->player->gear.weapon_id = -1;
-                    }
+                    PlayerUnequipWeapon(session->player);
                 } else {
                     int chosen_item_id = menu->itemIds[menu->activeItemSlot - 1];
-
-                    // Return old weapon to inventory if equipped
-                    if (session->player->gear.weapon_id != -1) {
-                        GiveItem(session->player, session->player->gear.weapon_id);
-                    }
-                    // Equip new weapon
-                    session->player->gear.weapon_id = chosen_item_id;
-
-                    // Decrement item quantity directly from the inventory array
-                    session->player->item_inventory[chosen_item_id]--;
+                    PlayerEquipWeapon(session->player, chosen_item_id);
                 }
             }
             else if (menu->mode == SLOT_ACCESSORY) {
                 int acc_index = menu->activeSlot - 1;
-
                 if (menu->activeItemSlot == 0) {
-                    // Unequip accessory slot
-                    if (session->player->gear.accessory_ids[acc_index] != -1) {
-                        GiveItem(session->player, session->player->gear.accessory_ids[acc_index]);
-                        session->player->gear.accessory_ids[acc_index] = -1;
-                    }
+                    PlayerUnequipAccessory(session->player, acc_index);
                 } else {
                     int chosen_item_id = menu->itemIds[menu->activeItemSlot - 1];
-
-                    // Return old accessory to inventory if present
-                    if (session->player->gear.accessory_ids[acc_index] != -1) {
-                        GiveItem(session->player, session->player->gear.accessory_ids[acc_index]);
-                    }
-                    // Equip new accessory
-                    session->player->gear.accessory_ids[acc_index] = chosen_item_id;
-
-                    // Decrement item quantity directly
-                    session->player->item_inventory[chosen_item_id]--;
+                    PlayerEquipAccessory(session->player, acc_index, chosen_item_id);
+                }
+            }
+            else if (menu->mode == SLOT_TAROT) {
+                int tarot_index = menu->activeSlot - (acc_count + 1);
+                if (menu->activeItemSlot == 0) {
+                    PlayerUnequipTarot(session->player, tarot_index);
+                } else {
+                    int chosen_item_id = menu->itemIds[menu->activeItemSlot - 1];
+                    PlayerEquipTarot(session->player, tarot_index, chosen_item_id);
                 }
             }
 
-            // Right after RecalculateStats in State 2:
-            RecalculateStats(&session->player->stats, &session->player->gear);
-
-            // Clamp activeSlot so cursor doesn't get stuck on a hidden accessory slot
-            if (menu->activeSlot > session->player->stats.current[STAT_ACCESORY_COUNT]) {
-                menu->activeSlot = session->player->stats.current[STAT_ACCESORY_COUNT];
+            int current_max_slots = session->player->stats.current[STAT_ACCESORY_COUNT] + 3;
+            if (menu->activeSlot > current_max_slots) {
+                menu->activeSlot = current_max_slots;
             }
             menu->mode = SLOT_NONE;
         }

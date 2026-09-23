@@ -31,6 +31,7 @@ extern World WORLD_REGISTER[100];
 extern char* STATS_NAMES[STAT_COUNT];
 extern ExchangeNode NODE_REGISTRY[100];
 extern Exchange EXCHANGE_REGISTRY[1000];
+extern TarotCard TAROT_REGISTRY[78];
 
 //Media Register
 extern Texture2D PORTAL_TV_SPRITE;
@@ -59,4 +60,5 @@ Vector2 GetDestination(EntityType type, int id);
 char* GetWorldNameFromPortalId(int portal_id);
 PortalType GetPortalType(int id);
 Vector2 GetEntityCenter(MapEntity* entity);
+TarotCard* GetTarotCardByItemId(int item_id);
 #endif

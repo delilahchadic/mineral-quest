@@ -269,6 +269,40 @@ void ParseCharacterRow(char* line) {
   }
 }
 
+void ParseTarotRow(char* line) {
+    char* idToken = strtok(line, ",");
+    char* nameToken = strtok(NULL, ",");
+    char* suitToken = strtok(NULL, ",");
+    char* valueToken = strtok(NULL, ",");
+    char* itemIDToken = strtok(NULL, ",");
+    char* equipCostToken = strtok(NULL, ",");
+    char* useCostToken = strtok(NULL, ",");
+    char* elementToken = strtok(NULL, ",");
+    char* durationToken = strtok(NULL, ",");
+    char* potencyToken = strtok(NULL, ",");
+    char* behaviorToken = strtok(NULL, ",");
+
+    if (idToken && nameToken && suitToken && valueToken &&
+        itemIDToken && equipCostToken && useCostToken && durationToken && behaviorToken) {
+        int id = atoi(idToken);
+        TarotCard* t = &TAROT_REGISTRY[id];
+
+        // 1. Base Core Data
+        t->id = id;
+        strncpy(t->name, nameToken, sizeof(t->name) - 1);
+        t->name[sizeof(t->name) - 1] = '\0';
+        t->suit = atoi(suitToken);
+        t->value = atoi(valueToken);
+        t->item_id = atoi(itemIDToken);
+        t->equip_cost = atoi(equipCostToken);
+        t->use_cost = atoi(useCostToken);
+        t->element = atoi(elementToken);
+        t->duration = atof(durationToken);
+        t->potency = atoi(potencyToken);
+        t->behavior = atoi(behaviorToken);
+    }
+}
+
 void ParseItemRow(char* line) {
     char* idToken = strtok(line, ",");
     char* nameToken = strtok(NULL, ",");
@@ -378,6 +412,10 @@ void LoadCommandRegistry(){
   LoadRegistry("data/tables/commands.csv", ParseCommandRegistryRow);
 }
 
+void LoadTarotRegistry(){
+    LoadRegistry("data/tables/tarot.csv", ParseTarotRow);
+}
+
 int LoadPortalRegistry(){
     return LoadRegistry("data/tables/portals.csv", ParsePortalRow);
 }
@@ -399,6 +437,7 @@ void InitRegistries(){
     LoadSpriteOverrideRegistry();
     LoadNodeExchange();
     LoadCommandRegistry();
+    LoadTarotRegistry();
     GLOBAL_PLAYER = Get_Default_Player();
     PLAYER = &GLOBAL_PLAYER;
 

@@ -20,7 +20,8 @@ typedef struct SystemMenu{
 typedef enum {
     ITEM_MENU_BROWSE,       // Normal inventory navigation
     ITEM_MENU_PROMPT_WEAPON, // "Weapon equipped. Swap?" (YES / NO)
-    ITEM_MENU_PROMPT_ACC     // "Choose slot to replace" (SLOT 1, SLOT 2, ...)
+    ITEM_MENU_PROMPT_ACC,     // "Choose slot to replace" (SLOT 1, SLOT 2, ...)
+    ITEM_MENU_PROMPT_TAROT
 } ItemMenuSubState;
 
 typedef struct {

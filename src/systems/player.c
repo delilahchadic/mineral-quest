@@ -4,17 +4,11 @@
 #include "raylib.h"
 #include "registry/register.h"
 #include <string.h>
+#include "systems/gear.h"
 
 void DamagePlayer(int damage) {
     int damageDealt = damage > GLOBAL_PLAYER.stats.current_hp ? GLOBAL_PLAYER.stats.current_hp : damage;
     GLOBAL_PLAYER.stats.current_hp -= damageDealt;
-}
-
-void InitEquipmentSet(EquipmentSet* gear) {
-    gear->weapon_id = 12; // equip the classical guitar
-    for (int i = 0; i < MAX_ACCESSORY_SLOTS; i++) {
-        gear->accessory_ids[i] = -1;
-    }
 }
 
 int CanAfford(Player* player, CostSlot slot) {
@@ -67,7 +61,7 @@ void SetDefaultStat(Player* player) {
     player->stats.base[STAT_ACCESORY_COUNT] = 2;
 }
 
-void RecalculateStats(StatBlock* stats, EquipmentSet* gear) {
+void RecalculateStats(StatBlock* stats, Gear* gear) {
     // 1. Reset base stats and baseline max HP
     stats->max_hp = 100;
     for (int i = 0; i < STAT_COUNT; i++) {
@@ -116,11 +110,12 @@ Player Get_Default_Player() {
     player.item_inventory[3]++;
     player.item_inventory[4]++;
     player.item_inventory[13]++;
+    player.item_inventory[17]++;
     player.speed = 250.0f;
     player.sprite = LoadTexture("data/sprites/sprite.png");
     player.targeting.target_id = -1;
     SetDefaultStat(&player);
-    InitEquipmentSet(&player.gear);
+    InitGear(&player.gear);
     RecalculateStats(&player.stats, &player.gear);
     return player;
 }

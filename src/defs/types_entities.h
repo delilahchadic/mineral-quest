@@ -58,7 +58,8 @@ typedef enum {
 typedef enum {
     SLOT_NONE = -1,     // Non-equipables (Consumables, Minerals, Key Items)
     SLOT_WEAPON = 0,    // Primary weapon
-    SLOT_ACCESSORY,     // Accessories (capped by player stats)
+    SLOT_ACCESSORY,
+    SLOT_TAROT,// Accessories (capped by player stats)
     SLOT_COUNT          // Total valid equipment slot types (2)
 } EquipSlot;
 
@@ -192,7 +193,8 @@ typedef enum EntityType{
     ENTITY_MINERAL,
     ENTITY_PORTAL,
     ENTITY_ENEMY,
-    ENTITY_PLAYER
+    ENTITY_PLAYER,
+    ENTITY_PROJECTILE
 } EntityType;
 
 typedef enum TraitFlags{
@@ -216,10 +218,12 @@ typedef struct Character{
   uint32_t default_trait_flags;
 } Character;
 
-typedef struct EquipmentSet{
+typedef struct Gear{
     int weapon_id;
     int accessory_ids[MAX_ACCESSORY_SLOTS];
-}EquipmentSet;
+    int tarot_ids[3];
+    int active_tarot_index;
+}Gear;
 
 typedef struct PlayerTargeting{
     int target_id;       // The unique ID of the locked entity (-1 if none)
@@ -235,7 +239,7 @@ typedef struct Player{
   float speed;
   Texture2D sprite;     // How fast we move
   StatBlock stats;
-  EquipmentSet gear;
+  Gear gear;
   PlayerTargeting targeting;
 } Player;
 
@@ -267,4 +271,39 @@ typedef struct ExchangeNode{
     int count;
     ExchangeNodeType type;
 }ExchangeNode;
+
+typedef enum TarotSuit{
+    SUIT_WANDS,
+    SUIT_PENTACLES,
+    SUIT_SWORDS,
+    SUIT_CUPS,
+    SUIT_MAJOR_ARCANA
+}TarotSuit;
+
+typedef enum TarotBehavior{
+    TAROT_BEHAVIOR_AIM,
+    TAROT_BEHAVIOR_HEAL
+}TarotBehavior;
+
+typedef enum ElementType {
+    ELEMENT_NONE =-1,
+    ELEMENT_FIRE,
+    ELEMENT_WATER,
+    ELEMENT_EARTH,
+    ELEMENT_AIR
+} ElementType;
+
+typedef struct TarotCard{
+    int id;
+    char name[32];
+    TarotSuit suit;
+    int value;
+    int equip_cost;
+    int use_cost;
+    ElementType element;
+    int potency;
+    float duration;
+    TarotBehavior behavior;
+    int item_id;
+}TarotCard;
 #endif

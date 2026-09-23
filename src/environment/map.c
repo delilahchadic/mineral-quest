@@ -19,12 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum ElementType {
-    ELEMENT_NONE,
-    ELEMENT_FIRE,
-    ELEMENT_WATER
-} ElementType;
-
 void InitMap(Map *map) {
     InitPlayer(map);
     map->lastTileHeight = -1;
@@ -66,7 +60,7 @@ void InitPlayer(Map *map) {
     player->combat.attackTimer = 0;
     player->combat.attackDuration = 0.25f;
     player->stats = GetStats(ENTITY_PLAYER, 0);
-    player->instance_id = -1;
+    player->instance_id = -2;
 }
 
 void Close_Map(Map *map) {

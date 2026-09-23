@@ -12,13 +12,6 @@
 #define WORLD_WIDTH_PX (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
 
-typedef enum MapEntityType {
-    MAP_ITEM,
-    MAP_NPC,
-    MAP_OBJECT,
-    MAP_TRANSITION
-} MapEntityType;
-
 typedef enum State { NORMAL_STATE, JUMPING_STATE } State;
 
 typedef enum Behavior {
