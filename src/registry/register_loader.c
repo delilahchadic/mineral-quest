@@ -3,6 +3,7 @@
 #include "defs/types_env.h"
 #include "raylib.h"
 #include "registry/register.h"
+#include "registry/tarot_register.h"
 
 
 
@@ -18,6 +19,14 @@ void CloseEnemyRegistry(){
 void ClosePortalRegistry(){
   UnloadTexture(PORTAL_CRYSTAL_SPRITE);
   UnloadTexture(PORTAL_TV_SPRITE);
+}
+
+void CloseProjectileRegistry(){
+  for(int i =0; i<100;i++){
+    if(PROJECTILE_REGISTRY[i].sprite.id > 0){
+      UnloadTexture(PROJECTILE_REGISTRY[i].sprite);
+    }
+  }
 }
 
 void CloseCharacterRegistry(){
@@ -47,6 +56,7 @@ void CloseRegistries(){
   ClosePlantRegistry();
   CloseSpriteOverrideRegistry();
   ClosePortalRegistry();
+  CloseProjectileRegistry();
   CloseEnemyRegistry();
   ClosePlayer(PLAYER);
 }
@@ -242,6 +252,21 @@ void ParsePlantRow(char* line) {
   }
 }
 
+void ParseProjectileRow(char* line) {
+  char* idToken = strtok(line,",");
+  char* spriteToken = strtok(NULL,",");
+
+  if(idToken && spriteToken){
+    int id = atoi(idToken);
+    Projectile* p = &PROJECTILE_REGISTRY[id];
+
+    Image image = LoadImage(spriteToken);
+    p->sprite = LoadTextureFromImage(image);
+    UnloadImage(image);
+
+  }
+}
+
 void ParseCharacterRow(char* line) {
   char* idToken = strtok(line,",");
   char* nameToken = strtok(NULL,",");
@@ -277,7 +302,6 @@ void ParseTarotRow(char* line) {
     char* itemIDToken = strtok(NULL, ",");
     char* equipCostToken = strtok(NULL, ",");
     char* useCostToken = strtok(NULL, ",");
-    char* elementToken = strtok(NULL, ",");
     char* durationToken = strtok(NULL, ",");
     char* potencyToken = strtok(NULL, ",");
     char* behaviorToken = strtok(NULL, ",");
@@ -296,7 +320,6 @@ void ParseTarotRow(char* line) {
         t->item_id = atoi(itemIDToken);
         t->equip_cost = atoi(equipCostToken);
         t->use_cost = atoi(useCostToken);
-        t->element = atoi(elementToken);
         t->duration = atof(durationToken);
         t->potency = atoi(potencyToken);
         t->behavior = atoi(behaviorToken);
@@ -400,6 +423,9 @@ int LoadPlantRegistry(){
 int LoadEnemyRegistry(){
   return LoadRegistry("data/tables/enemies.csv", ParseEnemyRow);
 }
+int LoadProjectileRegistry(){
+  return LoadRegistry("data/tables/projectiles.csv", ParseProjectileRow);
+}
 void LoadSpriteOverrideRegistry(){
   LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
 }
@@ -432,6 +458,8 @@ void InitRegistries(){
     SetEntityTypeCount(ENTITY_PLANT,LoadPlantRegistry());
     SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
     SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
+    SetEntityTypeCount(ENTITY_PROJECTILE, LoadProjectileRegistry());
+
     WORLD_COUNT= LoadRegistry("data/tables/worlds.csv", ParseWorldRow);
     LoadDialogRegistry();
     LoadSpriteOverrideRegistry();

@@ -111,6 +111,7 @@ Player Get_Default_Player() {
     player.item_inventory[4]++;
     player.item_inventory[13]++;
     player.item_inventory[17]++;
+    player.item_inventory[18]++;
     player.speed = 250.0f;
     player.sprite = LoadTexture("data/sprites/sprite.png");
     player.targeting.target_id = -1;

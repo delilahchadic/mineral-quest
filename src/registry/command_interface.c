@@ -1,4 +1,5 @@
 #include "registry/command_interface.h"
+#include "registry/command_register.h"
 
 
 char* GetCommandLabel(int id){

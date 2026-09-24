@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include "systems/targeting.h"
 #include <stdio.h>
+#include "registry/tarot_register.h"
 
 void InitPlaySession(Gamestate *gamestate) {
     PlaySession *session = &gamestate->session;
@@ -131,6 +132,27 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 
     if (input->buttons_pressed & KEY_U_PRESSED) {
         PLAYER->targeting.locked = !PLAYER->targeting.locked;
+        return;
+    }
+    if(input->buttons_pressed & KEY_Z_PRESSED){
+        if(PLAYER->gear.tarot_ids[0] != -1){
+            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[0]);
+            ExecuteTarotCommand(t->id, gamestate);
+        }
+        return;
+    }
+    if(input->buttons_pressed & KEY_X_PRESSED){
+        if(PLAYER->gear.tarot_ids[1] != -1){
+            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[1]);
+            ExecuteTarotCommand(t->id, gamestate);
+        }
+        return;
+    }
+    if(input->buttons_pressed & KEY_C_PRESSED){
+        if(PLAYER->gear.tarot_ids[2] != -1){
+            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[2]);
+            ExecuteTarotCommand(t->id, gamestate);
+        }
         return;
     }
     if (input->buttons_pressed & KEY_O_PRESSED) {

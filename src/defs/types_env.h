@@ -21,7 +21,8 @@ typedef enum Behavior {
     BEHAVIOR_WINDUP,
     BEHAVIOR_ATTACK,
     BEHAVIOR_RECOVERY,
-    BEHAVIOR_STAGGERED
+    BEHAVIOR_STAGGERED,
+    BEHAVIOR_AIM
 } Behavior;
 
 typedef enum ComboState { COMBO_NONE, COMBO_1, COMBO_2, COMBO_3 } ComboState;
@@ -56,6 +57,7 @@ typedef struct MapEntity {
     bool hitThisSwing;
     bool isCollecting;
     StatBlock *stats;
+    uint32_t element_flags;
     int entity_id;// unique on any entitiy in a map instance
 } MapEntity;
 

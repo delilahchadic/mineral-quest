@@ -15,7 +15,8 @@ Plant PLANT_REGISTRY[100] = {0};
 Portal PORTAL_REGISTRY[100] = {0};
 ExchangeNode NODE_REGISTRY[100] = {0};
 Exchange EXCHANGE_REGISTRY[1000] = {0};
-TarotCard TAROT_REGISTRY[78] = {0};
+Projectile PROJECTILE_REGISTRY[100] = {0};
+
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
 Player *PLAYER;
@@ -27,7 +28,7 @@ static int plant_count = 0;
 static int charcter_count = 0;
 static int portal_count = 0;
 static int enemy_count = 0;
-static int tarot_card_count =0;
+static int projectile_count = 0;
 
 Texture2D PORTAL_TV_SPRITE;
 Texture2D PORTAL_CRYSTAL_SPRITE;
@@ -182,6 +183,8 @@ Texture2D *GetSprite(EntityType type, int id) {
         }
     case ENTITY_ENEMY:
         return &ENEMY_REGISTRY[id].sprite;
+    case ENTITY_PROJECTILE:
+        return &PROJECTILE_REGISTRY[id].sprite;
     default:
         return NULL;
     }
@@ -224,6 +227,8 @@ int GetEntityTypeCount(EntityType type) {
         return portal_count;
     case ENTITY_ENEMY:
         return enemy_count;
+    case ENTITY_PROJECTILE:
+        return projectile_count;
     case ENTITY_MINERAL:
         return MINERAL_COUNT;
     case ENTITY_PLAYER:
@@ -250,6 +255,8 @@ void SetEntityTypeCount(EntityType type, int count) {
     case ENTITY_ENEMY:
         enemy_count = count;
         return;
+    case ENTITY_PROJECTILE:
+        projectile_count = count;
     default:
         return;
     }
@@ -290,13 +297,4 @@ Vector2 GetEntityCenter(MapEntity *entity) {
     Texture2D *texture = GetSprite(entity->type, entity->entity_id);
     return (Vector2){entity->position.x + (texture->width / 2.0f),
                      entity->position.y + (texture->height / 2.0f)};
-}
-
-TarotCard* GetTarotCardByItemId(int item_id) {
-    for (int i = 0; i < tarot_card_count; i++) {
-        if (TAROT_REGISTRY[i].item_id == item_id) {
-            return &TAROT_REGISTRY[i];
-        }
-    }
-    return NULL; // Not a tarot card item
 }

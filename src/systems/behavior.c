@@ -179,6 +179,83 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
     }
 }
 
+bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
+    Vector2 diff = Vector2Subtract(entity->target_position, entity->position);
+    float distance = Vector2Length(diff);
+
+    float speed = (entity->speed > 0.0f) ? entity->speed : 600.0f;
+
+    if (distance <= speed * dt) {
+        RemoveEntityAt(map, index);
+        return true;
+    }
+
+    Vector2 dir = Vector2Normalize(diff);
+    entity->velocity = Vector2Scale(dir, speed);
+    entity->position = Vector2Add(entity->position, Vector2Scale(entity->velocity, dt));
+
+    for (int j = 0; j < map->entity_count; j++) {
+        MapEntity *other = &map->entities[j];
+        if (j == index) continue;
+
+        if (other->type == ENTITY_PLANT) {
+            float projectileRadius = 8.0f;
+            float plantRadius = 20.0f;
+
+            if (Vector2Distance(entity->position, other->position) < (projectileRadius + plantRadius)) {
+                if (entity->element_flags & ELEMENT_FIRE) {
+                    printf("The plant catches fire and burns!\n");
+                }
+
+                // Track if plant 'j' was the last element before we remove the projectile
+                int plant_index = j;
+                int last_index = map->entity_count - 1;
+
+                // 1. Remove the projectile first (moves last element into 'index')
+                RemoveEntityAt(map, index);
+
+                // 2. If the plant was the last element, it was swapped into 'index'
+                if (plant_index == last_index) {
+                    plant_index = index;
+                }
+
+                // 3. Now safely remove the plant
+                RemoveEntityAt(map, plant_index);
+
+                return true;
+            }
+        }
+
+        if (other->type == ENTITY_ENEMY) {
+            float projectileRadius = 8.0f;
+            float enemyRadius = 26.0f;
+
+            if (Vector2Distance(entity->position, other->position) < (projectileRadius + enemyRadius)) {
+                other->hp -= 35;
+                printf("Fireball hit enemy! Dealt damage. Enemy HP: %d\n", other->hp);
+
+                int enemy_index = j;
+                int last_index = map->entity_count - 1;
+
+                // Remove projectile first
+                RemoveEntityAt(map, index);
+                if (enemy_index == last_index) {
+                    enemy_index = index;
+                }
+
+                // If enemy dies, remove it too
+                if (other->hp <= 0) {
+                    RemoveEntityAt(map, enemy_index);
+                }
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void UpdateEntityMovement(Map *map, float dt) {
     if (map == NULL)
         return;
@@ -198,15 +275,19 @@ void UpdateEntityMovement(Map *map, float dt) {
                 SetSoundPitch(MINERAL_SOUND, pitch);
                 PlaySound(MINERAL_SOUND);
 
-                // Remove it using your flat-array helper, then step i back
-                // so the newly shifted element at this index isn't skipped!
                 RemoveEntityAt(map, i);
                 i--;
                 continue;
             }
         }
 
-        if (entity->type == ENTITY_ENEMY) {
+        // Handle Aim / Projectile Behavior
+        if (entity->behavior == BEHAVIOR_AIM) {
+            if (UpdateAimBehavior(map, entity, i, dt)) {
+                i--; // Step back so the newly shifted element isn't skipped
+                continue;
+            }
+        } else if (entity->type == ENTITY_ENEMY) {
             UpdateEnemyCombat(map, entity, dt);
         } else if (entity->behavior == BEHAVIOR_WANDER) {
             UpdateWanderBehavior(map, entity, dt);

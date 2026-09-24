@@ -99,6 +99,10 @@ typedef struct Plant{
   uint32_t default_trait_flags;
 } Plant;
 
+typedef struct Projectile{
+    Texture2D sprite;
+}Projectile;
+
 typedef enum PortalType{
     PORTAL_TV,
     PORTAL_CRYSTAL
@@ -222,7 +226,6 @@ typedef struct Gear{
     int weapon_id;
     int accessory_ids[MAX_ACCESSORY_SLOTS];
     int tarot_ids[3];
-    int active_tarot_index;
 }Gear;
 
 typedef struct PlayerTargeting{
@@ -285,13 +288,15 @@ typedef enum TarotBehavior{
     TAROT_BEHAVIOR_HEAL
 }TarotBehavior;
 
-typedef enum ElementType {
-    ELEMENT_NONE =-1,
-    ELEMENT_FIRE,
-    ELEMENT_WATER,
-    ELEMENT_EARTH,
-    ELEMENT_AIR
-} ElementType;
+typedef enum ElementFlags {
+    ELEMENT_NONE     = 0,
+    ELEMENT_FIRE     = 1 << 0, // 1
+    ELEMENT_WATER    = 1 << 1, // 2
+    ELEMENT_EARTH    = 1 << 2, // 4
+    ELEMENT_AIR      = 1 << 3, // 8
+    ELEMENT_PIERCING = 1 << 4, // 16
+    ELEMENT_EXPLOSIVE= 1 << 5, // 32
+} ElementFlags;
 
 typedef struct TarotCard{
     int id;
@@ -300,7 +305,7 @@ typedef struct TarotCard{
     int value;
     int equip_cost;
     int use_cost;
-    ElementType element;
+    uint32_t element_flags; // might not use since we can more easily set it at the fn level
     int potency;
     float duration;
     TarotBehavior behavior;

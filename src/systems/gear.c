@@ -24,11 +24,6 @@ void PlayerEquipTarot(Player* player, int slot_index, int new_item_id) {
         player->item_inventory[new_item_id]--;
     }
 
-    // If active_tarot_index was unassigned (-1), point it to this new card
-    if (player->gear.active_tarot_index == -1 && new_item_id != -1) {
-        player->gear.active_tarot_index = slot_index;
-    }
-
     RecalculateStats(&player->stats, &player->gear);
 }
 
@@ -40,34 +35,8 @@ void PlayerUnequipTarot(Player* player, int slot_index) {
         player->gear.tarot_ids[slot_index] = -1;
     }
 
-    // If we just unequipped the active tarot, look for another valid one
-    if (player->gear.active_tarot_index == slot_index) {
-        player->gear.active_tarot_index = -1;
-        for (int i = 0; i < 3; i++) {
-            if (player->gear.tarot_ids[i] != -1) {
-                player->gear.active_tarot_index = i;
-                break;
-            }
-        }
-    }
-
     RecalculateStats(&player->stats, &player->gear);
 }
-
-void PlayerCycleActiveTarot(Player* player) {
-    // Find the next equipped tarot card starting from the current active index
-    int current = player->gear.active_tarot_index;
-    for (int i = 1; i <= 3; i++) {
-        int next_index = (current + i) % 3;
-        if (player->gear.tarot_ids[next_index] != -1) {
-            player->gear.active_tarot_index = next_index;
-            return;
-        }
-    }
-    // If no other tarot cards are equipped, keep it as is (or -1)
-}
-
-// systems/player.c
 
 void PlayerEquipWeapon(Player* player, int new_item_id) {
     // If a weapon is already equipped, return it to inventory
