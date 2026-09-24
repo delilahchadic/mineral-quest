@@ -2,3 +2,4 @@ id,name,dialog,sprite,type
 0,henry,0,data/sprites/sprite_old.png,0
 1,kipo,2,data/sprites/kipo.png,0
 2,misty,4,data/sprites/misty.png,1
+3,maria,6,data/sprites/maria.png,0
