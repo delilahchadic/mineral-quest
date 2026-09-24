@@ -5,6 +5,7 @@
 #include "environment/map.h"
 #include "registry/register.h"
 #include <stdlib.h>
+#include <raymath.h>
 static int tarot_card_count = 78;
 
 TarotCard TAROT_REGISTRY[78] = {0};
@@ -25,14 +26,21 @@ void (*tarot_callbacks[100])(void *) = {
 
 Vector2 GetTargetPosition(Map *map) {
     if (PLAYER->targeting.target_id == -1) {
-        return map->player.position;
+        // Convert the float angle into a direction vector using trig
+        float angle = map->player.combat.facing_direction;
+        Vector2 facing = { cosf(angle), sinf(angle) };
+
+        // Shoot roughly 4 tiles (150 pixels) ahead in that direction
+        return Vector2Add(map->player.position, Vector2Scale(facing, 150.0f));
     }
+
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *entity = &map->entities[i];
         if (entity->instance_id == PLAYER->targeting.target_id) {
             return entity->position;
         }
     }
+
     return map->player.position;
 }
 
