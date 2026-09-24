@@ -59,9 +59,9 @@ void DrawSystemMenu(SystemMenu* menu){
   }
 }
 
-void DrawMenu(const MenuRenderData* data) {
+void DrawMenu(const MenuRenderData* data,Color color) {
     // 1. Background
-    ClearBackground(COLOR_PULP_PAPER);
+    ClearBackground(color);
 
     int margin = 50;
     int uiWidth = SCREEN_WIDTH - (margin * 2);

@@ -40,6 +40,8 @@ typedef enum ButtonPressed{
   KEY_Z_PRESSED = 1<<22,
   KEY_X_PRESSED = 1<<23,
   KEY_C_PRESSED = 1<<24,
+  KEY_B_PRESSED = 1 << 25,
+  KEY_G_PRESSED = 1 <<26,
 } ButtonPressed;
 
 typedef struct ScriptManager{

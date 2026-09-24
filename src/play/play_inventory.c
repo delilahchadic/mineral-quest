@@ -93,7 +93,7 @@ void DrawInventory(Menu* menu) {
     }
 
     // 1. Draw the base menu logbook
-    DrawMenu(&render_data);
+    DrawMenu(&render_data,COLOR_SNOOT_PINK);
 
     // 2. Render Sub-State Overlay Prompts
     if (menu->sub_state == ITEM_MENU_PROMPT_WEAPON) {

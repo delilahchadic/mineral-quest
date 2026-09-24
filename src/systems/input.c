@@ -14,6 +14,10 @@ Input CaptureInput(){
     i.buttons_pressed |= KEY_W_PRESSED;
   }
 
+  if(IsKeyPressed(KEY_B)){
+    i.buttons_pressed |= KEY_B_PRESSED;
+  }
+
   if(IsKeyPressed(KEY_Z)){
     i.buttons_pressed |= KEY_Z_PRESSED;
   }
@@ -36,6 +40,9 @@ Input CaptureInput(){
   }
   if(IsKeyPressed(KEY_J)){
     i.buttons_pressed |= KEY_J_PRESSED;
+  }
+  if(IsKeyPressed(KEY_G)){
+    i.buttons_pressed |= KEY_G_PRESSED;
   }
   if(IsKeyPressed(KEY_K)){
     i.buttons_pressed |= KEY_K_PRESSED;

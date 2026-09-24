@@ -16,20 +16,21 @@
 #include "raymath.h"
 #include "registry/mineral_register.h"
 #include "registry/register.h"
+#include "registry/tarot_register.h"
 #include "systems/input.h"
 #include "systems/physics.h"
 #include "systems/player.h"
 #include "systems/script_manager.h"
+#include "systems/targeting.h"
 #include "ui/dialog_box.h"
 #include "ui/equip_menu.h"
 #include "ui/menu.h"
 #include "ui/node_menu.h"
+#include "ui/plant_inventory.h"
 #include "ui/stats_menu.h"
 #include <math.h>
 #include <stdbool.h>
-#include "systems/targeting.h"
 #include <stdio.h>
-#include "registry/tarot_register.h"
 
 void InitPlaySession(Gamestate *gamestate) {
     PlaySession *session = &gamestate->session;
@@ -45,8 +46,7 @@ void InitPlaySession(Gamestate *gamestate) {
 
     Vector2 player_center = GetEntityCenter(&gamestate->map.player);
 
-    CenterCameraOn(&gamestate->camera, player_center, 3.0f,
-                   &gamestate->map);
+    CenterCameraOn(&gamestate->camera, player_center, 3.0f, &gamestate->map);
     int tx = (int)(player_center.x / TILE_SIZE);
     int ty = (int)(player_center.y / TILE_SIZE);
     // Set the altitude to the floor height immediately
@@ -90,7 +90,23 @@ void RebindItemMenu(PlaySession *session) {
     return;
 }
 
+void RebindPlantMenu(PlaySession *session) {
+    session->menu.type = ENTITY_PLANT;
+    session->menu.exit_button = KEY_B_PRESSED;
+    // Gather all non-zero item IDs from the frequency map into a temporary list
+    // for the menu
+    int active_item_ids[100];
+    int active_count = 0;
+    for (int i = 0; i < 100; i++) {
+        if (session->player->plant_inventory[i] > 0) {
+            active_item_ids[active_count++] = i;
+        }
+    }
 
+    FillMenu(&session->menu, active_item_ids, active_count);
+    session->state = PLANT_INVENTORY;
+    return;
+}
 
 void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     PlaySession *session = &gamestate->session;
@@ -125,6 +141,11 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         return;
     }
 
+    if (input->buttons_pressed & KEY_B_PRESSED) {
+        RebindPlantMenu(session);
+        return;
+    }
+
     if (input->buttons_pressed & SHIFT_PRESSED) {
         session->state = STATS_MENU;
         return;
@@ -134,23 +155,23 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         PLAYER->targeting.locked = !PLAYER->targeting.locked;
         return;
     }
-    if(input->buttons_pressed & KEY_Z_PRESSED){
-        if(PLAYER->gear.tarot_ids[0] != -1){
-            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[0]);
+    if (input->buttons_pressed & KEY_Z_PRESSED) {
+        if (PLAYER->gear.tarot_ids[0] != -1) {
+            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[0]);
             ExecuteTarotCommand(t->id, gamestate);
         }
         return;
     }
-    if(input->buttons_pressed & KEY_X_PRESSED){
-        if(PLAYER->gear.tarot_ids[1] != -1){
-            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[1]);
+    if (input->buttons_pressed & KEY_X_PRESSED) {
+        if (PLAYER->gear.tarot_ids[1] != -1) {
+            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[1]);
             ExecuteTarotCommand(t->id, gamestate);
         }
         return;
     }
-    if(input->buttons_pressed & KEY_C_PRESSED){
-        if(PLAYER->gear.tarot_ids[2] != -1){
-            TarotCard* t =GetTarotCardByItemId(PLAYER->gear.tarot_ids[2]);
+    if (input->buttons_pressed & KEY_C_PRESSED) {
+        if (PLAYER->gear.tarot_ids[2] != -1) {
+            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[2]);
             ExecuteTarotCommand(t->id, gamestate);
         }
         return;
@@ -168,48 +189,51 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
                 GetTargetEntity(&gamestate->map, PLAYER->targeting.target_id);
             if (target) {
                 // Point player straight at the target
-                Vector2 diff = Vector2Subtract(GetEntityCenter(target),
-                                               GetEntityCenter(&gamestate->map.player));
+                Vector2 diff =
+                    Vector2Subtract(GetEntityCenter(target),
+                                    GetEntityCenter(&gamestate->map.player));
                 gamestate->map.player.combat.facing_direction =
                     atan2f(diff.y, diff.x);
 
                 // Trigger a combat swing/lunge immediately
                 InitCombat(&gamestate->map);
             }
-        }else{
+        } else {
             InitCombat(&gamestate->map);
         }
         return;
     }
 
-    if (input->buttons_pressed & KEY_E_PRESSED) {
-        int item = PollChest(session->player, &gamestate->map);
-        if (item >= 0) {
+    if (input->buttons_pressed & KEY_G_PRESSED) {
+        char *item = GatherEntity(session->player, &gamestate->map);
+        if (item) {
             session->state = ITEM;
-            sprintf(session->pendingItemName, "You got a %s !",
-                    GetName(ENTITY_ITEM, item));
-        } else {
-            int node_index = PollTrait(&gamestate->map, TRAIT_NODE, 50.0f);
-            if (node_index > -1) {
-                MapEntity *nodecharacter = &gamestate->map.entities[node_index];
-                for (int i = 0; i < gamestate->map.node_count; i++) {
-                    if (GetCharacterId(gamestate->map.active_nodes[i]) ==
-                        nodecharacter->entity_id) {
-                        session->node_menu.node_id =
-                            gamestate->map.active_nodes[i];
-                        session->state = NODE_MENU;
-                        session->node_menu.selected_index = 0;
-                        session->node_menu.state = NODE_MENU_BROWSE;
-                    }
-                }
+            sprintf(session->pendingItemName, "You got a %s !", item);
+            return;
+        }
+    }
 
-            } else {
-                InitDialog(&gamestate->map, &session->manager);
-                if (session->manager.active)
-                    session->state = TALKING;
-                else
-                    session->state = EQUIPMENT_MENU;
+    if (input->buttons_pressed & KEY_E_PRESSED) {
+
+        int node_index = PollTrait(&gamestate->map, TRAIT_NODE, 50.0f);
+        if (node_index > -1) {
+            MapEntity *nodecharacter = &gamestate->map.entities[node_index];
+            for (int i = 0; i < gamestate->map.node_count; i++) {
+                if (GetCharacterId(gamestate->map.active_nodes[i]) ==
+                    nodecharacter->entity_id) {
+                    session->node_menu.node_id = gamestate->map.active_nodes[i];
+                    session->state = NODE_MENU;
+                    session->node_menu.selected_index = 0;
+                    session->node_menu.state = NODE_MENU_BROWSE;
+                }
             }
+
+        } else {
+            InitDialog(&gamestate->map, &session->manager);
+            if (session->manager.active)
+                session->state = TALKING;
+            else
+                session->state = EQUIPMENT_MENU;
         }
     }
 
@@ -227,7 +251,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
                     atan2f(input->dir.y, input->dir.x);
             }
         }
-
+        CheckHazards(&gamestate->map, dt);
         UpdatePhysics(&gamestate->map, input);
         UpdateBuffs(session->player, dt);
         UpdateCombat(&gamestate->map);
@@ -249,7 +273,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 }
 
 void UpdateItemPopup(PlaySession *session, Input *input) {
-    if (input->buttons_pressed & KEY_E_PRESSED) {
+    if (input->buttons_pressed & KEY_G_PRESSED) {
         session->state = ADVENTURE;
     }
 }
@@ -288,6 +312,8 @@ void UpdatePlaySession(Gamestate *gamestate) {
     case NODE_MENU:
         UpdateNodeMenu(session, &input);
         break;
+    case PLANT_INVENTORY:
+        UpdatePlantInventory(session, &input);
     default:
         return;
     }

@@ -19,6 +19,7 @@
 #include "ui/equip_menu.h"
 #include "ui/node_menu.h"
 #include "ui/stats_menu.h"
+#include "ui/plant_inventory.h"
 #include "systems/script_manager.h"
 #include "systems/player.h"
 
@@ -66,7 +67,9 @@ void DrawHUD(){
 
 void DrawPlaySession(Gamestate* gamestate){
     PlaySession* session = &gamestate->session;
-    if(session->state==NODE_MENU){
+    if(session->state==PLANT_INVENTORY){
+        DrawPlantInventory(&session->menu);
+    }else if(session->state==NODE_MENU){
         DrawNodeSession(session);
     }else if(session->state==EQUIPMENT_MENU){
         DrawEquipmentMenu(session,&session->equip_menu);

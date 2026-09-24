@@ -10,7 +10,7 @@
 
 
 void FillMenu(Menu* menu, int itemIds[], int count);
-void DrawMenu(const MenuRenderData* data);
+void DrawMenu(const MenuRenderData* data,Color color);
 bool UpdateMenu(Menu* menu, Input* input);
 
 void FillSystemMenu(SystemMenu* menu, int ids[], int count, char* name);

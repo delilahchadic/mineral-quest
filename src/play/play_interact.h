@@ -7,6 +7,7 @@
 
 
 void InitDialog(Map* map, ScriptManager* manager);
-int PollChest(Player* player, Map* map);
+char* GatherEntity(Player* player, Map* map);
 void CheckAndCollectMinerals(Map* map);
+void CheckHazards(Map *map, float dt);
 #endif

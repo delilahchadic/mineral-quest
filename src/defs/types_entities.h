@@ -96,6 +96,9 @@ typedef struct Plant{
   int framewidth;
   int hitboxheight;
   int hitboxwidth;
+  int gather_level;
+  int damage_amount;
+  int damage_waive_level;
   uint32_t default_trait_flags;
 } Plant;
 
@@ -207,6 +210,7 @@ typedef enum TraitFlags{
   TRAIT_GATHER = 1 << 1,
   TRAIT_TELEPORT = 1 <<2, // used to designate that a enity can change the map
   TRAIT_NODE = 1 <<3, // used to designate characters that associated to a node
+  TRAIT_DAMAGE = 1 <<4,
 } TraitFlags;
 
 typedef enum CharacterType{
@@ -244,6 +248,8 @@ typedef struct Player{
   StatBlock stats;
   Gear gear;
   PlayerTargeting targeting;
+  // Inside your Player struct or stats definition:
+  float damage_cooldown;
 } Player;
 
 typedef enum ExchangeNodeType{
