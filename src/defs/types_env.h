@@ -7,7 +7,7 @@
 #define TILE_SIZE 32
 #define MAP_WIDTH 256
 #define MAP_HEIGHT 256
-#define MAX_ENTITIES 500
+#define MAX_ENTITIES 1000
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)

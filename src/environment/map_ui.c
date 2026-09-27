@@ -294,7 +294,9 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
 
         if(entity->instance_id==PLAYER->targeting.target_id){
             Texture2D *sprite = GetSprite(entity->type, entity->entity_id);
-            DrawTargetReticle((Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height/2.0),} , entity->type);
+            Vector2 reticlePos = sprite->height>100 ? (Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height *0.8)}:
+                 (Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height/2.0)};
+            DrawTargetReticle( reticlePos, entity->type);
         }
         if (entity == &map->player) {
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
@@ -379,7 +381,8 @@ void Draw_Map(Map *map, Camera2D *camera, bool drawPlayer) {
     Vector2 g4 = GetIsoWorldToGrid(br);
     // Dynamically calculate top padding based on altitude to save performance
     int altitudePadding = (int)(map->player.altitude / 8.0f) + 25;
-    if (altitudePadding > 100) altitudePadding = 100;
+    altitudePadding =  altitudePadding > 100? 100: 25;
+    // if (altitudePadding < 125) altitudePadding = 100;
 
     int min_y = (int)fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y)) - altitudePadding;
     int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + altitudePadding;

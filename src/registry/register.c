@@ -295,6 +295,18 @@ Vector2 GetDestination(EntityType type, int id) {
 
 Vector2 GetEntityCenter(MapEntity *entity) {
     Texture2D *texture = GetSprite(entity->type, entity->entity_id);
-    return (Vector2){entity->position.x + (texture->width / 2.0f),
-                     entity->position.y + (texture->height / 2.0f)};
+
+    float center_x = entity->position.x; // Or entity->position.x + (texture->width / 2.0f) depending on your origin
+    float center_y;
+
+    if (texture->height > 100) {
+        // Since position.y is the base, keep it right at the base
+        // or subtract a tiny fraction to move slightly up into the trunk.
+        center_y = entity->position.y - (texture->height * 0.05f);
+    } else {
+        // For normal plants (where position.y is the base, center is halfway up)
+        center_y = entity->position.y - (texture->height / 2.0f);
+    }
+
+    return (Vector2){center_x, center_y};
 }
