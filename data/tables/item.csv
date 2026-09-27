@@ -18,3 +18,4 @@ id,name,description,type,use_type,duration,equip_slot,hp,str,def,mag_off,mag_def
 16,Combat Quarterly #17,A rare magazine about combat. Read to learn how to equip anothr accespory!,6,3,0.0,-1,0,0,0,0,0,0,0,0,0,0,1,-1,
 17,Three of Wands,The start of a new journey,1,0,0.0,2,10,2,0,6,3,0,0,0,0,0,0,-1,
 18,Three of Cups,A nice party,1,0,0.0,2,10,2,0,6,3,0,0,0,0,0,0,-1,
+19,Tropical Juice,A good drink Maria taught you how to make,6,2,0.0,-1,100,25,25,0,0,0,0,35,50,25,0,-1,

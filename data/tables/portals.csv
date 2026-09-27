@@ -16,3 +16,4 @@ id,name,world_id,type,start_x,start_y
 14,t,14,0,4,4
 15,testboard,15,1,25,22
 16,testboard2,15,1,5,4
+17,rivers3,16,0,69,75
