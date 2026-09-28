@@ -3,7 +3,7 @@
 
 #include "defs/types_engine.h"
 
-void InitPlaySession(Gamestate* gamestate);
-void UpdatePlaySession(Gamestate* gamestate);
+void InitPlaySession(Gamestate *gamestate);
+void UpdatePlaySession(Gamestate *gamestate);
 
 #endif

@@ -169,7 +169,8 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
             sprintf(session->pendingItemName, "You got a %s !", item);
             return;
         }
-        int node_index = CheckTargetTrait(session->player,&gamestate->map, TRAIT_NODE);
+        int node_index =
+            CheckTargetTrait(session->player, &gamestate->map, TRAIT_NODE);
         if (node_index > -1) {
             MapEntity *nodecharacter = &gamestate->map.entities[node_index];
             for (int i = 0; i < gamestate->map.node_count; i++) {
@@ -183,10 +184,9 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
             }
 
         } else {
-            InitDialog(session->player,&gamestate->map, &session->manager);
+            InitDialog(session->player, &gamestate->map, &session->manager);
             if (session->manager.active)
                 session->state = DIALOG_PROMPT;
-
         }
     }
 
