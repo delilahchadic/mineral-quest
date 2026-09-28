@@ -10,6 +10,171 @@
 #include "ui/menu.h"
 #include <stdio.h>
 
+void UpdateInventory(PlaySession *session, Input *input) {
+    Menu *menu = &session->menu;
+    Player *player = session->player;
+
+    // --- SUB-STATE 1: Prompting for Weapon Swap (YES / NO) ---
+    if (menu->sub_state == ITEM_MENU_PROMPT_WEAPON) {
+        if (input->buttons_pressed & KEY_W_PRESSED ||
+            input->buttons_pressed & KEY_S_PRESSED) {
+            menu->prompt_selected = !menu->prompt_selected;
+        }
+        if (input->buttons_pressed & BACKSPACE_PRESSED) {
+            menu->sub_state = ITEM_MENU_BROWSE;
+            return;
+        }
+        if (input->buttons_pressed & ENTER_PRESSED) {
+            if (menu->prompt_selected == 0) {
+                PlayerEquipWeapon(player, menu->pending_item_id);
+                RebindItemMenu(menu, player);
+            }
+            menu->sub_state = ITEM_MENU_BROWSE;
+        }
+        return;
+    }
+
+    // --- SUB-STATE 2: Prompting for Accessory Slot Selection ---
+    if (menu->sub_state == ITEM_MENU_PROMPT_ACC) {
+        int max_slots = player->stats.current[STAT_ACCESORY_COUNT];
+
+        if (input->buttons_pressed & KEY_W_PRESSED) {
+            menu->prompt_selected =
+                (menu->prompt_selected - 1 + max_slots) % max_slots;
+        }
+        if (input->buttons_pressed & KEY_S_PRESSED) {
+            menu->prompt_selected = (menu->prompt_selected + 1) % max_slots;
+        }
+        if (input->buttons_pressed & BACKSPACE_PRESSED) {
+            menu->sub_state = ITEM_MENU_BROWSE;
+            return;
+        }
+        if (input->buttons_pressed & ENTER_PRESSED) {
+            int target_slot = menu->prompt_selected;
+            int current_acc_id = player->gear.accessory_ids[target_slot];
+
+            // Prevent replacing an accessory that grants extra accessory slots
+            if (current_acc_id != -1) {
+                ItemDefinition *current_acc = &ITEM_REGISTRY[current_acc_id];
+                if (current_acc->stat_bonuses[STAT_ACCESORY_COUNT] > 0) {
+                    return;
+                }
+            }
+
+            PlayerEquipAccessory(player, target_slot, menu->pending_item_id);
+            RebindItemMenu(menu, player);
+            menu->sub_state = ITEM_MENU_BROWSE;
+        }
+        return;
+    }
+
+    // --- SUB-STATE 3: Prompting for Tarot Slot Selection ---
+    if (menu->sub_state == ITEM_MENU_PROMPT_TAROT) {
+        int max_slots = 3;
+
+        if (input->buttons_pressed & KEY_W_PRESSED) {
+            menu->prompt_selected =
+                (menu->prompt_selected - 1 + max_slots) % max_slots;
+        }
+        if (input->buttons_pressed & KEY_S_PRESSED) {
+            menu->prompt_selected = (menu->prompt_selected + 1) % max_slots;
+        }
+        if (input->buttons_pressed & BACKSPACE_PRESSED) {
+            menu->sub_state = ITEM_MENU_BROWSE;
+            return;
+        }
+        if (input->buttons_pressed & ENTER_PRESSED) {
+            int target_slot = menu->prompt_selected;
+            PlayerEquipTarot(player, target_slot, menu->pending_item_id);
+            RebindItemMenu(menu, player);
+            menu->sub_state = ITEM_MENU_BROWSE;
+        }
+        return;
+    }
+
+    // --- SUB-STATE 0: Normal Item Browsing ---
+    if (!UpdateMenu(menu, input)) {
+        session->state = ADVENTURE_STATE;
+        return;
+    }
+
+    if (input->buttons_pressed & ENTER_PRESSED) {
+        if (menu->count == 0)
+            return;
+
+        int selected = menu->selected;
+        int itemId = menu->itemIds[selected];
+        ItemDefinition *item = &ITEM_REGISTRY[itemId];
+
+        // 1. Usable Consumable
+        if (item->use_type != 0) {
+            UseItem(player, item);
+            RebindItemMenu(menu, player);
+            selected = (selected >= menu->count) ? menu->count - 1 : selected;
+            menu->selected = (selected >= 0) ? selected : 0;
+            return;
+        }
+
+        // 2. Weapons
+        if (item->slot == SLOT_WEAPON) {
+            if (player->gear.weapon_id != -1) {
+                menu->sub_state = ITEM_MENU_PROMPT_WEAPON;
+                menu->pending_item_id = itemId;
+                menu->prompt_selected = 0;
+            } else {
+                PlayerEquipWeapon(player, itemId);
+                RebindItemMenu(menu, player);
+            }
+            return;
+        }
+
+        // 3. Accessories
+        if (item->slot == SLOT_ACCESSORY) {
+            int max_slots = player->stats.current[STAT_ACCESORY_COUNT];
+            int empty_slot = -1;
+
+            for (int i = 0; i < max_slots; i++) {
+                if (player->gear.accessory_ids[i] == -1) {
+                    empty_slot = i;
+                    break;
+                }
+            }
+
+            if (empty_slot != -1) {
+                PlayerEquipAccessory(player, empty_slot, itemId);
+                RebindItemMenu(menu, player);
+            } else {
+                menu->sub_state = ITEM_MENU_PROMPT_ACC;
+                menu->pending_item_id = itemId;
+                menu->prompt_selected = 0;
+            }
+            return;
+        }
+
+        // 4. Tarot Cards
+        if (item->slot == SLOT_TAROT) {
+            int empty_slot = -1;
+
+            for (int i = 0; i < 3; i++) {
+                if (player->gear.tarot_ids[i] == -1) {
+                    empty_slot = i;
+                    break;
+                }
+            }
+
+            if (empty_slot != -1) {
+                PlayerEquipTarot(player, empty_slot, itemId);
+                RebindItemMenu(menu, player);
+            } else {
+                menu->sub_state = ITEM_MENU_PROMPT_TAROT;
+                menu->pending_item_id = itemId;
+                menu->prompt_selected = 0;
+            }
+            return;
+        }
+    }
+}
+
 void DrawInventory(Menu *menu) {
     if (!menu)
         return;
@@ -195,19 +360,9 @@ void DrawInventory(Menu *menu) {
     }
 }
 
-void DrawLevelInventory() {
-    ClearBackground(COLOR_PULP_PAPER);
-
-    int margin = 50;
-    int uiWidth = SCREEN_WIDTH - (margin * 2);
-
-    DrawText("PORTAL LOG", margin, 40, 30, COLOR_SUNKEN_INK);
-    DrawRectangle(50, 80, uiWidth, 2, COLOR_SUNKEN_INK);
-
-    int levelCount = GetEntityTypeCount(ENTITY_PORTAL);
-    for (int i = 0; i < levelCount; i++) {
-        Color textColor = COLOR_MOONGLOW;
-        DrawText(GetName(ENTITY_PORTAL, i), 100, 120 + (i * 30), 20, textColor);
+void UpdateMineralInventory(PlaySession *session, Input *input) {
+    if (input->buttons_pressed & KEY_M_PRESSED) {
+        session->state = ADVENTURE_STATE;
     }
 }
 
@@ -228,182 +383,5 @@ void DrawMineralInventory(Player *player) {
         DrawMineral(i, (Vector2){50, 120 + (i * 30) + 12});
         DrawText(GetMineralLabel(i), 100, 120 + (i * 30), 20, textColor);
         DrawText(count, 250, 120 + (i * 30), 20, textColor);
-    }
-}
-
-void UpdateInventory(PlaySession *session, Input *input) {
-    Menu *menu = &session->menu;
-    Player *player = session->player;
-
-    // --- SUB-STATE 1: Prompting for Weapon Swap (YES / NO) ---
-    if (menu->sub_state == ITEM_MENU_PROMPT_WEAPON) {
-        if (input->buttons_pressed & KEY_W_PRESSED ||
-            input->buttons_pressed & KEY_S_PRESSED) {
-            menu->prompt_selected = !menu->prompt_selected;
-        }
-        if (input->buttons_pressed & BACKSPACE_PRESSED) {
-            menu->sub_state = ITEM_MENU_BROWSE;
-            return;
-        }
-        if (input->buttons_pressed & ENTER_PRESSED) {
-            if (menu->prompt_selected == 0) {
-                PlayerEquipWeapon(player, menu->pending_item_id);
-                RebindItemMenu(menu, player);
-            }
-            menu->sub_state = ITEM_MENU_BROWSE;
-        }
-        return;
-    }
-
-    // --- SUB-STATE 2: Prompting for Accessory Slot Selection ---
-    if (menu->sub_state == ITEM_MENU_PROMPT_ACC) {
-        int max_slots = player->stats.current[STAT_ACCESORY_COUNT];
-
-        if (input->buttons_pressed & KEY_W_PRESSED) {
-            menu->prompt_selected =
-                (menu->prompt_selected - 1 + max_slots) % max_slots;
-        }
-        if (input->buttons_pressed & KEY_S_PRESSED) {
-            menu->prompt_selected = (menu->prompt_selected + 1) % max_slots;
-        }
-        if (input->buttons_pressed & BACKSPACE_PRESSED) {
-            menu->sub_state = ITEM_MENU_BROWSE;
-            return;
-        }
-        if (input->buttons_pressed & ENTER_PRESSED) {
-            int target_slot = menu->prompt_selected;
-            int current_acc_id = player->gear.accessory_ids[target_slot];
-
-            // Prevent replacing an accessory that grants extra accessory slots
-            if (current_acc_id != -1) {
-                ItemDefinition *current_acc = &ITEM_REGISTRY[current_acc_id];
-                if (current_acc->stat_bonuses[STAT_ACCESORY_COUNT] > 0) {
-                    return;
-                }
-            }
-
-            PlayerEquipAccessory(player, target_slot, menu->pending_item_id);
-            RebindItemMenu(menu, player);
-            menu->sub_state = ITEM_MENU_BROWSE;
-        }
-        return;
-    }
-
-    // --- SUB-STATE 3: Prompting for Tarot Slot Selection ---
-    if (menu->sub_state == ITEM_MENU_PROMPT_TAROT) {
-        int max_slots = 3;
-
-        if (input->buttons_pressed & KEY_W_PRESSED) {
-            menu->prompt_selected =
-                (menu->prompt_selected - 1 + max_slots) % max_slots;
-        }
-        if (input->buttons_pressed & KEY_S_PRESSED) {
-            menu->prompt_selected = (menu->prompt_selected + 1) % max_slots;
-        }
-        if (input->buttons_pressed & BACKSPACE_PRESSED) {
-            menu->sub_state = ITEM_MENU_BROWSE;
-            return;
-        }
-        if (input->buttons_pressed & ENTER_PRESSED) {
-            int target_slot = menu->prompt_selected;
-            PlayerEquipTarot(player, target_slot, menu->pending_item_id);
-            RebindItemMenu(menu, player);
-            menu->sub_state = ITEM_MENU_BROWSE;
-        }
-        return;
-    }
-
-    // --- SUB-STATE 0: Normal Item Browsing ---
-    if (!UpdateMenu(menu, input)) {
-        session->state = ADVENTURE_STATE;
-        return;
-    }
-
-    if (input->buttons_pressed & ENTER_PRESSED) {
-        if (menu->count == 0)
-            return;
-
-        int selected = menu->selected;
-        int itemId = menu->itemIds[selected];
-        ItemDefinition *item = &ITEM_REGISTRY[itemId];
-
-        // 1. Usable Consumable
-        if (item->use_type != 0) {
-            UseItem(player, item);
-            RebindItemMenu(menu, player);
-            selected = (selected >= menu->count) ? menu->count - 1 : selected;
-            menu->selected = (selected >= 0) ? selected : 0;
-            return;
-        }
-
-        // 2. Weapons
-        if (item->slot == SLOT_WEAPON) {
-            if (player->gear.weapon_id != -1) {
-                menu->sub_state = ITEM_MENU_PROMPT_WEAPON;
-                menu->pending_item_id = itemId;
-                menu->prompt_selected = 0;
-            } else {
-                PlayerEquipWeapon(player, itemId);
-                RebindItemMenu(menu, player);
-            }
-            return;
-        }
-
-        // 3. Accessories
-        if (item->slot == SLOT_ACCESSORY) {
-            int max_slots = player->stats.current[STAT_ACCESORY_COUNT];
-            int empty_slot = -1;
-
-            for (int i = 0; i < max_slots; i++) {
-                if (player->gear.accessory_ids[i] == -1) {
-                    empty_slot = i;
-                    break;
-                }
-            }
-
-            if (empty_slot != -1) {
-                PlayerEquipAccessory(player, empty_slot, itemId);
-                RebindItemMenu(menu, player);
-            } else {
-                menu->sub_state = ITEM_MENU_PROMPT_ACC;
-                menu->pending_item_id = itemId;
-                menu->prompt_selected = 0;
-            }
-            return;
-        }
-
-        // 4. Tarot Cards
-        if (item->slot == SLOT_TAROT) {
-            int empty_slot = -1;
-
-            for (int i = 0; i < 3; i++) {
-                if (player->gear.tarot_ids[i] == -1) {
-                    empty_slot = i;
-                    break;
-                }
-            }
-
-            if (empty_slot != -1) {
-                PlayerEquipTarot(player, empty_slot, itemId);
-                RebindItemMenu(menu, player);
-            } else {
-                menu->sub_state = ITEM_MENU_PROMPT_TAROT;
-                menu->pending_item_id = itemId;
-                menu->prompt_selected = 0;
-            }
-            return;
-        }
-    }
-}
-
-void UpdateMineralInventory(PlaySession *session, Input *input) {
-    if (input->buttons_pressed & KEY_M_PRESSED) {
-        session->state = ADVENTURE_STATE;
-    }
-}
-
-void UpdateLevelInventory(PlaySession *session, Input *input) {
-    if (input->buttons_pressed & KEY_P_PRESSED) {
-        session->state = ADVENTURE_STATE;
     }
 }

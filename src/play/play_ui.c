@@ -80,8 +80,6 @@ void DrawPlaySession(Gamestate* gamestate){
     DrawHUD();
   }else if(session->state==MINERAL_INVENTORY){
     DrawMineralInventory(session->player);
-  }else if(session->state == LEVEL_INVENTORY){
-    DrawLevelInventory();
   }else {
     Draw_Map(&gamestate->map,&gamestate->camera,true);
     DrawHUD();

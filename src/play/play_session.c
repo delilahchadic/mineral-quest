@@ -206,9 +206,6 @@ void UpdatePlaySession(Gamestate *gamestate) {
     case GATHER_PROMPT:
         UpdateItemPopup(session, &input);
         break;
-    case LEVEL_INVENTORY:
-        UpdateLevelInventory(session, &input);
-        break;
     case STATS_MENU:
         UpdateStatsMenu(session, &input);
         break;
