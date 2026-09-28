@@ -72,42 +72,6 @@ void UpdateTalking(Gamestate *gamestate, Input *input, float dt) {
     AdjustCamera(gamestate, true, dt);
 }
 
-void RebindItemMenu(PlaySession *session) {
-    session->menu.type = ENTITY_ITEM;
-    session->menu.exit_button = KEY_N_PRESSED;
-    // Gather all non-zero item IDs from the frequency map into a temporary list
-    // for the menu
-    int active_item_ids[100];
-    int active_count = 0;
-    for (int i = 0; i < 100; i++) {
-        if (session->player->item_inventory[i] > 0) {
-            active_item_ids[active_count++] = i;
-        }
-    }
-
-    FillMenu(&session->menu, active_item_ids, active_count);
-    session->state = INVENTORY_MENU;
-    return;
-}
-
-void RebindPlantMenu(PlaySession *session) {
-    session->menu.type = ENTITY_PLANT;
-    session->menu.exit_button = KEY_B_PRESSED;
-    // Gather all non-zero item IDs from the frequency map into a temporary list
-    // for the menu
-    int active_item_ids[100];
-    int active_count = 0;
-    for (int i = 0; i < 100; i++) {
-        if (session->player->plant_inventory[i] > 0) {
-            active_item_ids[active_count++] = i;
-        }
-    }
-
-    FillMenu(&session->menu, active_item_ids, active_count);
-    session->state = PLANT_INVENTORY;
-    return;
-}
-
 void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     PlaySession *session = &gamestate->session;
     // Refresh nearby targets every frame
@@ -132,7 +96,8 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     }
 
     if (input->buttons_pressed & KEY_N_PRESSED) {
-        RebindItemMenu(session);
+        RebindItemMenu(&session->menu, session->player);
+        session->state = INVENTORY_MENU;
         return;
     }
 
@@ -142,7 +107,8 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     }
 
     if (input->buttons_pressed & KEY_B_PRESSED) {
-        RebindPlantMenu(session);
+        RebindPlantMenu(&session->menu, session->player);
+        session->state = PLANT_INVENTORY;
         return;
     }
 
@@ -156,25 +122,13 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         return;
     }
     if (input->buttons_pressed & KEY_Z_PRESSED) {
-        if (PLAYER->gear.tarot_ids[0] != -1) {
-            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[0]);
-            ExecuteTarotCommand(t->id, gamestate);
-        }
-        return;
+        UsePlayerTarotSlot(session->player, gamestate, 0);
     }
     if (input->buttons_pressed & KEY_X_PRESSED) {
-        if (PLAYER->gear.tarot_ids[1] != -1) {
-            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[1]);
-            ExecuteTarotCommand(t->id, gamestate);
-        }
-        return;
+        UsePlayerTarotSlot(session->player, gamestate, 1);
     }
     if (input->buttons_pressed & KEY_C_PRESSED) {
-        if (PLAYER->gear.tarot_ids[2] != -1) {
-            TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[2]);
-            ExecuteTarotCommand(t->id, gamestate);
-        }
-        return;
+        UsePlayerTarotSlot(session->player, gamestate, 2);
     }
     if (input->buttons_pressed & KEY_O_PRESSED) {
         if (PLAYER->targeting.locked) {
@@ -183,7 +137,6 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         }
     }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        // session->state = LEVEL_INVENTORY;
         if (PLAYER->targeting.target_id != -1) {
             MapEntity *target =
                 GetTargetEntity(&gamestate->map, PLAYER->targeting.target_id);

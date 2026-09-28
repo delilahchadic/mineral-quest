@@ -8,6 +8,8 @@
 #include "registry/command_register.h"
 #include "systems/input.h"
 
+void RebindItemMenu( Menu* menu,Player* player);
+void RebindPlantMenu( Menu* menu,Player* player);
 
 void FillMenu(Menu* menu, int itemIds[], int count);
 void DrawMenu(const MenuRenderData* data,Color color);

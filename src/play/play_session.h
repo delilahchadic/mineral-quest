@@ -5,5 +5,5 @@
 
 void InitPlaySession(Gamestate* gamestate);
 void UpdatePlaySession(Gamestate* gamestate);
-void RebindItemMenu(PlaySession* session);
+
 #endif

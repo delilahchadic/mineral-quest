@@ -4,6 +4,42 @@
 #include "registry/command_interface.h"
 #include "registry/register.h"
 
+void RebindItemMenu( Menu* menu,Player* player) {
+    menu->type = ENTITY_ITEM;
+    menu->exit_button = KEY_N_PRESSED;
+    // Gather all non-zero item IDs from the frequency map into a temporary list
+    // for the menu
+    int active_item_ids[100];
+    int active_count = 0;
+    for (int i = 0; i < 100; i++) {
+        if (player->item_inventory[i] > 0) {
+            active_item_ids[active_count++] = i;
+        }
+    }
+
+    FillMenu(menu, active_item_ids, active_count);
+
+    return;
+}
+
+void RebindPlantMenu( Menu* menu,Player* player) {
+    menu->type = ENTITY_PLANT;
+    menu->exit_button = KEY_B_PRESSED;
+    // Gather all non-zero item IDs from the frequency map into a temporary list
+    // for the menu
+    int active_item_ids[100];
+    int active_count = 0;
+    for (int i = 0; i < 100; i++) {
+        if (player->plant_inventory[i] > 0) {
+            active_item_ids[active_count++] = i;
+        }
+    }
+
+    FillMenu(menu, active_item_ids, active_count);
+
+    return;
+}
+
 void FillMenu(Menu* menu, int itemIds[], int count){
     memset(menu->itemIds, 0, sizeof(menu->itemIds));
     memcpy(menu->itemIds, itemIds, sizeof(int) * count);

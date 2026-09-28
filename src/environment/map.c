@@ -8,10 +8,10 @@
 #include "raymath.h"
 #include "registry/mineral_register.h"
 #include "registry/register.h"
+#include "systems/behavior.h"
 #include "systems/input.h"
 #include "systems/player.h"
 #include "systems/script_manager.h"
-#include "systems/behavior.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -158,6 +158,7 @@ void Remove_Building(Map *map, BuildingZone *building) {
     if (map->buildings == building) {
         map->buildings = building->next;
         building->next = NULL;
+        free(building);
         return;
     }
 
@@ -203,11 +204,13 @@ MapEntity *AddEntity(Map *map) {
 
 int CheckTargetTrait(Player *player, Map *map, uint32_t trait) {
     int targetId = player->targeting.target_id;
-    if (targetId == -1) return -1;
+    if (targetId == -1)
+        return -1;
 
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *tmp = &map->entities[i];
-        if (tmp->instance_id != targetId) continue;
+        if (tmp->instance_id != targetId)
+            continue;
 
         // Direct check—no guessing, no fallback logic needed!
         return (tmp->trait_flags & trait) ? i : -1;
