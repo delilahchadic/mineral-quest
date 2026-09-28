@@ -275,7 +275,7 @@ void UpdateBuffs(Player *player, float dt) {
 void UsePlayerTarotSlot(Player *player, Gamestate *gamestate, int index) {
     if(index<0 || index>2) return;
     if (player->gear.tarot_ids[index] != -1) {
-        TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[0]);
+        TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[index]);
         ExecuteTarotCommand(t->id, gamestate);
     }
     return;
