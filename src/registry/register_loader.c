@@ -56,6 +56,7 @@ void CloseRegistries() {
     CloseProjectileRegistry();
     CloseEnemyRegistry();
     ClosePlayer(PLAYER);
+    UnloadSound(MINERAL_SOUND);
 }
 
 void ParseCommandRegistryRow(char *line) {

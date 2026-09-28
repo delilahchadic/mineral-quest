@@ -1,114 +1,119 @@
 #include "engine/gamestate.h"
 
-#include "defs/types_engine.h"
-#include "raylib.h"
-#include "raymath.h"
 #include "defs/constants.h"
+#include "defs/types_engine.h"
 #include "editor/edit_session.h"
 #include "editor/edit_ui.h"
 #include "engine/palette.h"
 #include "environment/map.h"
 #include "play/play_session.h"
 #include "play/play_ui.h"
-#include "registry/register.h"
+#include "raylib.h"
+#include "raymath.h"
 #include "registry/command_interface.h"
+#include "registry/register.h"
 #include "systems/input.h"
 #include "systems/player.h"
 #include "ui/menu.h"
 #include <stdbool.h>
 
-void InitGame(Gamestate* gamestate){
-  gamestate->screen= LOGO;
-  gamestate->framesCounter = 0;
-  FillSystemMenu(&gamestate->main_menu,(int[]){0,1},2, "Mineral Quest");
+void InitGame(Gamestate *gamestate) {
+    gamestate->screen = LOGO;
+    gamestate->framesCounter = 0;
+    FillSystemMenu(&gamestate->main_menu, (int[]){0, 1}, 2, "Mineral Quest");
 }
 
-//routes to update based on gamestate
-void UpdateScene(Gamestate* gamestate){
-  Input input = CaptureInput();
-  switch(gamestate->screen) {
+// routes to update based on gamestate
+void UpdateScene(Gamestate *gamestate) {
+    Input input = CaptureInput();
+    switch (gamestate->screen) {
     case LOGO:
-      gamestate->framesCounter++;
-      if (gamestate->framesCounter > 120) gamestate->screen = TITLE; // Switch after 2 seconds
-      break;
+        gamestate->framesCounter++;
+        if (gamestate->framesCounter > 120)
+            gamestate->screen = TITLE; // Switch after 2 seconds
+        break;
     case TITLE:
-      if (input.buttons_pressed & ENTER_PRESSED) gamestate->screen = MENU;
-      break;
-    case MENU:{
-      int option_selected = UpdateSystemMenu(&gamestate->main_menu,&input);
-      if(option_selected >=0) ExecuteCommand(option_selected, gamestate);
-      break;
+        if (input.buttons_pressed & ENTER_PRESSED)
+            gamestate->screen = MENU;
+        break;
+    case MENU: {
+        int option_selected = UpdateSystemMenu(&gamestate->main_menu, &input);
+        if (option_selected >= 0)
+            ExecuteCommand(option_selected, gamestate);
+        break;
     }
     case GAMEPLAY:
-        if(gamestate->session.state ==  GAME_OVER){
+        if (gamestate->session.state == GAME_OVER) {
             gamestate->screen = TITLE;
             Close_Map(&gamestate->map);
-            gamestate->session.state =0;
+            gamestate->session.state = 0;
             SetDefaultStat(PLAYER);
             RecalculateStats(&PLAYER->stats, &PLAYER->gear);
             PLAYER->targeting.locked = false;
             PLAYER->targeting.target_id = -1;
-            PLAYER->targeting.potential_count=0;
+            PLAYER->targeting.potential_count = 0;
         }
-      UpdatePlaySession(gamestate);
-      break;
+        UpdatePlaySession(gamestate);
+        break;
     case EDIT_SCREEN:
-      if(!UpdateEditSession(gamestate, &input)){
-        gamestate->screen = MENU;
-      }
-      break;
-  }
-}
-
-void DrawLogo(){
-    // 1. Define the colors in the order you want them to appear
-  Color barPalette[] = {
-      COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE, COLOR_JADE,
-      COLOR_TAROT_GOLD, COLOR_DUSTY_CORAL, COLOR_DUSTY_SALMON,
-      COLOR_DUSTY_ROSE, COLOR_TEXAS_HAZE
-  };
-  int colorCount = 8;
-  float barWidth = (float)SCREEN_WIDTH / colorCount;
-
-    // 2. Draw the vertical bars
-  for (int i = 0; i < colorCount; i++) {
-      DrawRectangle(i * barWidth, 0, barWidth,SCREEN_HEIGHT, barPalette[i]);
-  }
-
-    // 3.
-    // Draw a dark semi-transparent bar behind the text for readability
-    DrawRectangle(0, SCREEN_HEIGHT/2 - 40, SCREEN_WIDTH, 80, Fade(COLOR_SUNKEN_INK, 0.6f));
-    DrawText("ARCHAEOLOGY", SCREEN_WIDTH/4, SCREEN_HEIGHT/2, 30, COLOR_PULP_PAPER);
-
-}
-
-void DrawScreen(Gamestate* gamestate){
-    switch(gamestate->screen) {
-        case LOGO:
-            DrawLogo();
-            break;
-        case TITLE:
-            DrawText("Mineral Quest", SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 40, COLOR_SUNKEN_INK);
-            DrawText("PRESS ENTER TO START",( SCREEN_WIDTH/2) , (SCREEN_HEIGHT/2) + 50, 20, COLOR_SUNKEN_INK);
-            break;
-        case MENU:
-            DrawSystemMenu(&gamestate->main_menu);
-            break;
-        case GAMEPLAY:
-            DrawPlaySession(gamestate);
-            break;
-        case EDIT_SCREEN:
-            DrawEditSession(gamestate);
-            break;
+        if (!UpdateEditSession(gamestate, &input)) {
+            gamestate->screen = MENU;
+        }
+        break;
     }
 }
 
-void CloseGame(Gamestate* gamestate){
-  Close_Map(&gamestate->map);
-  if(gamestate->editUsed){
-      CloseEditor(gamestate);
-  }
+void DrawLogo() {
+    // 1. Define the colors in the order you want them to appear
+    Color barPalette[] = {COLOR_BEAVIS_SHIRT, COLOR_VHS_BLUE,
+                          COLOR_JADE,         COLOR_TAROT_GOLD,
+                          COLOR_DUSTY_CORAL,  COLOR_DUSTY_SALMON,
+                          COLOR_DUSTY_ROSE,   COLOR_TEXAS_HAZE};
+    int colorCount = 8;
+    float barWidth = (float)SCREEN_WIDTH / colorCount;
 
-  free(gamestate);
-  CloseWindow();
+    // 2. Draw the vertical bars
+    for (int i = 0; i < colorCount; i++) {
+        DrawRectangle(i * barWidth, 0, barWidth, SCREEN_HEIGHT, barPalette[i]);
+    }
+
+    // 3.
+    // Draw a dark semi-transparent bar behind the text for readability
+    DrawRectangle(0, SCREEN_HEIGHT / 2 - 40, SCREEN_WIDTH, 80,
+                  Fade(COLOR_SUNKEN_INK, 0.6f));
+    DrawText("ARCHAEOLOGY", SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2, 30,
+             COLOR_PULP_PAPER);
+}
+
+void DrawScreen(Gamestate *gamestate) {
+    switch (gamestate->screen) {
+    case LOGO:
+        DrawLogo();
+        break;
+    case TITLE:
+        DrawText("Mineral Quest", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 40,
+                 COLOR_SUNKEN_INK);
+        DrawText("PRESS ENTER TO START", (SCREEN_WIDTH / 2),
+                 (SCREEN_HEIGHT / 2) + 50, 20, COLOR_SUNKEN_INK);
+        break;
+    case MENU:
+        DrawSystemMenu(&gamestate->main_menu);
+        break;
+    case GAMEPLAY:
+        DrawPlaySession(gamestate);
+        break;
+    case EDIT_SCREEN:
+        DrawEditSession(gamestate);
+        break;
+    }
+}
+
+void CloseGame(Gamestate *gamestate) {
+    Close_Map(&gamestate->map);
+    if (gamestate->editUsed) {
+        CloseEditor(gamestate);
+    }
+
+    free(gamestate);
+    CloseWindow();
 }
