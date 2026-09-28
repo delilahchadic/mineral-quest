@@ -34,7 +34,7 @@
 
 void InitPlaySession(Gamestate *gamestate) {
     PlaySession *session = &gamestate->session;
-    session->state = ADVENTURE;
+    session->state = ADVENTURE_STATE;
     session->player = PLAYER;
     session->menu = (Menu){0};
     int startPortalId = 12; // romantic treasure room
@@ -68,7 +68,7 @@ void ChangeMap(Gamestate *gamestate, char *map_name, Vector2 destination) {
 void UpdateTalking(Gamestate *gamestate, Input *input, float dt) {
     PlaySession *session = &gamestate->session;
     UpdateScriptManager(&session->manager, input);
-    session->state = session->manager.active ? TALKING : ADVENTURE;
+    session->state = session->manager.active ? DIALOG_PROMPT : ADVENTURE_STATE;
     AdjustCamera(gamestate, true, dt);
 }
 
@@ -86,7 +86,7 @@ void RebindItemMenu(PlaySession *session) {
     }
 
     FillMenu(&session->menu, active_item_ids, active_count);
-    session->state = INVENTORY;
+    session->state = INVENTORY_MENU;
     return;
 }
 
@@ -212,7 +212,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 
         char *item = GatherTarget(session->player, &gamestate->map);
         if (item) {
-            session->state = ITEM;
+            session->state = GATHER_PROMPT;
             sprintf(session->pendingItemName, "You got a %s !", item);
             return;
         }
@@ -232,7 +232,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         } else {
             InitDialog(session->player,&gamestate->map, &session->manager);
             if (session->manager.active)
-                session->state = TALKING;
+                session->state = DIALOG_PROMPT;
 
         }
     }
@@ -274,7 +274,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 
 void UpdateItemPopup(PlaySession *session, Input *input) {
     if (input->buttons_pressed & KEY_E_PRESSED) {
-        session->state = ADVENTURE;
+        session->state = ADVENTURE_STATE;
     }
 }
 
@@ -285,19 +285,19 @@ void UpdatePlaySession(Gamestate *gamestate) {
     if (dt > 0.1f)
         dt = 0.1f;
     switch (session->state) {
-    case ADVENTURE:
+    case ADVENTURE_STATE:
         UpdateAdventure(gamestate, &input, dt);
         break;
-    case INVENTORY:
+    case INVENTORY_MENU:
         UpdateInventory(session, &input);
         break;
     case MINERAL_INVENTORY:
         UpdateMineralInventory(session, &input);
         break;
-    case TALKING:
+    case DIALOG_PROMPT:
         UpdateTalking(gamestate, &input, dt);
         break;
-    case ITEM:
+    case GATHER_PROMPT:
         UpdateItemPopup(session, &input);
         break;
     case LEVEL_INVENTORY:

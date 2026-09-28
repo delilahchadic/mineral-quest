@@ -54,7 +54,7 @@ void UpdatePlantInventory(PlaySession* session, Input* input) {
 
     // --- Normal Botany Log Browsing ---
     if (!UpdateMenu(menu, input)) {
-        session->state = ADVENTURE; // Or your default adventure state
+        session->state = ADVENTURE_STATE; // Or your default adventure state
         return;
     }
 

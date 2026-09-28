@@ -8,7 +8,7 @@
 
 void UpdateStatsMenu(PlaySession *session, Input *input) {
     if (input->buttons_pressed & SHIFT_PRESSED) {
-        session->state = ADVENTURE;
+        session->state = ADVENTURE_STATE;
     }
 }
 

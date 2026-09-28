@@ -37,7 +37,7 @@ void UpdateNodeMenu(PlaySession* session, Input* input){
         }
 
         if(input->buttons_pressed & KEY_E_PRESSED){
-            session->state = ADVENTURE;
+            session->state = ADVENTURE_STATE;
             return;
         }
     }else{

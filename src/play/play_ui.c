@@ -75,7 +75,7 @@ void DrawPlaySession(Gamestate* gamestate){
         DrawEquipmentMenu(session,&session->equip_menu);
     }else if(session->state == STATS_MENU){
       DrawStatsMenu(gamestate);
-  }else if(session->state == INVENTORY){
+  }else if(session->state == INVENTORY_MENU){
     DrawInventory(&session->menu);
     DrawHUD();
   }else if(session->state==MINERAL_INVENTORY){
@@ -85,10 +85,10 @@ void DrawPlaySession(Gamestate* gamestate){
   }else {
     Draw_Map(&gamestate->map,&gamestate->camera,true);
     DrawHUD();
-    if(session->state == TALKING){
+    if(session->state == DIALOG_PROMPT){
       DrawMessage(&session->manager);
     }
-    if(session->state == ITEM){
+    if(session->state == GATHER_PROMPT){
       DrawDialog("you found something!", session->pendingItemName);
     }
   }

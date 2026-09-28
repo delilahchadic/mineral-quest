@@ -291,7 +291,7 @@ void UpdateInventory(PlaySession* session, Input* input) {
 
     // --- SUB-STATE 0: Normal Item Browsing ---
     if (!UpdateMenu(menu, input)) {
-        session->state = ADVENTURE;
+        session->state = ADVENTURE_STATE;
         return;
     }
 
@@ -373,12 +373,12 @@ void UpdateInventory(PlaySession* session, Input* input) {
 
 void UpdateMineralInventory(PlaySession* session, Input* input) {
     if (input->buttons_pressed & KEY_M_PRESSED) {
-        session->state = ADVENTURE;
+        session->state = ADVENTURE_STATE;
     }
 }
 
 void UpdateLevelInventory(PlaySession* session, Input* input) {
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        session->state = ADVENTURE;
+        session->state = ADVENTURE_STATE;
     }
 }
