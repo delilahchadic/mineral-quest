@@ -77,13 +77,6 @@ typedef struct ItemDefinition {
     int granted_ability_id;           // -1 if no ability attached
 } ItemDefinition;
 
-typedef struct Message{
-  char character_name[32];
-  char text[256];
-  int id;
-  int nextid;
-} Message;
-
 typedef struct Enemy{
     char species_name[32];
     Texture2D sprite;

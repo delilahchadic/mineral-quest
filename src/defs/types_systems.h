@@ -44,6 +44,13 @@ typedef enum ButtonPressed{
   KEY_G_PRESSED = 1 <<26,
 } ButtonPressed;
 
+typedef struct Message{
+  char character_name[32];
+  char text[256];
+  int id;
+  int nextid;
+} Message;
+
 typedef struct ScriptManager{
   Message* active_messsage;
   int count;
