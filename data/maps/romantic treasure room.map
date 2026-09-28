@@ -177,6 +177,9 @@ type,grid_x,grid_y,id
 2,27,5,2
 2,27,6,2
 5,10,30,17
+5,14,13,18
+1,16,10,4
+5,15,12,19
 
 buildingid,x1,y1,x2,y2,min_height,max_height,total_floors,door_x,door_y
 
