@@ -9,7 +9,7 @@
 #include "defs/types_systems.h"
 
 void InitEnitityDrawer(EntityDrawer* drawer, int startX, int startY);
-bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, Input* input,Camera2D* camera);
+bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, SelectionBuffer* buffer, Input* input, Camera2D* camera);
 void DrawEnitityDrawer(EntityDrawer* drawer);
 
 #endif

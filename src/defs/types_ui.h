@@ -105,6 +105,7 @@ typedef struct EntityDrawer{
     Rectangle item_button;
     Rectangle enemy_button;
     Rectangle portal_button;
+    Rectangle delete_button;
     int ids[9];
 }EntityDrawer;
 

@@ -58,11 +58,11 @@ bool UpdateTileEditor(TileEditor* tile_editor, Map* map, SelectionBuffer* buffer
             UpdateHeightAdjuster(&tile_editor->adjuster, map, buffer, input);
             break;
         case ENTITY_DRAWER:
-            UpdateEnitityDrawer(&tile_editor->drawer, map, input,camera);
-            return true;
+            UpdateEnitityDrawer(&tile_editor->drawer, map,buffer, input,camera);
             break;
         case BUIDING_BUILDER:
             UpdateBuildingBuilder(&tile_editor->builder, map, input, last_x, last_y);
+            break;
         default:
             break;
     }

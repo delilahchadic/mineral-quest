@@ -9,6 +9,7 @@
 #include "systems/physics.h"
 #include "ui/ui_helpers.h"
 #include "environment/map.h"
+#include "core/selection_buffer.h"
 
 void DrawEnityTypeLabel(EntityType type, int start_x, int start_y){
     switch (type) {
@@ -36,22 +37,24 @@ void InitDrawerButtons(EntityDrawer* drawer, int start_x, int start_y){
     drawer->mineral_button = (Rectangle) {start_x + 210, start_y, 64,32};
     drawer->enemy_button = (Rectangle) {start_x + 280, start_y, 64,32};
     drawer->portal_button = (Rectangle) {start_x, start_y+48, 64,32};
+
+    drawer->delete_button = (Rectangle) {start_x + 210, start_y + 96, 64, 32};
     drawer->prev_page_button = (Rectangle) {start_x, start_y+96, 64,32};
     drawer->next_page_button = (Rectangle) {start_x + 128, start_y +64, 64,32};
+
     int spacing = 70; // 64px button + 6px padding
     int grid_start_y = start_y + 128;
 
-        for (int i = 0; i < drawer->entities_per_page; i++) {
-            int row = i / 3; // Integer division gives you the row (0, 0, 0, 1, 1, 1...)
-            int col = i % 3; // Modulo gives you the column (0, 1, 2, 0, 1, 2...)
+    for (int i = 0; i < drawer->entities_per_page; i++) {
+        int row = i / 3;
+        int col = i % 3;
 
-            drawer->buttons[i] = (Rectangle) {
-                (float)start_x + (col * spacing),
-                (float)grid_start_y + (row * spacing),
-                64, 64
-            };
-        }
-
+        drawer->buttons[i] = (Rectangle) {
+            (float)start_x + (col * spacing),
+            (float)grid_start_y + (row * spacing),
+            64, 64
+        };
+    }
 }
 
 void SetPage(EntityDrawer* drawer){
@@ -61,13 +64,47 @@ void SetPage(EntityDrawer* drawer){
     int pagestart = page * drawer->entities_per_page;
 
     for (int k = 0; k < drawer->entities_per_page; k++) {
-            drawer->ids[k] = -1;
+        drawer->ids[k] = -1;
     }
 
     if(pagestart < count){
-    for(int i = pagestart,j = 0; i < pagestart + drawer->entities_per_page && i < count;i++,j++){
-        drawer->ids[j] = i;
-    }}
+        for(int i = pagestart, j = 0; i < pagestart + drawer->entities_per_page && i < count; i++, j++){
+            drawer->ids[j] = i;
+        }
+    }
+}
+
+void RemoveEntitiesOnSelectedTiles(Map* map, SelectionBuffer* buffer) {
+    for (int i = map->entity_count - 1; i >= 0; i--) {
+        MapEntity* entity = &map->entities[i];
+
+        int ix = (int)(entity->position.x / TILE_SIZE);
+        int iy = (int)(entity->position.y / TILE_SIZE);
+
+        if (IsTileSelected(buffer, ix, iy)) {
+            RemoveEntityAt(map, i);
+        }
+    }
+}
+
+bool HandleMapSelection(Map* map, SelectionBuffer* buffer, Camera2D* camera, Input* input) {
+    if (input->mouse.x > (SCREEN_WIDTH * 0.66f)) return false;
+
+    if (input->buttons_pressed & LEFT_MOUSE_CLICKED) {
+        Vector2 mouseWorldPos = GetScreenToWorld2D(input->mouse, *camera);
+        Vector2 gridCoords = GetIsoWorldToGrid(mouseWorldPos); // Or GetIsoWorldToGridWithHeight depending on your preference
+
+        int ix = (int)gridCoords.x;
+        int iy = (int)gridCoords.y;
+
+        if (ix >= 0 && ix < map->columns && iy >= 0 && iy < map->rows) {
+            // Toggle or set selection state based on current buffer state
+            bool currentlySelected = IsTileSelected(buffer, ix, iy);
+            SetTileSelected(buffer, ix, iy, !currentlySelected);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input* input) {
@@ -82,12 +119,11 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
         int iy = (int)gridCoords.y;
 
         MapEntity* newEntity = AddEntity(map);
+        if (!newEntity) return false;
+
         newEntity->type = drawer->current_type;
         newEntity->entity_id = drawer->selected_id;
-
-        // FIX: Capture the height of the tile and convert to pixels (8.0f step)
         newEntity->altitude = map->grid[iy][ix].height * 8.0f;
-
         newEntity->state = NORMAL_STATE;
         newEntity->jumpoffset = 0.0f;
         newEntity->position.x = gridCoords.x * TILE_SIZE + (TILE_SIZE / 2.0f);
@@ -97,7 +133,7 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
     return false;
 }
 
-bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, Input* input,Camera2D* camera){
+bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, SelectionBuffer* buffer, Input* input, Camera2D* camera){
     int count = GetEntityTypeCount(drawer->current_type);
     if(input->buttons_pressed & LEFT_MOUSE_CLICKED){
         if(CheckCollisionPointRec(input->mouse, drawer->prev_page_button)){
@@ -116,12 +152,10 @@ bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, Input* input,Camera2D* 
             drawer->current_type = ENTITY_PLANT;
             SetPage(drawer);
         }
-
         if(CheckCollisionPointRec(input->mouse, drawer->character_button)){
             drawer->current_type = ENTITY_CHARACTER;
             SetPage(drawer);
         }
-
         if(CheckCollisionPointRec(input->mouse, drawer->portal_button)){
             drawer->current_type = ENTITY_PORTAL;
             SetPage(drawer);
@@ -138,14 +172,25 @@ bool UpdateEnitityDrawer(EntityDrawer* drawer, Map* map, Input* input,Camera2D* 
             drawer->current_type = ENTITY_ENEMY;
             SetPage(drawer);
         }
-        for(int i =0;i<drawer->entities_per_page && drawer->ids[i] > -1;i++){
+        if(CheckCollisionPointRec(input->mouse, drawer->delete_button)){
+            RemoveEntitiesOnSelectedTiles(map, buffer);
+            return false;
+        }
+
+        for(int i = 0; i < drawer->entities_per_page && drawer->ids[i] > -1; i++){
             if(CheckCollisionPointRec(input->mouse, drawer->buttons[i])){
                 drawer->selected_id = drawer->ids[i];
             }
         }
-
     }
-    return HandleMapPlacement(map,drawer,camera, input);
+
+    // If Shift is held down, route clicks to update the selection buffer instead of placing entities
+    if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+        return false;
+        // return HandleMapSelection(map, buffer, camera, input);
+    }
+
+    return HandleMapPlacement(map, drawer, camera, input);
 }
 
 void InitEnitityDrawer(EntityDrawer* drawer, int start_x, int start_y){
@@ -157,21 +202,15 @@ void InitEnitityDrawer(EntityDrawer* drawer, int start_x, int start_y){
 #include <math.h>
 
 void DrawTextureProFit(Texture2D texture, Rectangle box) {
-    // Find the single uniform scale factor that fits inside the box
     float scale = fminf(box.width / (float)texture.width, box.height / (float)texture.height);
-
-    // Calculate scaled dimensions
     float w = texture.width * scale;
     float h = texture.height * scale;
-
-    // Center it inside the box
     Rectangle dest = {
         box.x + (box.width - w) / 2.0f,
         box.y + (box.height - h) / 2.0f,
         w,
         h
     };
-
     DrawTexturePro(texture, (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height }, dest, (Vector2){ 0.0f, 0.0f }, 0.0f, WHITE);
 }
 
@@ -187,28 +226,28 @@ void DrawEnitityDrawer(EntityDrawer* drawer) {
     DrawButton(drawer->portal_button, "Portals", COLOR_CERULEAN_BERYL, COLOR_PULP_PAPER);
     DrawButton(drawer->prev_page_button, "Previous", COLOR_AMBER, COLOR_PULP_PAPER);
     DrawButton(drawer->next_page_button, "Next", COLOR_RED_OCHRE, COLOR_PULP_PAPER);
+    DrawButton(drawer->delete_button, "Delete", COLOR_MAGENTA, COLOR_PULP_PAPER);
 
-    for(int i=0;i<10 && drawer->ids[i] > -1;i++){
+    for(int i = 0; i < 10 && drawer->ids[i] > -1; i++){
         if(drawer->current_type == ENTITY_MINERAL){
-            DrawMineral(drawer->ids[i],(Vector2){drawer->buttons[i].x,drawer->buttons[i].y});
+            DrawMineral(drawer->ids[i], (Vector2){drawer->buttons[i].x, drawer->buttons[i].y});
         }else{
             DrawTextureProFit(*GetSprite(drawer->current_type, drawer->ids[i]), drawer->buttons[i]);
         }
-
     }
-    Rectangle panel = (Rectangle){s,(SCREEN_HEIGHT * 0.66f) + 30 ,(SCREEN_WIDTH * 0.33f)-0, (SCREEN_HEIGHT * 0.33f) -60};
+
+    Rectangle panel = (Rectangle){s, (SCREEN_HEIGHT * 0.66f) + 30, (SCREEN_WIDTH * 0.33f) - 0, (SCREEN_HEIGHT * 0.33f) - 60};
 
     DrawRectangleRec(panel, COLOR_PULP_PAPER);
     DrawRectangleLinesEx(panel, 1.0f, COLOR_SUNKEN_INK);
-    DrawText("Current Entity", panel.x+20, panel.y+25, 15.0f, COLOR_SUNKEN_INK);
+    DrawText("Current Entity", panel.x + 20, panel.y + 25, 15.0f, COLOR_SUNKEN_INK);
     int selected_id = drawer->selected_id;
-    if(selected_id >-1){
-        DrawText(GetName(drawer->current_type, selected_id), panel.x+10, panel.y+40, 15.0f, COLOR_SUNKEN_INK);
+    if(selected_id > -1){
+        DrawText(GetName(drawer->current_type, selected_id), panel.x + 10, panel.y + 40, 15.0f, COLOR_SUNKEN_INK);
         if(drawer->current_type == ENTITY_MINERAL){
-            DrawMineral(selected_id,GetMousePosition());
+            DrawMineral(selected_id, GetMousePosition());
         }else{
             DrawTexture(*GetSprite(drawer->current_type, selected_id), GetMousePosition().x, GetMousePosition().y, WHITE);
         }
     }
-
 }
