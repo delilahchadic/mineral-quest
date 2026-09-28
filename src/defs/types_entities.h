@@ -35,6 +35,7 @@ typedef struct StatBlock {
     int current[STAT_COUNT];
     ActiveBuff buffs[MAX_ACTIVE_BUFFS];
     int max_hp;
+    int max_base_hp;
     int current_hp;
 } StatBlock;
 
