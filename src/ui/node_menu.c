@@ -60,39 +60,60 @@ void UpdateNodeMenu(PlaySession* session, Input* input){
     }
 }
 
-void DrawNodeSession(PlaySession* session){
-      // 1. Background - The Aged Paper
-      ClearBackground(COLOR_CELADON);
-      ExchangeNode* n= &NODE_REGISTRY[session->node_menu.node_id];
-      // Dynamic horizontal line based on screen width
-      int margin = 50;
-      int uiWidth = SCREEN_WIDTH - (margin * 2);
+void DrawNodeSession(PlaySession* session) {
+    // 1. Background - The Aged Paper
+    ClearBackground(COLOR_CELADON);
+    ExchangeNode* n = &NODE_REGISTRY[session->node_menu.node_id];
 
-      // 2. Title - The "Ink" look
-      DrawText(n->name, margin, 40, 30, COLOR_BONE_WHITE);
-      DrawRectangle(50, 80, uiWidth, 2, COLOR_BONE_WHITE); // A simple line
+    // Dynamic horizontal line based on screen width
+    int margin = 50;
+    int uiWidth = SCREEN_WIDTH - (margin * 2);
 
-      for(int i = 0;i< n->count;i++){
-          Color textColor =  session->node_menu.selected_index == i? COLOR_BONE_WHITE: COLOR_RED_OCHRE;
-          Exchange* e = &EXCHANGE_REGISTRY[n->exchange_ids[i]];
-          DrawText(GetName(ENTITY_ITEM, e->item_id),250, 120 + (i * 30), 20, textColor);
-          if(session->node_menu.selected_index == i && e->cost_slots[0].type != ENTITY_NONE){
-              Color costColor = CanAfford(session->player, e->cost_slots[0])? COLOR_SAP_GREEN : COLOR_RED_OCHRE;
-              DrawText(GetName(e->cost_slots[0].type, e->cost_slots[0].id),
-                  500, 120 + (i * 30), 20, costColor);
-              char cost1_amount[5];
-              sprintf(cost1_amount, "%d", e->cost_slots[0].amount);
-              DrawText(cost1_amount,
-                  600, 120 + (i * 30), 20, COLOR_BONE_WHITE);
-              if(session->node_menu.state ==  NODE_MENU_CONFIRM){
-                  DrawText("Do you want to buy this?",600, 120 + (i * 30), 20, COLOR_BONE_WHITE);
-                  Color yesColor = session->node_menu.confirm_index == 0? COLOR_BONE_WHITE: COLOR_RED_OCHRE;
-                  Color noColor = session->node_menu.confirm_index == 1? COLOR_BONE_WHITE: COLOR_RED_OCHRE;
-                  DrawText("Yes",600, 140 + (i * 30), 20, yesColor);
-                  DrawText("No",600, 160 + (i * 30), 20, noColor);
-              }
+    // 2. Title - The "Ink" look
+    DrawText(n->name, margin, 40, 30, COLOR_BONE_WHITE);
+    DrawRectangle(50, 80, uiWidth, 2, COLOR_BONE_WHITE); // A simple line
 
-          }
-          // DrawText(current,450, 120 + (i * 30), 20, COLOR_BONE_WHITE);
-      }
+    for (int i = 0; i < n->count; i++) {
+        Color textColor = (session->node_menu.selected_index == i) ? COLOR_BONE_WHITE : COLOR_RED_OCHRE;
+        Exchange* e = &EXCHANGE_REGISTRY[n->exchange_ids[i]];
+
+        // Draw the result item name
+        DrawText(GetName(ENTITY_ITEM, e->item_id), 250, 120 + (i * 30), 20, textColor);
+
+        // If this row is selected, render all valid cost slots
+        if (session->node_menu.selected_index == i) {
+            int cost_x = 480;
+
+            for (int c = 0; c < 3; c++) {
+                if (e->cost_slots[c].type == ENTITY_NONE) break;
+
+                // Check affordability for each specific cost slot
+                Color costColor = CanAfford(session->player, e->cost_slots[c]) ? COLOR_SAP_GREEN : COLOR_RED_OCHRE;
+
+                // Draw Cost Item Name
+                DrawText(GetName(e->cost_slots[c].type, e->cost_slots[c].id),
+                    cost_x, 120 + (i * 30), 18, costColor);
+
+                // Draw Cost Amount
+                char amount_buf[8];
+                snprintf(amount_buf, sizeof(amount_buf), "x%d", e->cost_slots[c].amount);
+                DrawText(amount_buf, cost_x + 105, 120 + (i * 30), 18, COLOR_BONE_WHITE);
+
+                // Increment X offset for the next cost slot (if any)
+                cost_x += 150;
+            }
+
+            // Draw Confirmation Menu if active
+            if (session->node_menu.state == NODE_MENU_CONFIRM) {
+                int confirm_x = 800;
+                DrawText("Buy?", confirm_x, 120 + (i * 30), 18, COLOR_BONE_WHITE);
+
+                Color yesColor = (session->node_menu.confirm_index == 0) ? COLOR_BONE_WHITE : COLOR_RED_OCHRE;
+                Color noColor  = (session->node_menu.confirm_index == 1) ? COLOR_BONE_WHITE : COLOR_RED_OCHRE;
+
+                DrawText("Yes", confirm_x + 55, 120 + (i * 30), 18, yesColor);
+                DrawText("No",  confirm_x + 95, 120 + (i * 30), 18, noColor);
+            }
+        }
+    }
 }
