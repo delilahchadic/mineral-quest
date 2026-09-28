@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "registry/register.h"
+#include "defs/types_tarot.h"
 #include <math.h>
 #include <stdlib.h>
 

@@ -1,6 +1,7 @@
 #ifndef TAROT_REGISTER_H
 #define TAROT_REGISTER_H
 #include "defs/types_entities.h"
+#include "defs/types_tarot.h"
 extern TarotCard TAROT_REGISTRY[78];
 
 TarotCard* GetTarotCardByItemId(int item_id);
