@@ -1,5 +1,4 @@
 #include "systems/player.h"
-#include "defs/types_entities.h"
 #include "defs/types_minerals.h"
 #include "raylib.h"
 #include "registry/register.h"
