@@ -86,13 +86,8 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         return;
     }
     if (input->attack_dir.x != 0.0f || input->attack_dir.y != 0.0f) {
-        // 1. Update facing direction immediately to match the IJKL input
-        gamestate->map.player.combat.facing_direction =
-            atan2f(input->attack_dir.y, input->attack_dir.x);
+        ExecuteDirectionalAttack(&gamestate->map,input);
 
-        // 2. Trigger the attack combo (InitCombat handles combo states 1, 2,
-        // and 3)
-        InitCombat(&gamestate->map);
     }
 
     if (input->buttons_pressed & KEY_N_PRESSED) {
@@ -137,24 +132,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         }
     }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        if (PLAYER->targeting.target_id != -1) {
-            MapEntity *target =
-                GetTargetEntity(&gamestate->map, PLAYER->targeting.target_id);
-            if (target) {
-                // Point player straight at the target
-                Vector2 diff =
-                    Vector2Subtract(GetEntityCenter(target),
-                                    GetEntityCenter(&gamestate->map.player));
-                gamestate->map.player.combat.facing_direction =
-                    atan2f(diff.y, diff.x);
-
-                // Trigger a combat swing/lunge immediately
-                InitCombat(&gamestate->map);
-            }
-        } else {
-            InitCombat(&gamestate->map);
-        }
-        return;
+        ExecuteTargetedAttack(&gamestate->map, gamestate->session.player);
     }
 
     if (input->buttons_pressed & KEY_G_PRESSED) {
@@ -162,32 +140,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     }
 
     if (input->buttons_pressed & KEY_E_PRESSED) {
-
-        char *item = GatherTarget(session->player, &gamestate->map);
-        if (item) {
-            session->state = GATHER_PROMPT;
-            sprintf(session->pendingItemName, "You got a %s !", item);
-            return;
-        }
-        int node_index =
-            CheckTargetTrait(session->player, &gamestate->map, TRAIT_NODE);
-        if (node_index > -1) {
-            MapEntity *nodecharacter = &gamestate->map.entities[node_index];
-            for (int i = 0; i < gamestate->map.node_count; i++) {
-                if (GetCharacterId(gamestate->map.active_nodes[i]) ==
-                    nodecharacter->entity_id) {
-                    session->node_menu.node_id = gamestate->map.active_nodes[i];
-                    session->state = NODE_MENU;
-                    session->node_menu.selected_index = 0;
-                    session->node_menu.state = NODE_MENU_BROWSE;
-                }
-            }
-
-        } else {
-            InitDialog(session->player, &gamestate->map, &session->manager);
-            if (session->manager.active)
-                session->state = DIALOG_PROMPT;
-        }
+        HandleInteract(gamestate);
     }
 
     if (gamestate->map.hitstop_timer > 0.0f) {
