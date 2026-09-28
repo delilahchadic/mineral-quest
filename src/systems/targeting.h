@@ -5,4 +5,5 @@
 MapEntity *GetTargetEntity(Map *map, int target_id);
 void UpdatePlayerTargets(Map *map, PlayerTargeting *targeting);
 void CycleTarget(PlayerTargeting *targeting);
+void DrawTargetReticle(Vector2 position, EntityType type);
 #endif

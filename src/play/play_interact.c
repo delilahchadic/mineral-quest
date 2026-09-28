@@ -8,10 +8,10 @@
 #include "systems/script_manager.h"
 #include <stdbool.h>
 
-void InitDialog(Map *map, ScriptManager *manager) {
+void InitDialog(Player* player,Map *map, ScriptManager *manager) {
     // get characterid
     // set dialg
-    int characterIndex = PollTrait(map, TRAIT_TALK, 50.0f);
+    int characterIndex = CheckTargetTrait(player, map, TRAIT_TALK);
     if (characterIndex > -1) {
         MapEntity *p = &map->entities[characterIndex];
         int dialogID = GetDialogID(ENTITY_CHARACTER, p->entity_id);
@@ -36,28 +36,30 @@ void CheckAndCollectMinerals(Map *map) {
     }
 }
 
-char *GatherEntity(Player *player, Map *map) {
-    int index = PollTrait(map, TRAIT_GATHER, 50.0f);
-
-    if (index > -1) {
-        if (map->entities[index].type == ENTITY_ITEM) {
-            MapEntity *p = &map->entities[index];
-            int item_id = p->entity_id;
+char *GatherTarget(Player *player, Map *map){
+    int target = player->targeting.target_id;
+    if (target == -1) return NULL;
+    int index = CheckTargetTrait(player, map, TRAIT_GATHER);
+    if(index != -1){
+        MapEntity* entity = &map->entities[index];
+        if(entity->type ==  ENTITY_ITEM){
+            int item_id = entity->entity_id;
             GiveItem(player, item_id);
             RemoveEntityAt(map, index);
             return GetName(ENTITY_ITEM, item_id);
-            ;
-        } else if (map->entities[index].type == ENTITY_PLANT) {
-            MapEntity *p = &map->entities[index];
-            Plant *pl = &PLANT_REGISTRY[p->entity_id];
-            int plant_id = p->entity_id;
-            if (PLAYER->stats.current[STAT_BOTANY] >= pl->gather_level) {
-                PLAYER->plant_inventory[p->entity_id]++;
+        }else if (map->entities[index].type == ENTITY_PLANT){
+            Plant *pl = &PLANT_REGISTRY[entity->entity_id];
+            int plant_id = entity->entity_id;
+            if (PLAYER->stats.current[STAT_BOTANY] >= pl->gather_level){
+                PLAYER->plant_inventory[entity->entity_id]++;
                 RemoveEntityAt(map, index);
                 return GetName(ENTITY_PLANT, plant_id);
             }
+        }else{
+            return NULL;
         }
     }
+
     return NULL;
 }
 

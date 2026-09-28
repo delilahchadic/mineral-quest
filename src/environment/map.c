@@ -201,6 +201,21 @@ MapEntity *AddEntity(Map *map) {
     return slot;
 }
 
+int CheckTargetTrait(Player *player, Map *map, uint32_t trait) {
+    int targetId = player->targeting.target_id;
+    if (targetId == -1) return -1;
+
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *tmp = &map->entities[i];
+        if (tmp->instance_id != targetId) continue;
+
+        // Direct check—no guessing, no fallback logic needed!
+        return (tmp->trait_flags & trait) ? i : -1;
+    }
+
+    return -1;
+}
+
 int PollTrait(Map *map, TraitFlags trait, float distance) {
     Vector2 playerCenter = GetEntityCenter(&map->player);
 

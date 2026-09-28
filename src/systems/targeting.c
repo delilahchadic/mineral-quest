@@ -35,8 +35,7 @@ void UpdatePlayerTargets(Map *map, PlayerTargeting *targeting) {
         MapEntity *e = &map->entities[i];
 
         // Skip player, minerals, or items only
-        if (e == &map->player || e->type == ENTITY_MINERAL ||
-            e->type == ENTITY_ITEM)
+        if (e == &map->player || e->type == ENTITY_MINERAL)
             continue;
 
         Vector2 enemy_center = GetEntityCenter(e);
@@ -113,4 +112,43 @@ void CycleTarget(PlayerTargeting *targeting) {
     // Move to the next target in the list (loops back to 0 at the end)
     int nextIndex = (currentIndex + 1) % targeting->potential_count;
     targeting->target_id = targeting->potential_targets[nextIndex];
+}
+
+void DrawTargetReticle(Vector2 position, EntityType type) {
+    // if (!position) return;
+
+    // 1. Create a pulsing glow effect based on real-time
+    float pulse = sinf(GetTime() * 8.0f) * 3.0f;
+    float radius = 24.0f + pulse;
+
+    // 2. Color-code by entity type (replace these with your custom color names)
+    Color reticleColor = WHITE;
+    if (PLAYER->targeting.locked) {
+        switch (type) {
+        case ENTITY_ENEMY:
+            reticleColor = COLOR_RED_OCHRE; // Swap with your custom enemy color
+                                            // (e.g., COLOR_ENEMY_RED)
+            break;
+        case ENTITY_PLANT:
+            reticleColor =
+                COLOR_SAP_GREEN; // Swap with your custom harvest color
+            break;
+        case ENTITY_PORTAL:
+            reticleColor = COLOR_MUTED_FUCHSIA;
+            break;
+        case ENTITY_CHARACTER:
+            reticleColor = COLOR_COBALT_TEAL_PALE;
+        default:
+            reticleColor = COLOR_CERULEAN_WISTFUL; // Swap with your
+                                                   // default/interactive color
+            break;
+        }
+    }
+
+    // 3. Draw an outer glowing, semi-transparent ring
+    DrawRing(position, radius - 3.0f, radius + 1.0f, 0.0f, 360.0f, 16,
+             Fade(reticleColor, 0.35f));
+
+    // 4. Draw the crisp main reticle ring
+    DrawCircleLines(position.x, position.y, radius, reticleColor);
 }

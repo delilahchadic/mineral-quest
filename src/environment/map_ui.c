@@ -11,6 +11,7 @@
 #include "registry/weapon_register.h"
 #include "systems/input.h"
 #include "systems/player.h"
+#include "systems/targeting.h"
 #include "systems/script_manager.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -212,39 +213,6 @@ void Draw_Buildings(Map *map, int current_x, int current_y) {
         b = b->next;
     }
 }
-void DrawTargetReticle(Vector2 position, EntityType type) {
-    // if (!position) return;
-
-    // 1. Create a pulsing glow effect based on real-time
-    float pulse = sinf(GetTime() * 8.0f) * 3.0f;
-    float radius = 24.0f + pulse;
-
-    // 2. Color-code by entity type (replace these with your custom color names)
-    Color reticleColor = WHITE;
-    if(PLAYER->targeting.locked){
-        switch (type) {
-            case ENTITY_ENEMY:
-                reticleColor = COLOR_RED_OCHRE;       // Swap with your custom enemy color (e.g., COLOR_ENEMY_RED)
-                break;
-            case ENTITY_PLANT:
-                reticleColor = COLOR_SAP_GREEN;     // Swap with your custom harvest color
-                break;
-            case ENTITY_PORTAL:
-                reticleColor = COLOR_SNOOT_PINK;
-                break;
-            default:
-                reticleColor = COLOR_CERULEAN_WISTFUL;    // Swap with your default/interactive color
-                break;
-        }
-    }
-
-
-    // 3. Draw an outer glowing, semi-transparent ring
-    DrawRing(position, radius - 3.0f, radius + 1.0f, 0.0f, 360.0f, 16, Fade(reticleColor, 0.35f));
-
-    // 4. Draw the crisp main reticle ring
-    DrawCircleLines(position.x, position.y, radius, reticleColor);
-}
 
 void Draw_MapEntity(MapEntity *entity, Map *map) {
 
@@ -268,8 +236,12 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
         } else {
             DrawTextureV(*sprite, drawPos, WHITE);
-            DrawText(GetName(entity->type, entity->entity_id), drawPos.x + 20,
-                     drawPos.y - 20.0, 2.0, COLOR_SUNKEN_INK);
+            if (entity->type == ENTITY_PORTAL) {
+                DrawText(GetName(entity->type, entity->entity_id),
+                         drawPos.x + 20, drawPos.y - 20.0, 2.0,
+                         COLOR_SUNKEN_INK);
+            }
+
             if (entity->type == ENTITY_ENEMY) {
                 char hpStr[16];
                 snprintf(hpStr, sizeof(hpStr), "hp:%d", entity->hp);
@@ -292,17 +264,34 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
                                BLANK);
         }
 
-        if(entity->instance_id==PLAYER->targeting.target_id){
+        if (entity->instance_id == PLAYER->targeting.target_id) {
             Texture2D *sprite = GetSprite(entity->type, entity->entity_id);
-            Vector2 reticlePos = sprite->height>100 ? (Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height *0.8)}:
-                 (Vector2){drawPos.x + (sprite->width/2.0),drawPos.y + (sprite->height/2.0)};
-            DrawTargetReticle( reticlePos, entity->type);
+            Vector2 reticlePos;
+
+            if (entity->type == ENTITY_ITEM) {
+                // Items are drawn at 0.5 scale, so center is width * 0.25 and height * 0.25 from drawPos
+                reticlePos = (Vector2){
+                    drawPos.x + (sprite->width * 0.25f),
+                    drawPos.y + (sprite->height * 0.25f)
+                };
+            } else if (sprite->height > 100) {
+                reticlePos = (Vector2){
+                    drawPos.x + (sprite->width / 2.0f),
+                    drawPos.y + (sprite->height * 0.8f)
+                };
+            } else {
+                reticlePos = (Vector2){
+                    drawPos.x + (sprite->width / 2.0f),
+                    drawPos.y + (sprite->height / 2.0f)
+                };
+            }
+
+            DrawTargetReticle(reticlePos, entity->type);
         }
         if (entity == &map->player) {
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
             DrawWeapon(GLOBAL_PLAYER.gear.weapon_id, handPos,
                        map->player.combat.attackAngle);
-
         }
     }
 }
@@ -381,13 +370,17 @@ void Draw_Map(Map *map, Camera2D *camera, bool drawPlayer) {
     Vector2 g4 = GetIsoWorldToGrid(br);
     // Dynamically calculate top padding based on altitude to save performance
     int altitudePadding = (int)(map->player.altitude / 8.0f) + 25;
-    altitudePadding =  altitudePadding > 100? 100: 25;
+    altitudePadding = altitudePadding > 100 ? 100 : 25;
     // if (altitudePadding < 125) altitudePadding = 100;
 
-    int min_y = (int)fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y)) - altitudePadding;
-    int max_y = (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + altitudePadding;
-    int min_x = (int)fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) - altitudePadding;
-    int max_x = (int)fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x)) + altitudePadding;
+    int min_y =
+        (int)fminf(fminf(g1.y, g2.y), fminf(g3.y, g4.y)) - altitudePadding;
+    int max_y =
+        (int)fmaxf(fmaxf(g1.y, g2.y), fmaxf(g3.y, g4.y)) + altitudePadding;
+    int min_x =
+        (int)fminf(fminf(g1.x, g2.x), fminf(g3.x, g4.x)) - altitudePadding;
+    int max_x =
+        (int)fmaxf(fmaxf(g1.x, g2.x), fmaxf(g3.x, g4.x)) + altitudePadding;
 
     if (min_x < 0)
         min_x = 0;

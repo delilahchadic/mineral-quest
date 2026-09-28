@@ -298,8 +298,10 @@ Vector2 GetEntityCenter(MapEntity *entity) {
 
     float center_x = entity->position.x; // Or entity->position.x + (texture->width / 2.0f) depending on your origin
     float center_y;
-
-    if (texture->height > 100) {
+    if(entity->type==ENTITY_ITEM){
+        center_x = entity->position.x - (texture->width/4.0);
+        center_y =  (entity->position.y - (texture->height/4.0));
+    }else if (texture->height > 100) {
         // Since position.y is the base, keep it right at the base
         // or subtract a tiny fraction to move slightly up into the trunk.
         center_y = entity->position.y - (texture->height * 0.05f);

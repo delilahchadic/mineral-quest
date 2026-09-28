@@ -205,17 +205,18 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     }
 
     if (input->buttons_pressed & KEY_G_PRESSED) {
-        char *item = GatherEntity(session->player, &gamestate->map);
+        session->state = EQUIPMENT_MENU;
+    }
+
+    if (input->buttons_pressed & KEY_E_PRESSED) {
+
+        char *item = GatherTarget(session->player, &gamestate->map);
         if (item) {
             session->state = ITEM;
             sprintf(session->pendingItemName, "You got a %s !", item);
             return;
         }
-    }
-
-    if (input->buttons_pressed & KEY_E_PRESSED) {
-
-        int node_index = PollTrait(&gamestate->map, TRAIT_NODE, 50.0f);
+        int node_index = CheckTargetTrait(session->player,&gamestate->map, TRAIT_NODE);
         if (node_index > -1) {
             MapEntity *nodecharacter = &gamestate->map.entities[node_index];
             for (int i = 0; i < gamestate->map.node_count; i++) {
@@ -229,11 +230,10 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
             }
 
         } else {
-            InitDialog(&gamestate->map, &session->manager);
+            InitDialog(session->player,&gamestate->map, &session->manager);
             if (session->manager.active)
                 session->state = TALKING;
-            else
-                session->state = EQUIPMENT_MENU;
+
         }
     }
 
@@ -260,7 +260,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     }
     AdjustCamera(gamestate, false, dt);
 
-    int portal_index = PollTrait(&gamestate->map, TRAIT_TELEPORT, 20.0f);
+    int portal_index = PollTrait(&gamestate->map, TRAIT_TELEPORT, 32.0f);
     if (portal_index > -1) {
 
         MapEntity *entity = &gamestate->map.entities[portal_index];
@@ -273,7 +273,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 }
 
 void UpdateItemPopup(PlaySession *session, Input *input) {
-    if (input->buttons_pressed & KEY_G_PRESSED) {
+    if (input->buttons_pressed & KEY_E_PRESSED) {
         session->state = ADVENTURE;
     }
 }

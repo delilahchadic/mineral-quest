@@ -6,8 +6,9 @@
 #include "defs/types_systems.h"
 
 
-void InitDialog(Map* map, ScriptManager* manager);
+void InitDialog(Player* player,Map* map, ScriptManager* manager);
 char* GatherEntity(Player* player, Map* map);
+char *GatherTarget(Player *player, Map *map);
 void CheckAndCollectMinerals(Map* map);
 void CheckHazards(Map *map, float dt);
 #endif

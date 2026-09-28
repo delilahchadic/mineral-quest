@@ -9,7 +9,6 @@ void InitNewMap(Map* map,char* name,int rows, int columns);
 void InitMap(Map* map);
 void Draw_MapEntity(MapEntity* entity, Map* map);
 void UpdateEntityMovement(Map* map, float dt);
-// void Draw_Map(Map* map, Camera2D* camera);
 void DrawWaterEffects(Map* map,int x, int y);
 void DrawSimpleSparkle(Vector2 pos, Color color, float size);
 void ResetAllHitFlags(Map* map);
@@ -25,5 +24,5 @@ Vector2 GetGridToIsoWorld(int x, int y);
 int  PollTrait(Map* map, TraitFlags traits, float distance);
 void AddBuilding(Map* map, BuildingZone* building);
 void Remove_Building(Map* map, BuildingZone* building);
-
+int CheckTargetTrait(Player *player,Map *map, TraitFlags trait);
 #endif

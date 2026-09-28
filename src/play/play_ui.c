@@ -89,7 +89,7 @@ void DrawPlaySession(Gamestate* gamestate){
       DrawMessage(&session->manager);
     }
     if(session->state == ITEM){
-      DrawDialog("you found a christmas present", session->pendingItemName);
+      DrawDialog("you found something!", session->pendingItemName);
     }
   }
 }

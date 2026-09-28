@@ -223,7 +223,7 @@ void UpdateEquipMenu(PlaySession* session, Input* input) {
             }
         }
 
-        if (input->buttons_pressed & KEY_E_PRESSED) {
+        if (input->buttons_pressed & KEY_G_PRESSED) {
             session->state = ADVENTURE;
         }
     }
