@@ -48,6 +48,7 @@ void ProcessRecipe(Player* player, Exchange e) {
 
 void SetDefaultStat(Player* player) {
     player->stats.max_hp = 100;
+    player->stats.max_base_hp = 100;
     player->stats.current_hp = 100;
     player->stats.base[STAT_STR] = 8;
     player->stats.base[STAT_DEF] = 7;
@@ -63,7 +64,7 @@ void SetDefaultStat(Player* player) {
 
 void RecalculateStats(StatBlock* stats, Gear* gear) {
     // 1. Reset base stats and baseline max HP
-    stats->max_hp = 100;
+    stats->max_hp = stats->max_base_hp;
     for (int i = 0; i < STAT_COUNT; i++) {
         stats->current[i] = stats->base[i];
     }
@@ -138,7 +139,9 @@ void RemoveOneFromInventory(Player* player, int id) {
 }
 
 void ApplyPermanentStat(Player* player, ItemDefinition* item) {
-    player->stats.max_hp += item->hp_bonus;
+
+    player->stats.max_base_hp += item->hp_bonus;
+    TraceLog(LOG_ERROR,"theres this : ", item->hp_bonus);
     for (int s = 0; s < STAT_COUNT; s++) {
         player->stats.base[s] += item->stat_bonuses[s];
     }
