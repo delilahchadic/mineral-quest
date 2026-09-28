@@ -2,7 +2,6 @@
 #define TYPES_SYSTEMS
 #include "raylib.h"
 #include <stdint.h>
-#include "defs/types_entities.h"
 #include "defs/types_minerals.h"
 #include "defs/constants.h"
 
@@ -59,4 +58,61 @@ typedef struct ScriptManager{
   int currentID;
 } ScriptManager;
 
+typedef struct Gear{
+    int weapon_id;
+    int accessory_ids[MAX_ACCESSORY_SLOTS];
+    int tarot_ids[3];
+}Gear;
+#define MAX_ACTIVE_BUFFS 8
+
+typedef enum {
+    STAT_STR,
+    STAT_DEF,
+    STAT_MAG_OFF,
+    STAT_MAG_DEF,
+    STAT_SPEED,
+    STAT_GEOLOGY,
+    STAT_BOTANY,
+    STAT_ALCHEMY,
+    STAT_AEROBICS,
+    STAT_ACCESORY_COUNT,
+    STAT_COUNT
+} StatType;
+
+typedef struct {
+    int id;
+    int hpBonus;
+    int modifiers[STAT_COUNT];   // Holds +2 Aerobics, +1 Grace, -1 Defense, etc.
+    float duration;              // Remaining time in seconds
+    bool active;
+} ActiveBuff;
+
+typedef struct StatBlock {
+    int base[STAT_COUNT];
+    int current[STAT_COUNT];
+    ActiveBuff buffs[MAX_ACTIVE_BUFFS];
+    int max_hp;
+    int max_base_hp;
+    int current_hp;
+} StatBlock;
+
+typedef struct PlayerTargeting{
+    int target_id;       // The unique ID of the locked entity (-1 if none)
+    int potential_targets[8]; // Array of nearby target IDs for tab-targeting
+    int potential_count;
+    bool locked;
+} PlayerTargeting;
+
+typedef struct Player{
+  int item_inventory[100];
+  int mineral_inventory[MINERAL_COUNT];
+  int plant_inventory[100];
+  float speed;
+  Texture2D sprite;     // How fast we move
+  StatBlock stats;
+  Gear gear;
+  PlayerTargeting targeting;
+  // Inside your Player struct or stats definition:
+  float damage_cooldown;
+} Player;
 #endif

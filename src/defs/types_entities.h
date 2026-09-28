@@ -5,39 +5,7 @@
 #include "raylib.h"
 #include "defs/constants.h"
 #include "defs/types_minerals.h"
-
-#define MAX_ACTIVE_BUFFS 8
-
-typedef enum {
-    STAT_STR,
-    STAT_DEF,
-    STAT_MAG_OFF,
-    STAT_MAG_DEF,
-    STAT_SPEED,
-    STAT_GEOLOGY,
-    STAT_BOTANY,
-    STAT_ALCHEMY,
-    STAT_AEROBICS,
-    STAT_ACCESORY_COUNT,
-    STAT_COUNT
-} StatType;
-
-typedef struct {
-    int id;
-    int hpBonus;
-    int modifiers[STAT_COUNT];   // Holds +2 Aerobics, +1 Grace, -1 Defense, etc.
-    float duration;              // Remaining time in seconds
-    bool active;
-} ActiveBuff;
-
-typedef struct StatBlock {
-    int base[STAT_COUNT];
-    int current[STAT_COUNT];
-    ActiveBuff buffs[MAX_ACTIVE_BUFFS];
-    int max_hp;
-    int max_base_hp;
-    int current_hp;
-} StatBlock;
+#include "defs/types_systems.h"
 
 typedef enum ItemType{
   ITEM_VHS_TAPE,
@@ -118,73 +86,6 @@ typedef struct Portal{
     Vector2 destination;
 } Portal;
 
-typedef enum {
-    // --- ROW 1: LIGHTS, BUFFS & PALE YELLOWS ---
-    TILE_LIMESTONE_CHALK,
-    TILE_SNOOT_PINK,
-    TILE_BUFF_TITANIUM,
-    TILE_STONE,
-    TILE_BRILLIANT_JAUNE,
-    TILE_NAPLES_YELLOW,
-    TILE_NICKEL_TITANITE,
-
-    // --- ROW 2: ROSES, PINKS, SALMON & MAUVES ---
-    TILE_RHYOLITE_TUFF,
-    TILE_TERRA_PALE,
-    TILE_SHELL_PINK,
-    TILE_SALMON,
-    TILE_POTTERS_PINK,
-    TILE_DUSTY_MAGENTA,
-    TILE_MUTED_FUSCHIA,
-    TILE_WITHERED_LILAC,
-    TILE_CAPUT_MORTUUM,
-
-    // --- ROW 3: EARTHS, STONES, UMBER & SIENNA ---
-    TILE_GRANITE,
-    TILE_RAW_UMBER,
-    TILE_BURNT_SIENNA,
-    TILE_HEMATITE_BASE,
-    TILE_ROAD,
-
-    // --- ROW 4: OCHRES & KHMER SANDSTONE ---
-    TILE_SILT,
-    TILE_YELLOW_OCHRE,
-    TILE_FIRED_GOLD_OCHRE,
-    TILE_RED_OCHRE,
-    TILE_PURPLE_OCHRE,
-    TILE_BLUE_OCHRE,
-    TILE_KHMER_SANDSTONE,
-
-    // --- ROW 5: GREENS, SAGE & MOSS ---
-    TILE_GREEN_GOLD,
-    TILE_SAGE,
-    TILE_CELADON,
-    TILE_WITHERED_VIRIDIAN,
-    TILE_GRASS,
-    TILE_OLIVE_DRAB,
-    TILE_DEEP_MOSS,
-    TILE_AMAZONITE,
-
-    // --- ROW 6: BLUES, TEALS, SLATES & DARK INORGANICS ---
-    TILE_COBALT_TEAL_PALE,
-    TILE_BERYL,
-    TILE_LIVID_SLATE,
-    TILE_MOON_STONE,
-    TILE_BASALT,
-    TILE_WATER,
-
-    TILE_COUNT // Useful for array sizing or loops
-} TileType;
-
-typedef struct TileDefinition{
-    int id;             // 0 = Sand, 1 = Asphalt, 2 = Magnetic Pit
-    bool is_blocking;   //
-    float friction;     // 1.0 = Normal, 0.2 = Ice/Oil, 1.5 = Deep Sand
-    int footstep_sfx;
-    Color color;// sound??
-    char* label;
-} TileDefinition;
-
 typedef enum EntityType{
     ENTITY_NONE=-1,
     ENTITY_CHARACTER,
@@ -219,32 +120,6 @@ typedef struct Character{
   int dialogId;
   uint32_t default_trait_flags;
 } Character;
-
-typedef struct Gear{
-    int weapon_id;
-    int accessory_ids[MAX_ACCESSORY_SLOTS];
-    int tarot_ids[3];
-}Gear;
-
-typedef struct PlayerTargeting{
-    int target_id;       // The unique ID of the locked entity (-1 if none)
-    int potential_targets[8]; // Array of nearby target IDs for tab-targeting
-    int potential_count;
-    bool locked;
-} PlayerTargeting;
-
-typedef struct Player{
-  int item_inventory[100];
-  int mineral_inventory[MINERAL_COUNT];
-  int plant_inventory[100];
-  float speed;
-  Texture2D sprite;     // How fast we move
-  StatBlock stats;
-  Gear gear;
-  PlayerTargeting targeting;
-  // Inside your Player struct or stats definition:
-  float damage_cooldown;
-} Player;
 
 typedef enum ExchangeNodeType{
     NODE_SHOP,

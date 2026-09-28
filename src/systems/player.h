@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include "raylib.h"
 #include "defs/types_systems.h"
+#include "defs/types_entities.h"
 #include <stddef.h>
 
 Player Get_Default_Player();

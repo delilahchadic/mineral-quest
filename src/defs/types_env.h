@@ -2,6 +2,7 @@
 #define TYPES_ENV
 
 #include "defs/types_entities.h"
+#include "defs/types_tiles.h"
 #include "raylib.h"
 #include <stdint.h>
 #define TILE_SIZE 32
