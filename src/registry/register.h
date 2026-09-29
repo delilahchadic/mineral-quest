@@ -19,7 +19,7 @@ extern Character CHARACTER_REGISTRY[200];
 extern ItemDefinition ITEM_REGISTRY[100];
 extern Portal PORTAL_REGISTRY[100];
 extern Projectile PROJECTILE_REGISTRY[100];
-
+extern Recipe RECIPE_REGISTRY[100];
 //system register
 extern Message DIALOG_REGISTRY[500];
 extern Player GLOBAL_PLAYER;

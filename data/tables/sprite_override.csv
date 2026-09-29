@@ -1,2 +1,3 @@
-id,name,sprite
-0,data/sprites/chest.png
+id,sprite,sprite
+0,data/sprites/chest.png,
+1,data/sprites/recipe.png,

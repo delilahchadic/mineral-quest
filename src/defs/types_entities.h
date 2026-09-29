@@ -51,6 +51,12 @@ typedef struct Enemy{
     int hp;
 }Enemy;
 
+typedef struct Recipe{
+    char name[32];
+    int id;
+    int exchangeId;
+}Recipe;
+
 typedef struct Plant{
   char species_name[32];
   Texture2D sprite;
@@ -96,7 +102,8 @@ typedef enum EntityType{
     ENTITY_PORTAL,
     ENTITY_ENEMY,
     ENTITY_PLAYER,
-    ENTITY_PROJECTILE
+    ENTITY_PROJECTILE,
+    ENTITY_RECIPE
 } EntityType;
 
 typedef enum TraitFlags{

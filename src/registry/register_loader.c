@@ -149,6 +149,22 @@ void ParseNodeInventory(char *line) {
         }
     }
 }
+void ParseRecipeRow(char *line) {
+    char *idToken = strtok(line, ",");
+    char *exchangeID = strtok(NULL, ",");
+    char *nameToken = strtok(NULL, ",");
+    if (idToken && nameToken && exchangeID) {
+
+        // grab the appropriate plant
+        int id = atoi(idToken);
+        Recipe *r = &RECIPE_REGISTRY[id];
+        // Load the sprit
+        r->id = atoi(idToken);
+        strncpy(r->name, nameToken, sizeof(r->name) - 1);
+        r->name[sizeof(r->name) - 1] = '\0';
+        r->exchangeId = atoi(exchangeID);
+    }
+}
 void ParseNodeRow(char *line) {
     char *idToken = strtok(line, ",");
     char *nameToken = strtok(NULL, ",");
@@ -438,6 +454,9 @@ int LoadEnemyRegistry() {
 int LoadProjectileRegistry() {
     return LoadRegistry("data/tables/projectiles.csv", ParseProjectileRow);
 }
+int LoadRecipeRegistry() {
+    return LoadRegistry("data/tables/recipes.csv", ParseRecipeRow);
+}
 void LoadSpriteOverrideRegistry() {
     LoadRegistry("data/tables/sprite_override.csv", ParseSpriteOverrideRow);
 }
@@ -471,7 +490,7 @@ void InitRegistries() {
     SetEntityTypeCount(ENTITY_PORTAL, LoadPortalRegistry());
     SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
     SetEntityTypeCount(ENTITY_PROJECTILE, LoadProjectileRegistry());
-
+    SetEntityTypeCount(ENTITY_RECIPE, LoadRecipeRegistry());
     WORLD_COUNT = LoadRegistry("data/tables/worlds.csv", ParseWorldRow);
     LoadDialogRegistry();
     LoadSpriteOverrideRegistry();

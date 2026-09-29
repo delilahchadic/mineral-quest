@@ -16,6 +16,7 @@ Portal PORTAL_REGISTRY[100] = {0};
 ExchangeNode NODE_REGISTRY[100] = {0};
 Exchange EXCHANGE_REGISTRY[1000] = {0};
 Projectile PROJECTILE_REGISTRY[100] = {0};
+Recipe RECIPE_REGISTRY[100] = {0};
 
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
@@ -29,6 +30,7 @@ static int charcter_count = 0;
 static int portal_count = 0;
 static int enemy_count = 0;
 static int projectile_count = 0;
+static int recipe_count = 0;
 
 Texture2D PORTAL_TV_SPRITE;
 Texture2D PORTAL_CRYSTAL_SPRITE;
@@ -185,6 +187,8 @@ Texture2D *GetSprite(EntityType type, int id) {
         return &ENEMY_REGISTRY[id].sprite;
     case ENTITY_PROJECTILE:
         return &PROJECTILE_REGISTRY[id].sprite;
+    case ENTITY_RECIPE:
+        return GetSpriteOverride(1);
     default:
         return NULL;
     }
@@ -231,6 +235,8 @@ int GetEntityTypeCount(EntityType type) {
         return projectile_count;
     case ENTITY_MINERAL:
         return MINERAL_COUNT;
+    case ENTITY_RECIPE:
+        return recipe_count;
     case ENTITY_PLAYER:
         return 1;
     default:
@@ -257,6 +263,8 @@ void SetEntityTypeCount(EntityType type, int count) {
         return;
     case ENTITY_PROJECTILE:
         projectile_count = count;
+    case ENTITY_RECIPE:
+        recipe_count = count;
     default:
         return;
     }
@@ -296,17 +304,20 @@ Vector2 GetDestination(EntityType type, int id) {
 Vector2 GetEntityCenter(MapEntity *entity) {
     Texture2D *texture = GetSprite(entity->type, entity->entity_id);
 
-    float center_x = entity->position.x; // Or entity->position.x + (texture->width / 2.0f) depending on your origin
+    float center_x =
+        entity->position.x; // Or entity->position.x + (texture->width / 2.0f)
+                            // depending on your origin
     float center_y;
-    if(entity->type==ENTITY_ITEM){
-        center_x = entity->position.x - (texture->width/4.0);
-        center_y =  (entity->position.y - (texture->height/4.0));
-    }else if (texture->height > 100) {
+    if (entity->type == ENTITY_ITEM) {
+        center_x = entity->position.x - (texture->width / 4.0);
+        center_y = (entity->position.y - (texture->height / 4.0));
+    } else if (texture->height > 100) {
         // Since position.y is the base, keep it right at the base
         // or subtract a tiny fraction to move slightly up into the trunk.
         center_y = entity->position.y - (texture->height * 0.05f);
     } else {
-        // For normal plants (where position.y is the base, center is halfway up)
+        // For normal plants (where position.y is the base, center is halfway
+        // up)
         center_y = entity->position.y - (texture->height / 2.0f);
     }
 
