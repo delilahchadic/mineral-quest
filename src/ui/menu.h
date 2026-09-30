@@ -10,7 +10,7 @@
 
 void RebindItemMenu( Menu* menu,Player* player);
 void RebindPlantMenu( Menu* menu,Player* player);
-void RebindRecipeMenu(Menu* menu, Player* player);
+
 void FillMenu(Menu* menu, int itemIds[], int count);
 void DrawMenu(const MenuRenderData* data,Color color);
 bool UpdateMenu(Menu* menu, Input* input);
