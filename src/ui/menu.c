@@ -39,7 +39,25 @@ void RebindPlantMenu( Menu* menu,Player* player) {
 
     return;
 }
+void RebindRecipeMenu(Menu* menu, Player* player) {
+    menu->type = ENTITY_RECIPE;
+    menu->exit_button = KEY_T_PRESSED; // Uses Key T to exit the recipe log
 
+    // Gather all unlocked recipe IDs into a temporary list for the menu
+    int active_recipe_ids[100];
+    int active_count = 0;
+
+    for (int i = 0; i < 100; i++) {
+        // Assuming your player struct tracks recipes via an array (e.g., recipe_inventory or unlocked_recipes)
+        if (player->recipe_inventory[i] > 0) {
+            active_recipe_ids[active_count++] = i;
+        }
+    }
+
+    FillMenu(menu, active_recipe_ids, active_count);
+
+    return;
+}
 void FillMenu(Menu* menu, int itemIds[], int count){
     memset(menu->itemIds, 0, sizeof(menu->itemIds));
     memcpy(menu->itemIds, itemIds, sizeof(int) * count);

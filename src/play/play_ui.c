@@ -18,6 +18,7 @@
 #include "ui/dialog_box.h"
 #include "ui/equip_menu.h"
 #include "ui/node_menu.h"
+#include "ui/recipe_menu.h"
 #include "ui/stats_menu.h"
 #include "ui/plant_inventory.h"
 #include "systems/script_manager.h"
@@ -80,6 +81,8 @@ void DrawPlaySession(Gamestate* gamestate){
     DrawHUD();
   }else if(session->state==MINERAL_INVENTORY){
     DrawMineralInventory(session->player);
+  }else if (session->state==RECIPE_INVENTORY){
+      DrawRecipeInventory(session);
   }else {
     Draw_Map(&gamestate->map,&gamestate->camera,true);
     DrawHUD();

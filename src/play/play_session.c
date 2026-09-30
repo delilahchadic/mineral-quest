@@ -27,6 +27,7 @@
 #include "ui/menu.h"
 #include "ui/node_menu.h"
 #include "ui/plant_inventory.h"
+#include "ui/recipe_menu.h"
 #include "ui/stats_menu.h"
 #include <math.h>
 #include <stdbool.h>
@@ -104,6 +105,12 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     if (input->buttons_pressed & KEY_B_PRESSED) {
         RebindPlantMenu(&session->menu, session->player);
         session->state = PLANT_INVENTORY;
+        return;
+    }
+
+    if (input->buttons_pressed & KEY_T_PRESSED) {
+        RebindRecipeMenu(&session->menu, session->player);
+        session->state = RECIPE_INVENTORY;
         return;
     }
 
@@ -217,6 +224,9 @@ void UpdatePlaySession(Gamestate *gamestate) {
         break;
     case PLANT_INVENTORY:
         UpdatePlantInventory(session, &input);
+        break;
+    case RECIPE_INVENTORY:
+        UpdateRecipeInventory(session, &input);
     default:
         return;
     }
