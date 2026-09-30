@@ -41,6 +41,7 @@ typedef struct ItemDefinition {
     float use_duration;
     EquipSlot slot;                   // Explicit enum type instead of raw int
     int hp_bonus;
+    int mp_bonus;
     int stat_bonuses[STAT_COUNT];     // Matches all 9 stats (STR through AEROBICS)
     int granted_ability_id;           // -1 if no ability attached
 } ItemDefinition;

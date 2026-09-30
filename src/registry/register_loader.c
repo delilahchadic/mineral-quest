@@ -383,6 +383,8 @@ void ParseItemRow(char *line) {
         d->slot = slotToken ? (EquipSlot)atoi(slotToken) : SLOT_NONE;
         char *hpBonus = strtok(NULL, ",");
         d->hp_bonus = hpBonus ? atoi(hpBonus) : 0;
+        char *mpBonus = strtok(NULL, ",");
+        d->mp_bonus = mpBonus ? atoi(mpBonus) : 0;
         // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
         for (int i = 0; i < STAT_COUNT; i++) {
             char *statToken = strtok(NULL, ",");

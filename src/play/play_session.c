@@ -178,7 +178,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 
         MapEntity *entity = &gamestate->map.entities[portal_index];
         if (GetPortalType(entity->entity_id) == PORTAL_CRYSTAL) {
-            PLAYER->stats.current_hp = PLAYER->stats.max_hp;
+           FullyRestPlayer(session->player);
         }
         ChangeMap(gamestate, GetWorldNameFromPortalId(entity->entity_id),
                   GetDestination(ENTITY_PORTAL, entity->entity_id));

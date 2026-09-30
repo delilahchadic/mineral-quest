@@ -18,4 +18,5 @@ void UseItem(Player *player, ItemDefinition *item);
 void UpdateBuffs(Player *player, float dt);
 void RemoveOneFromInventory(Player *player, int id);
 void UsePlayerTarotSlot(Player *player, Gamestate *gamestate, int index);
+void FullyRestPlayer(Player *player);
 #endif

@@ -10,8 +10,8 @@
 
 void DamagePlayer(int damage) {
     int damageDealt = damage > GLOBAL_PLAYER.stats.current_hp
-                          ? GLOBAL_PLAYER.stats.current_hp
-                          : damage;
+                        ? GLOBAL_PLAYER.stats.current_hp
+                        : damage;
     GLOBAL_PLAYER.stats.current_hp -= damageDealt;
 }
 
@@ -57,6 +57,11 @@ void SetDefaultStat(Player *player) {
     player->stats.max_hp = 100;
     player->stats.max_base_hp = 100;
     player->stats.current_hp = 100;
+
+    player->stats.max_mp = 75;
+    player->stats.max_base_mp = 75;
+    player->stats.current_mp = 75;
+
     player->stats.base[STAT_STR] = 8;
     player->stats.base[STAT_DEF] = 7;
     player->stats.base[STAT_MAG_OFF] = 5;
@@ -70,22 +75,25 @@ void SetDefaultStat(Player *player) {
 }
 
 void RecalculateStats(StatBlock *stats, Gear *gear) {
-    // 1. Reset base stats and baseline max HP
+    // 1. Reset base stats and baseline max HP/MP
     stats->max_hp = stats->max_base_hp;
+    stats->max_mp = stats->max_base_mp;
+
     for (int i = 0; i < STAT_COUNT; i++) {
         stats->current[i] = stats->base[i];
     }
 
-    // 2. Add Weapon Stats
+    // 2. Add Weapon Stats and Bonuses
     if (gear->weapon_id != -1) {
         ItemDefinition *weapon = &ITEM_REGISTRY[gear->weapon_id];
         stats->max_hp += weapon->hp_bonus;
+        stats->max_mp += weapon->mp_bonus;
         for (int s = 0; s < STAT_COUNT; s++) {
             stats->current[s] += weapon->stat_bonuses[s];
         }
     }
 
-    // 3. Add Accessory Stats dynamically
+    // 3. Add Accessory Stats and Bonuses dynamically
     for (int i = 0;
          i < MAX_ACCESSORY_SLOTS && i < stats->current[STAT_ACCESORY_COUNT];
          i++) {
@@ -93,6 +101,7 @@ void RecalculateStats(StatBlock *stats, Gear *gear) {
         if (acc_id != -1) {
             ItemDefinition *acc = &ITEM_REGISTRY[acc_id];
             stats->max_hp += acc->hp_bonus;
+            stats->max_mp += acc->mp_bonus;
             for (int s = 0; s < STAT_COUNT; s++) {
                 stats->current[s] += acc->stat_bonuses[s];
             }
@@ -104,14 +113,18 @@ void RecalculateStats(StatBlock *stats, Gear *gear) {
         if (!stats->buffs[i].active)
             continue;
         stats->max_hp += stats->buffs[i].hpBonus;
+        stats->max_mp += stats->buffs[i].mpBonus;
         for (int s = 0; s < STAT_COUNT; s++) {
             stats->current[s] += stats->buffs[i].modifiers[s];
         }
     }
 
-    // 5. Cap HP to max_hp after all gear and buffs are aggregated
+    // 5. Cap HP and MP to max limits after all gear and buffs are aggregated
     if (stats->current_hp > stats->max_hp) {
         stats->current_hp = stats->max_hp;
+    }
+    if (stats->current_mp > stats->max_mp) {
+        stats->current_mp = stats->max_mp;
     }
 }
 
@@ -149,9 +162,9 @@ void RemoveOneFromInventory(Player *player, int id) {
 }
 
 void ApplyPermanentStat(Player *player, ItemDefinition *item) {
-
     player->stats.max_base_hp += item->hp_bonus;
-    TraceLog(LOG_ERROR, "theres this : ", item->hp_bonus);
+    player->stats.max_base_mp += item->mp_bonus;
+    TraceLog(LOG_ERROR, "theres this : HP: %d, MP: %d", item->hp_bonus, item->mp_bonus);
     for (int s = 0; s < STAT_COUNT; s++) {
         player->stats.base[s] += item->stat_bonuses[s];
     }
@@ -168,8 +181,8 @@ bool AddActiveBuff(Player *player, ItemDefinition *item) {
     for (int i = 0; i < MAX_ACTIVE_BUFFS; i++) {
         if (stats->buffs[i].active && stats->buffs[i].id == item->id) {
             stats->buffs[i].duration = item->use_duration;
-            stats->buffs[i].hpBonus =
-                item->hp_bonus; // Replace, don't stack infinitely
+            stats->buffs[i].hpBonus = item->hp_bonus;
+            stats->buffs[i].mpBonus = item->mp_bonus; // Update MP bonus
 
             for (int s = 0; s < STAT_COUNT; s++) {
                 stats->buffs[i].modifiers[s] = item->stat_bonuses[s];
@@ -190,6 +203,7 @@ bool AddActiveBuff(Player *player, ItemDefinition *item) {
         buff->id = item->id;
         buff->duration = item->use_duration;
         buff->hpBonus = item->hp_bonus;
+        buff->mpBonus = item->mp_bonus; // Set MP bonus
         buff->active = true;
 
         for (int s = 0; s < STAT_COUNT; s++) {
@@ -218,6 +232,19 @@ void UseItem(Player *player, ItemDefinition *item) {
             used = true;
         }
         break;
+
+    // Optional handler if you implement MP restoration items
+    /*
+    case USE_RESTORE_MP:
+        if (player->stats.current_mp < player->stats.max_mp) {
+            player->stats.current_mp += item->mp_bonus;
+            if (player->stats.current_mp > player->stats.max_mp) {
+                player->stats.current_mp = player->stats.max_mp;
+            }
+            used = true;
+        }
+        break;
+    */
 
     case USE_PERM_BOOST:
         ApplyPermanentStat(player, item);
@@ -255,6 +282,7 @@ void UpdateBuffs(Player *player, float dt) {
         if (stats->buffs[i].duration <= 0.0f) {
             stats->buffs[i].duration = 0.0f;
             stats->buffs[i].hpBonus = 0;
+            stats->buffs[i].mpBonus = 0; // Clear MP bonus on expiration
             stats->buffs[i].active = false;
 
             // Clear modifier memory
@@ -276,7 +304,18 @@ void UsePlayerTarotSlot(Player *player, Gamestate *gamestate, int index) {
     if(index<0 || index>2) return;
     if (player->gear.tarot_ids[index] != -1) {
         TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[index]);
-        ExecuteTarotCommand(t->id, gamestate);
+        if(player->stats.current_mp >= t->use_cost){
+            player->stats.current_mp -= t->use_cost;
+            ExecuteTarotCommand(t->id, gamestate);
+        }
     }
     return;
+}
+
+void FullyRestPlayer(Player *player) {
+    player->stats.current_hp = player->stats.max_hp;
+    player->stats.current_mp = player->stats.max_mp;
+
+    // Optional: If you want portals to also clear temporary status debuffs/buffs
+    // ClearAllBuffs(player);
 }

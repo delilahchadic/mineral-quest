@@ -58,12 +58,25 @@ void AdjustCamera(Gamestate* gamestate, bool dialog, float dt){
 
 void DrawHUD(){
     Vector2 hud_start = (Vector2){SCREEN_WIDTH * 0.9, SCREEN_HEIGHT * 0.78};
-    Vector2 max_hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5))-PLAYER->stats.max_hp,(hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5))+10};
-    Vector2 hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5))-PLAYER->stats.current_hp,(hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5))+10};
 
+    // HP Bar coordinates (Right-to-left aligned)
+    Vector2 max_hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5)) - PLAYER->stats.max_hp, (hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5)) + 10};
+    Vector2 hp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5)) - PLAYER->stats.current_hp, (hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5)) + 10};
+
+    // MP Bar coordinates (Mirrored right-to-left alignment, placed 8 pixels below HP)
+    Vector2 max_mp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5)) - PLAYER->stats.max_mp, (hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5)) + 18};
+    Vector2 mp_start = (Vector2){(hud_start.x + (RUSTY_HEADSHOT_SPRITE.width * 0.5)) - PLAYER->stats.current_mp, (hud_start.y + (RUSTY_HEADSHOT_SPRITE.height * 0.5)) + 18};
+
+    // Draw HUD elements
     DrawTextureEx(RUSTY_HEADSHOT_SPRITE, hud_start, 0.0, 0.5, WHITE);
+
+    // Draw HP
     DrawRectangle(max_hp_start.x, max_hp_start.y, PLAYER->stats.max_hp, 6, COLOR_SUNKEN_INK);
     DrawRectangle(hp_start.x, hp_start.y, PLAYER->stats.current_hp, 6, COLOR_MAY_GREEN);
+
+    // Draw MP (using a distinct contrasting color or a suitable magic color, e.g., BLUE/CYAN if custom color isn't defined)
+    DrawRectangle(max_mp_start.x, max_mp_start.y, PLAYER->stats.max_mp, 6, COLOR_SUNKEN_INK);
+    DrawRectangle(mp_start.x, mp_start.y, PLAYER->stats.current_mp, 6, COLOR_CERULEAN_DUSTY); // Or replace BLUE with your custom MP color macro if available
 }
 
 void DrawPlaySession(Gamestate* gamestate){

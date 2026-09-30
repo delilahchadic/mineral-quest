@@ -33,6 +33,7 @@ void DrawStatsMenu(Gamestate *gamestate) {
     DrawText("Max HP", text_start_x + 200, current_y, 15, textColor);
     current_y += 20; // Move down for values
 
+
     char current_hp[16], max_hp[16];
     snprintf(current_hp, sizeof(current_hp), "%d",
              gamestate->map.player.stats->current_hp);
@@ -42,6 +43,19 @@ void DrawStatsMenu(Gamestate *gamestate) {
     DrawText(max_hp, text_start_x + 200, current_y, 20, textColor);
     current_y += 35; // Spacing before table headers
 
+
+    DrawText("Current MP", text_start_x, current_y, 15, textColor);
+    DrawText("Max MP", text_start_x + 200, current_y, 15, textColor);
+    current_y += 20; // Move down for values
+
+    char current_mp[16], max_mp[16];
+    snprintf(current_mp, sizeof(current_mp), "%d",
+             gamestate->map.player.stats->current_mp);
+    snprintf(max_mp, sizeof(max_mp), "%d", gamestate->map.player.stats->current_mp);
+
+    DrawText(current_mp, text_start_x, current_y, 20, textColor);
+    DrawText(max_mp, text_start_x + 200, current_y, 20, textColor);
+    current_y += 35;
     // 4. Stat Table Labels
     DrawText("Base", text_start_x, current_y, 15, textColor);
     DrawText("Current", text_start_x + 200, current_y, 15, textColor);
