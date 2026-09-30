@@ -41,6 +41,7 @@ typedef enum ButtonPressed{
   KEY_C_PRESSED = 1<<24,
   KEY_B_PRESSED = 1 << 25,
   KEY_G_PRESSED = 1 <<26,
+  KEY_T_PRESSED = 1 <<27,
 } ButtonPressed;
 
 typedef struct Message{
@@ -114,5 +115,6 @@ typedef struct Player{
   PlayerTargeting targeting;
   // Inside your Player struct or stats definition:
   float damage_cooldown;
+  uint8_t recipe_inventory[100];
 } Player;
 #endif
