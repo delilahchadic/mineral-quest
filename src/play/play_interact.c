@@ -56,6 +56,12 @@ char *GatherTarget(Player *player, Map *map){
                 RemoveEntityAt(map, index);
                 return GetName(ENTITY_PLANT, plant_id);
             }
+        }else if(map->entities[index].type == ENTITY_RECIPE){
+            Recipe* recipe = &RECIPE_REGISTRY[entity->entity_id];
+            int recipe_id = recipe->id;
+            player->recipe_inventory[recipe_id] = 1;
+            RemoveEntityAt(map, index);
+            return GetName(ENTITY_RECIPE, recipe_id);
         }else{
             return NULL;
         }
