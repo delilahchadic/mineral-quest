@@ -117,20 +117,22 @@ char *GetName(EntityType type, int id) {
     switch (type) {
     case ENTITY_PLANT:
         return PLANT_REGISTRY[id].species_name;
-        break;
     case ENTITY_CHARACTER:
         return CHARACTER_REGISTRY[id].name;
-        break;
     case ENTITY_ITEM:
         return ITEM_REGISTRY[id].name;
-        break;
     case ENTITY_PORTAL:
         return PORTAL_REGISTRY[id].name;
-        break;
     case ENTITY_ENEMY:
         return ENEMY_REGISTRY[id].species_name;
     case ENTITY_MINERAL:
         return GetMineralLabel(id);
+    case ENTITY_RECIPE: {
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "Recipe #%d: %s", id + 1,
+                 RECIPE_REGISTRY[id].name);
+        return buffer;
+    }
     default:
         return NULL;
     }
@@ -211,6 +213,8 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id) {
     case ENTITY_CHARACTER:
         return CHARACTER_REGISTRY[id].default_trait_flags;
     case ENTITY_ITEM:
+        return TRAIT_GATHER;
+    case ENTITY_RECIPE:
         return TRAIT_GATHER;
     case ENTITY_PORTAL:
         return TRAIT_TELEPORT;
