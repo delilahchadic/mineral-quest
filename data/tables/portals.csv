@@ -19,3 +19,4 @@ id,name,world_id,type,start_x,start_y
 17,rivers3,16,0,69,75
 18,natural treasure,17,1,17,17
 19,lovely treasure,18,1,17,30
+20,islands start,19,0,93,95
