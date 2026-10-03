@@ -23,6 +23,7 @@
 #include "ui/plant_inventory.h"
 #include "systems/script_manager.h"
 #include "systems/player.h"
+#include "ui/weapons_menu.h"
 
 void AdjustCamera(Gamestate* gamestate, bool dialog, float dt){
     float max_w = (gamestate->map.columns - 1) * TILE_SIZE;
@@ -94,6 +95,8 @@ void DrawPlaySession(Gamestate* gamestate){
     DrawHUD();
   }else if(session->state==MINERAL_INVENTORY){
     DrawMineralInventory(session->player);
+  }else if(session->state==WEAPONS_MENU){
+    DrawWeaponsMenu(session);
   }else if (session->state==RECIPE_INVENTORY){
       DrawRecipeInventory(session);
   }else {

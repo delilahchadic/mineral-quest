@@ -48,7 +48,7 @@ void UpdateScene(Gamestate *gamestate) {
             Close_Map(&gamestate->map);
             gamestate->session.state = 0;
             SetDefaultStat(PLAYER);
-            RecalculateStats(&PLAYER->stats, &PLAYER->gear);
+            RecalculateStats(PLAYER);
             PLAYER->targeting.locked = false;
             PLAYER->targeting.target_id = -1;
             PLAYER->targeting.potential_count = 0;

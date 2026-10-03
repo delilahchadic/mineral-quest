@@ -1,6 +1,7 @@
 #include "registry/register_loader.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "defs/types_systems.h"
 #include "raylib.h"
 #include "registry/register.h"
 #include "registry/tarot_register.h"
@@ -279,6 +280,17 @@ void ParsePlantRow(char *line) {
         d->framewidth = atoi(widthToken);
         d->hitboxheight = atoi(hitheightToken);
         d->hitboxwidth = atoi(hitwidthToken);
+        char *hpBonus = strtok(NULL, ",");
+        d->hp_bonus = hpBonus ? atoi(hpBonus) : 0;
+        char *mpBonus = strtok(NULL, ",");
+        d->mp_bonus = mpBonus ? atoi(mpBonus) : 0;
+        // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
+        for (uint8_t i = 0; i < STAT_COUNT; i++) {
+            char *statToken = strtok(NULL, ",");
+            d->stat_bonuses[i] = statToken ? atoi(statToken) : 0;
+        }
+        char *costToken = strtok(NULL,",");
+        d->cost= atoi(costToken);
     }
 }
 
@@ -416,6 +428,30 @@ void ParseDialogRow(char *line) {
     }
 }
 
+void ParseMineralStatsRow(char *line) {
+    // Plant ID
+    char *descripionToken = strtok(line, ",");
+    char *idToken = strtok(NULL, ",");
+    // if all are valid
+    if (idToken && descripionToken) {
+        // grab the appropriate plant
+        int id = atoi(idToken);
+        BasicStatBlock *d = &MINERAL_STATS[id];
+
+        char *hpBonus = strtok(NULL, ",");
+        d->hp_bonus = hpBonus ? atoi(hpBonus) : 0;
+        char *mpBonus = strtok(NULL, ",");
+        d->mp_bonus = mpBonus ? atoi(mpBonus) : 0;
+        // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
+        for (uint8_t i = 0; i < STAT_COUNT; i++) {
+            char *statToken = strtok(NULL, ",");
+            d->stat_bonuses[i] = statToken ? atoi(statToken) : 0;
+        }
+        char *costToken = strtok(NULL, ",");
+        d->cost = atoi(costToken);
+    }
+}
+
 int LoadRegistry(const char *filename, void (*parser)(char *)) {
     int count = 0;
     FILE *file = fopen(filename, "r");
@@ -442,6 +478,10 @@ int LoadItemRegistry() {
 
 void LoadDialogRegistry() {
     LoadRegistry("data/tables/dialog.csv", ParseDialogRow);
+}
+
+void LoadMineralStats() {
+    LoadRegistry("data/tables/mineral_stats.csv", ParseMineralStatsRow);
 }
 
 int LoadCharacterRegistry() {
@@ -499,6 +539,7 @@ void InitRegistries() {
     LoadNodeExchange();
     LoadCommandRegistry();
     LoadTarotRegistry();
+    LoadMineralStats();
     GLOBAL_PLAYER = Get_Default_Player();
     PLAYER = &GLOBAL_PLAYER;
 }

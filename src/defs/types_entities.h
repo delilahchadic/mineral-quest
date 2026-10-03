@@ -69,6 +69,10 @@ typedef struct Plant{
   int damage_amount;
   int damage_waive_level;
   uint32_t default_trait_flags;
+  int hp_bonus;
+  int mp_bonus;
+  int stat_bonuses[STAT_COUNT];
+  int cost;
 } Plant;
 
 typedef struct Projectile{

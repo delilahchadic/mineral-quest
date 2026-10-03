@@ -13,6 +13,20 @@ Input CaptureInput(){
   if(IsKeyPressed(KEY_W)){
     i.buttons_pressed |= KEY_W_PRESSED;
   }
+  if(IsKeyPressed(KEY_T)){
+    i.buttons_pressed |= KEY_T_PRESSED;
+  }
+  if(IsKeyPressed(KEY_F)){
+    i.buttons_pressed |= KEY_F_PRESSED;
+  }
+
+  if(IsKeyPressed(KEY_A)){
+    i.buttons_pressed |= KEY_A_PRESSED;
+  }
+
+  if(IsKeyPressed(KEY_D)){
+    i.buttons_pressed |= KEY_D_PRESSED;
+  }
 
   if(IsKeyPressed(KEY_B)){
     i.buttons_pressed |= KEY_B_PRESSED;

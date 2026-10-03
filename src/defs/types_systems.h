@@ -5,6 +5,16 @@
 #include "raylib.h"
 #include <stdint.h>
 
+typedef enum ElementFlags {
+    ELEMENT_NONE     = 0,
+    ELEMENT_FIRE     = 1 << 0, // 1
+    ELEMENT_WATER    = 1 << 1, // 2
+    ELEMENT_EARTH    = 1 << 2, // 4
+    ELEMENT_AIR      = 1 << 3, // 8
+    ELEMENT_PIERCING = 1 << 4, // 16
+    ELEMENT_EXPLOSIVE= 1 << 5, // 32
+} ElementFlags;
+
 typedef struct Input {
     Vector2 dir;
     Vector2 attack_dir;
@@ -42,6 +52,9 @@ typedef enum ButtonPressed {
     KEY_B_PRESSED = 1 << 25,
     KEY_G_PRESSED = 1 << 26,
     KEY_T_PRESSED = 1 << 27,
+    KEY_F_PRESSED = 1 << 28,
+    KEY_A_PRESSED = 1 << 29,
+    KEY_D_PRESSED = 1 << 30,
 } ButtonPressed;
 
 typedef struct Message {
@@ -60,7 +73,6 @@ typedef struct ScriptManager {
 } ScriptManager;
 
 typedef struct Gear {
-    int weapon_id;
     int accessory_ids[MAX_ACCESSORY_SLOTS];
     int tarot_ids[3];
 } Gear;
@@ -99,6 +111,12 @@ typedef struct StatBlock {
     int max_mp, max_base_mp, current_mp;
 } StatBlock;
 
+typedef struct BasicStatBlock{
+    int hp_bonus,mp_bonus;
+    int stat_bonuses[STAT_COUNT];
+    int cost;
+}BasicStatBlock;
+
 typedef struct PlayerTargeting {
     int target_id;            // The unique ID of the locked entity (-1 if none)
     int potential_targets[8]; // Array of nearby target IDs for tab-targeting
@@ -106,10 +124,40 @@ typedef struct PlayerTargeting {
     bool locked;
 } PlayerTargeting;
 
+typedef struct WeaponLeveling{
+    int exp;
+    int socket;
+}WeaponLeveling;
+
+typedef struct WeaponSlot{
+    bool active;
+    int weapon_id;
+    int minerals[MINERAL_COUNT];
+    int plant[100];
+    int hp_bonus;
+    int mp_bonus;
+    int stat_bonuses[STAT_COUNT];
+    uint32_t elements;
+    uint32_t activeElement;
+    int level;
+    int exp;
+    int next_level_exp;
+    int current_socket;
+    int max_socket;
+}WeaponSlot;
+
+typedef struct WeaponGrid{
+    WeaponSlot slots[25];
+    int count;
+    int activeIndex;
+}WeaponGrid;
+
+
 typedef struct Player {
     int item_inventory[100];
     int mineral_inventory[MINERAL_COUNT];
     int plant_inventory[100];
+    WeaponGrid weapon_grid;
     float speed;
     Texture2D sprite; // How fast we move
     StatBlock stats;

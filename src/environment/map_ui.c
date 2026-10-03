@@ -10,6 +10,7 @@
 #include "registry/register.h"
 #include "registry/weapon_register.h"
 #include "systems/input.h"
+#include "systems/weapon_grid.h"
 #include "systems/player.h"
 #include "systems/targeting.h"
 #include "systems/script_manager.h"
@@ -290,7 +291,9 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
         }
         if (entity == &map->player) {
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
-            DrawWeapon(GLOBAL_PLAYER.gear.weapon_id, handPos,
+            WeaponSlot* slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
+
+            DrawWeapon(slot->weapon_id, handPos,
                        map->player.combat.attackAngle);
         }
     }

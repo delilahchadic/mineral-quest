@@ -2,63 +2,88 @@
 #ifndef TYPES_ENGINE_H
 #define TYPES_ENGINE_H
 
-#include "defs/types_ui.h"
+#include "defs/types_core.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
-#include "defs/types_core.h"
 #include "defs/types_systems.h"
+#include "defs/types_ui.h"
 #include "raylib.h"
 
-typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY,MENU, EDIT_SCREEN } GameScreen;
-typedef enum PlayState { ADVENTURE_STATE = 0, INVENTORY_MENU, DIALOG_PROMPT, GATHER_PROMPT, MINERAL_INVENTORY , STATS_MENU, EQUIPMENT_MENU, NODE_MENU,GAME_OVER, PLANT_INVENTORY,RECIPE_INVENTORY} PlayState;
-typedef enum EditState {EDITOR_MENU = 0, EDITOR, EDITOR_PROMPT, LOAD_PROMPT}EditState;
+typedef enum GameScreen {
+    LOGO = 0,
+    TITLE,
+    GAMEPLAY,
+    MENU,
+    EDIT_SCREEN
+} GameScreen;
+typedef enum PlayState {
+    ADVENTURE_STATE = 0,
+    INVENTORY_MENU,
+    DIALOG_PROMPT,
+    GATHER_PROMPT,
+    MINERAL_INVENTORY,
+    STATS_MENU,
+    EQUIPMENT_MENU,
+    NODE_MENU,
+    GAME_OVER,
+    PLANT_INVENTORY,
+    RECIPE_INVENTORY,
+    WEAPONS_MENU
+} PlayState;
 
-typedef struct PlaySession{
-  Player* player;
-  ScriptManager manager;
-  PlayState state;
-  Menu menu;
-  char pendingItemName[100];
-  EquipMenu equip_menu;
-  NodeMenu node_menu;
+typedef enum EditState {
+    EDITOR_MENU = 0,
+    EDITOR,
+    EDITOR_PROMPT,
+    LOAD_PROMPT
+} EditState;
+
+typedef struct PlaySession {
+    Player *player;
+    ScriptManager manager;
+    PlayState state;
+    Menu menu;
+    char pendingItemName[100];
+    WeaponsMenu weapons_menu;
+    EquipMenu equip_menu;
+    NodeMenu node_menu;
 } PlaySession;
 
-typedef struct EditLoader{
+typedef struct EditLoader {
     char names[20][64];
     Rectangle buttons[20];
     int file_count;
     int current_file;
-}EditLoader;
+} EditLoader;
 
-typedef struct EditSession{
-  SystemMenu menu;
-  EditorForm form;
-  EditState state;
-  TileEditor editor;
-  Rectangle current_tile_panel;
-  SelectionBuffer buffer;
-  Vector2 last_selected_tile;
-  Vector2 dragStart;
-  bool isDragging;
-  EditLoader loaded_files;
+typedef struct EditSession {
+    SystemMenu menu;
+    EditorForm form;
+    EditState state;
+    TileEditor editor;
+    Rectangle current_tile_panel;
+    SelectionBuffer buffer;
+    Vector2 last_selected_tile;
+    Vector2 dragStart;
+    bool isDragging;
+    EditLoader loaded_files;
 } EditSession;
 
-typedef struct Gamestate{
-  GameScreen screen;
-  int framesCounter;
-  SystemMenu main_menu;
-  EditSession edit_session;
-  PlaySession session;
-  Map map;
-  Camera2D camera;
-  bool editUsed;
+typedef struct Gamestate {
+    GameScreen screen;
+    int framesCounter;
+    SystemMenu main_menu;
+    EditSession edit_session;
+    PlaySession session;
+    Map map;
+    Camera2D camera;
+    bool editUsed;
 } Gamestate;
 
-typedef struct Command{
-  char label[32];
-  char description[100];
-  void(*callback) (void* context);
+typedef struct Command {
+    char label[32];
+    char description[100];
+    void (*callback)(void *context);
 } Command;
-
 
 #endif

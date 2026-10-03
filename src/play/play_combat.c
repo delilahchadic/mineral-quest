@@ -7,6 +7,7 @@
 #include "raymath.h"
 #include "registry/register.h"
 #include "systems/targeting.h"
+#include "systems/weapon_grid.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -95,7 +96,16 @@ static bool ProcessHit(Map *map, MapEntity *player, int index) {
                 PLAYER->targeting.locked = false;
             }
             RemoveEntityAt(map, index);
-
+            WeaponSlot * slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
+            slot->exp += 10;
+            while (slot->exp >= slot->next_level_exp){
+                slot->exp = slot->exp % slot->next_level_exp;
+                int base_socket_count = slot->max_socket / slot->level;
+                int base_level_exp = slot->next_level_exp / slot->level;
+                slot->level++;
+                slot->max_socket = base_socket_count * slot->level;
+                slot->next_level_exp = base_level_exp * slot->level;
+            }
             return true;
         }
     }
@@ -112,10 +122,10 @@ static bool ProcessHit(Map *map, MapEntity *player, int index) {
 }
 
 void UpdateCombat(Map *map) {
-    if (PLAYER->gear.weapon_id == -1)
+    if (PLAYER->weapon_grid.activeIndex == -1)
         return;
     MapEntity *player = &map->player;
-
+    WeaponSlot* slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
     if (!player->combat.isAttacking)
         return;
 
@@ -126,7 +136,7 @@ void UpdateCombat(Map *map) {
         return;
 
     float baseAngle = player->combat.facing_direction;
-    bool useSword = PLAYER->gear.weapon_id == 5;
+    bool useSword = slot->weapon_id == 5;
 
     // 1. DYNAMIC HITBOX SETTINGS (Increased reach distance)
     float hitRadius = useSword ? 24.0f : 32.0f;
@@ -182,7 +192,8 @@ void UpdateCombat(Map *map) {
 }
 
 void UpdatePlayerCombatAnimation(MapEntity *player, float dt) {
-    if (PLAYER->gear.weapon_id == -1)
+
+    if (PLAYER->weapon_grid.activeIndex == -1)
         return;
     float baseAngle = player->combat.facing_direction;
     if (baseAngle == 0 && !player->combat.isAttacking) {
@@ -230,7 +241,8 @@ void UpdatePlayerCombatAnimation(MapEntity *player, float dt) {
         } else {
             float startOffsetDeg = 0.0f;
             float endOffsetDeg = 0.0f;
-            bool useSword = PLAYER->gear.weapon_id == 5;
+            WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
+            bool useSword = slot->weapon_id == 5;
 
             switch (player->combat.combo_state) {
             case COMBO_1:

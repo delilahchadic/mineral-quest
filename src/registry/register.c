@@ -6,6 +6,10 @@
 #include "raylib.h"
 #include "registry/mineral_register.h"
 
+
+
+BasicStatBlock MINERAL_STATS[MINERAL_COUNT] = {0};
+
 Enemy ENEMY_REGISTRY[100] = {0};
 ItemDefinition ITEM_REGISTRY[100] = {0};
 Message DIALOG_REGISTRY[500] = {0};
@@ -326,4 +330,12 @@ Vector2 GetEntityCenter(MapEntity *entity) {
     }
 
     return (Vector2){center_x, center_y};
+}
+
+int GetCost(EntityType type, int id){
+    switch(type){
+        case ENTITY_PLANT: return PLANT_REGISTRY[id].cost;
+        case ENTITY_MINERAL: return MINERAL_STATS[id].cost;
+        default: return 0;
+    }
 }

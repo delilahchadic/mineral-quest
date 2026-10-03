@@ -1,17 +1,20 @@
 #include "systems/player.h"
 #include "defs/types_engine.h"
 #include "defs/types_minerals.h"
+#include "defs/types_systems.h"
+#include "defs/types_tarot.h"
 #include "raylib.h"
 #include "registry/register.h"
-#include "systems/gear.h"
-#include "defs/types_tarot.h"
 #include "registry/tarot_register.h"
+#include "systems/gear.h"
+#include "systems/weapon_grid.h"
+#include <stdbool.h>
 #include <string.h>
 
 void DamagePlayer(int damage) {
     int damageDealt = damage > GLOBAL_PLAYER.stats.current_hp
-                        ? GLOBAL_PLAYER.stats.current_hp
-                        : damage;
+                          ? GLOBAL_PLAYER.stats.current_hp
+                          : damage;
     GLOBAL_PLAYER.stats.current_hp -= damageDealt;
 }
 
@@ -74,7 +77,10 @@ void SetDefaultStat(Player *player) {
     player->stats.base[STAT_ACCESORY_COUNT] = 2;
 }
 
-void RecalculateStats(StatBlock *stats, Gear *gear) {
+void RecalculateStats(Player* player) {
+    StatBlock *stats = &player->stats;
+    Gear *gear = &player->gear;
+    WeaponGrid *grid = &player->weapon_grid;
     // 1. Reset base stats and baseline max HP/MP
     stats->max_hp = stats->max_base_hp;
     stats->max_mp = stats->max_base_mp;
@@ -84,12 +90,14 @@ void RecalculateStats(StatBlock *stats, Gear *gear) {
     }
 
     // 2. Add Weapon Stats and Bonuses
-    if (gear->weapon_id != -1) {
-        ItemDefinition *weapon = &ITEM_REGISTRY[gear->weapon_id];
-        stats->max_hp += weapon->hp_bonus;
-        stats->max_mp += weapon->mp_bonus;
-        for (int s = 0; s < STAT_COUNT; s++) {
-            stats->current[s] += weapon->stat_bonuses[s];
+    if (grid->activeIndex != -1) {
+        WeaponSlot *slot = &grid->slots[grid->activeIndex];
+        if (slot->active) {
+            stats->max_hp += slot->hp_bonus;
+            stats->max_mp += slot->mp_bonus;
+            for (int s = 0; s < STAT_COUNT; s++) {
+                stats->current[s] += slot->stat_bonuses[s];
+            }
         }
     }
 
@@ -141,7 +149,8 @@ Player Get_Default_Player() {
     player.targeting.target_id = -1;
     SetDefaultStat(&player);
     InitGear(&player.gear);
-    RecalculateStats(&player.stats, &player.gear);
+    InitWeaponGrid(&player.weapon_grid);
+    RecalculateStats(&player);
     return player;
 }
 
@@ -150,6 +159,10 @@ void ClosePlayer(Player *player) { UnloadTexture(player->sprite); }
 void GiveItem(Player *player, int id) {
     if (id < 0)
         return;
+    if (ITEM_REGISTRY[id].slot == 0) {
+        AddWeapon(&player->weapon_grid, id);
+        return;
+    }
     player->item_inventory[id]++;
 }
 
@@ -164,7 +177,8 @@ void RemoveOneFromInventory(Player *player, int id) {
 void ApplyPermanentStat(Player *player, ItemDefinition *item) {
     player->stats.max_base_hp += item->hp_bonus;
     player->stats.max_base_mp += item->mp_bonus;
-    TraceLog(LOG_ERROR, "theres this : HP: %d, MP: %d", item->hp_bonus, item->mp_bonus);
+    TraceLog(LOG_ERROR, "theres this : HP: %d, MP: %d", item->hp_bonus,
+             item->mp_bonus);
     for (int s = 0; s < STAT_COUNT; s++) {
         player->stats.base[s] += item->stat_bonuses[s];
     }
@@ -188,7 +202,7 @@ bool AddActiveBuff(Player *player, ItemDefinition *item) {
                 stats->buffs[i].modifiers[s] = item->stat_bonuses[s];
             }
 
-            RecalculateStats(stats, &player->gear);
+            RecalculateStats(player);
             return true;
         }
 
@@ -210,7 +224,7 @@ bool AddActiveBuff(Player *player, ItemDefinition *item) {
             buff->modifiers[s] = item->stat_bonuses[s];
         }
 
-        RecalculateStats(stats, &player->gear);
+        RecalculateStats(player);
         return true;
     }
 
@@ -233,22 +247,22 @@ void UseItem(Player *player, ItemDefinition *item) {
         }
         break;
 
-    // Optional handler if you implement MP restoration items
-    /*
-    case USE_RESTORE_MP:
-        if (player->stats.current_mp < player->stats.max_mp) {
-            player->stats.current_mp += item->mp_bonus;
-            if (player->stats.current_mp > player->stats.max_mp) {
-                player->stats.current_mp = player->stats.max_mp;
+        // Optional handler if you implement MP restoration items
+        /*
+        case USE_RESTORE_MP:
+            if (player->stats.current_mp < player->stats.max_mp) {
+                player->stats.current_mp += item->mp_bonus;
+                if (player->stats.current_mp > player->stats.max_mp) {
+                    player->stats.current_mp = player->stats.max_mp;
+                }
+                used = true;
             }
-            used = true;
-        }
-        break;
-    */
+            break;
+        */
 
     case USE_PERM_BOOST:
         ApplyPermanentStat(player, item);
-        RecalculateStats(&player->stats, &player->gear);
+        RecalculateStats(player);
         used = true;
         break;
 
@@ -296,15 +310,16 @@ void UpdateBuffs(Player *player, float dt) {
 
     // Only recalculate stats if an active buff actually ran out this frame
     if (needs_recalc) {
-        RecalculateStats(stats, &player->gear);
+        RecalculateStats(player);
     }
 }
 
 void UsePlayerTarotSlot(Player *player, Gamestate *gamestate, int index) {
-    if(index<0 || index>2) return;
+    if (index < 0 || index > 2)
+        return;
     if (player->gear.tarot_ids[index] != -1) {
         TarotCard *t = GetTarotCardByItemId(PLAYER->gear.tarot_ids[index]);
-        if(player->stats.current_mp >= t->use_cost){
+        if (player->stats.current_mp >= t->use_cost) {
             player->stats.current_mp -= t->use_cost;
             ExecuteTarotCommand(t->id, gamestate);
         }
@@ -316,6 +331,6 @@ void FullyRestPlayer(Player *player) {
     player->stats.current_hp = player->stats.max_hp;
     player->stats.current_mp = player->stats.max_mp;
 
-    // Optional: If you want portals to also clear temporary status debuffs/buffs
-    // ClearAllBuffs(player);
+    // Optional: If you want portals to also clear temporary status
+    // debuffs/buffs ClearAllBuffs(player);
 }

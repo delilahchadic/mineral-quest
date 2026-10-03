@@ -155,4 +155,21 @@ typedef struct NodeMenu{
     int confirm_index;
     NodeMenuState state;
 }NodeMenu;
+
+typedef enum {
+    WEAPON_MENU_BROWSE,          // Navigating the 25 weapon grid slots
+    WEAPON_MENU_INSPECT,         // Viewing weapon stats / details
+    WEAPON_MENU_SWAP_PROMPT,     // Prompting to swap/replace an active slot
+    WEAPON_MENU_APPLY_MATERIALS, // Entry point for applying upgrades
+    WEAPON_MENU_SELECT_CATEGORY, // Choose between Plants (0) and Minerals (1)
+    WEAPON_MENU_SELECT_MATERIAL  // Choose specific material index from inventory list
+} WeaponsMenuSubState;
+
+typedef struct WeaponsMenu {
+    int selected_slot;           // Currently highlighted grid index (0 to 24)
+    WeaponsMenuSubState sub_state;
+    int pending_weapon_id;       // Used if assigning from another context
+    int material_category;       // 0 = Plants inventory, 1 = Minerals inventory
+    int material_list_index;     // Currently highlighted index in the inventory item list
+} WeaponsMenu;
 #endif

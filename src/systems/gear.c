@@ -1,7 +1,9 @@
 #include "systems/gear.h"
+#include "defs/types_systems.h"
 #include "systems/player.h"
+#include <stdbool.h>
+
 void InitGear(Gear* gear) {
-    gear->weapon_id = 12; // equip the classical guitar
     for (int i = 0; i < MAX_ACCESSORY_SLOTS; i++) {
         gear->accessory_ids[i] = -1;
     }
@@ -24,7 +26,7 @@ void PlayerEquipTarot(Player* player, int slot_index, int new_item_id) {
         player->item_inventory[new_item_id]--;
     }
 
-    RecalculateStats(&player->stats, &player->gear);
+    RecalculateStats(player);
 }
 
 void PlayerUnequipTarot(Player* player, int slot_index) {
@@ -35,31 +37,7 @@ void PlayerUnequipTarot(Player* player, int slot_index) {
         player->gear.tarot_ids[slot_index] = -1;
     }
 
-    RecalculateStats(&player->stats, &player->gear);
-}
-
-void PlayerEquipWeapon(Player* player, int new_item_id) {
-    // If a weapon is already equipped, return it to inventory
-    if (player->gear.weapon_id != -1) {
-        GiveItem(player, player->gear.weapon_id);
-    }
-
-    // Equip the new weapon and deduct from inventory
-    player->gear.weapon_id = new_item_id;
-    if (new_item_id != -1) {
-        player->item_inventory[new_item_id]--;
-    }
-
-    RecalculateStats(&player->stats, &player->gear);
-}
-
-void PlayerUnequipWeapon(Player* player) {
-    if (player->gear.weapon_id != -1) {
-        GiveItem(player, player->gear.weapon_id);
-        player->gear.weapon_id = -1;
-    }
-
-    RecalculateStats(&player->stats, &player->gear);
+    RecalculateStats(player);
 }
 
 void PlayerEquipAccessory(Player* player, int slot_index, int new_item_id) {
@@ -77,7 +55,7 @@ void PlayerEquipAccessory(Player* player, int slot_index, int new_item_id) {
         player->item_inventory[new_item_id]--;
     }
 
-    RecalculateStats(&player->stats, &player->gear);
+    RecalculateStats(player);
 }
 
 void PlayerUnequipAccessory(Player* player, int slot_index) {
@@ -89,5 +67,5 @@ void PlayerUnequipAccessory(Player* player, int slot_index) {
         player->gear.accessory_ids[slot_index] = -1;
     }
 
-    RecalculateStats(&player->stats, &player->gear);
+    RecalculateStats(player);
 }

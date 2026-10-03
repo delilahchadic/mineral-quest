@@ -9,7 +9,7 @@
 Player Get_Default_Player();
 void ClosePlayer(Player *player);
 void GiveItem(Player *player, int id);
-void RecalculateStats(StatBlock *stats, Gear *gear);
+void RecalculateStats(Player* player);
 int CanAfford(Player *player, CostSlot slot);
 void ProcessRecipe(Player *player, Exchange e);
 void SetDefaultStat(Player *player);

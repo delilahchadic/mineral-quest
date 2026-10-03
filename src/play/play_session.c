@@ -29,6 +29,7 @@
 #include "ui/plant_inventory.h"
 #include "ui/recipe_menu.h"
 #include "ui/stats_menu.h"
+#include "ui/weapons_menu.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -116,6 +117,10 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
 
     if (input->buttons_pressed & SHIFT_PRESSED) {
         session->state = STATS_MENU;
+        return;
+    }
+    if (input->buttons_pressed & KEY_F_PRESSED) {
+        session->state = WEAPONS_MENU;
         return;
     }
 
@@ -227,6 +232,8 @@ void UpdatePlaySession(Gamestate *gamestate) {
         break;
     case RECIPE_INVENTORY:
         UpdateRecipeInventory(session, &input);
+    case WEAPONS_MENU:
+        UpdateWeaponsMenu(session, &input);
     default:
         return;
     }

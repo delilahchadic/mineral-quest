@@ -4,4 +4,5 @@
 #include "defs/types_entities.h"
 
 void DrawWeapon(int weapon_id,Vector2 position, float rotation);
+WeaponLeveling GetWeaponLeveling(int weapon_id);
 #endif

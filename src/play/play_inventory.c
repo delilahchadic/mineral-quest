@@ -7,6 +7,7 @@
 #include "registry/register.h"
 #include "systems/gear.h"
 #include "systems/player.h"
+#include "systems/weapon_grid.h"
 #include "ui/menu.h"
 #include <stdio.h>
 
@@ -14,21 +15,42 @@ void UpdateInventory(PlaySession *session, Input *input) {
     Menu *menu = &session->menu;
     Player *player = session->player;
 
-    // --- SUB-STATE 1: Prompting for Weapon Swap (YES / NO) ---
+    // --- SUB-STATE 1: Prompting for Weapon Slot Selection / Replacement ---
     if (menu->sub_state == ITEM_MENU_PROMPT_WEAPON) {
-        if (input->buttons_pressed & KEY_W_PRESSED ||
-            input->buttons_pressed & KEY_S_PRESSED) {
-            menu->prompt_selected = !menu->prompt_selected;
+        WeaponGrid *grid = &player->weapon_grid;
+        // Let's allow selecting among available slots or up to 25 slots (or grid->count / 25 limit)
+        int max_slots = 25;
+
+        if (input->buttons_pressed & KEY_W_PRESSED) {
+            menu->prompt_selected = (menu->prompt_selected - 1 + max_slots) % max_slots;
+        }
+        if (input->buttons_pressed & KEY_S_PRESSED) {
+            menu->prompt_selected = (menu->prompt_selected + 1) % max_slots;
         }
         if (input->buttons_pressed & BACKSPACE_PRESSED) {
             menu->sub_state = ITEM_MENU_BROWSE;
             return;
         }
         if (input->buttons_pressed & ENTER_PRESSED) {
-            if (menu->prompt_selected == 0) {
-                PlayerEquipWeapon(player, menu->pending_item_id);
-                RebindItemMenu(menu, player);
+            int target_slot = menu->prompt_selected;
+
+            // If the slot is inactive, we can just add/activate it there. If active, it replaces it.
+            grid->slots[target_slot].active = true;
+            grid->slots[target_slot].weapon_id = menu->pending_item_id;
+            // Reset minerals/plants on slot change if desired, or keep them. Let's call CalculateWeapon.
+            CalculateWeapon(grid, target_slot);
+
+            // Update grid count if it was previously inactive
+            int active_count = 0;
+            for(int i=0; i<25; i++) {
+                if(grid->slots[i].active) active_count++;
             }
+            grid->count = active_count;
+            if (grid->activeIndex == -1) {
+                grid->activeIndex = target_slot;
+            }
+
+            RebindItemMenu(menu, player);
             menu->sub_state = ITEM_MENU_BROWSE;
         }
         return;
@@ -115,15 +137,33 @@ void UpdateInventory(PlaySession *session, Input *input) {
             return;
         }
 
-        // 2. Weapons
+        // 2. Weapons (Using WeaponGrid)
         if (item->slot == SLOT_WEAPON) {
-            if (player->gear.weapon_id != -1) {
+            WeaponGrid *grid = &player->weapon_grid;
+            int empty_slot = -1;
+
+            for (int i = 0; i < 25; i++) {
+                if (!grid->slots[i].active) {
+                    empty_slot = i;
+                    break;
+                }
+            }
+
+            if (empty_slot != -1) {
+                // Automatically equip into the first available weapon grid slot
+                grid->slots[empty_slot].active = true;
+                grid->slots[empty_slot].weapon_id = itemId;
+                CalculateWeapon(grid, empty_slot);
+                grid->count++;
+                if (grid->activeIndex == -1) {
+                    grid->activeIndex = empty_slot;
+                }
+                RebindItemMenu(menu, player);
+            } else {
+                // If all 25 slots are full, prompt user to choose which slot to replace
                 menu->sub_state = ITEM_MENU_PROMPT_WEAPON;
                 menu->pending_item_id = itemId;
                 menu->prompt_selected = 0;
-            } else {
-                PlayerEquipWeapon(player, itemId);
-                RebindItemMenu(menu, player);
             }
             return;
         }
@@ -233,8 +273,7 @@ void DrawInventory(Menu *menu) {
         }
         render_data.context_tag = context_buf;
 
-        // Effect strings logic (Skip stat/HP display for Tarot cards per your
-        // design)
+        // Effect strings logic
         int eff_idx = 0;
 
         if (item->slot != SLOT_TAROT) {
@@ -267,36 +306,43 @@ void DrawInventory(Menu *menu) {
 
     // 2. Render Sub-State Overlay Prompts
     if (menu->sub_state == ITEM_MENU_PROMPT_WEAPON) {
-        int boxW = 340;
-        int boxH = 110;
+        int max_slots = 25;
+        int boxW = 380;
+        int boxH = 60 + (6 * 22); // Show a scrollable-like list of slots
         int boxX = (SCREEN_WIDTH - boxW) / 2;
         int boxY = (SCREEN_HEIGHT - boxH) / 2;
-
-        Gear *gear = &PLAYER->gear;
-        const char *current_weapon_name =
-            (gear->weapon_id != -1) ? GetName(ENTITY_ITEM, gear->weapon_id)
-                                    : "NONE";
-
-        char prompt_title[64];
-        snprintf(prompt_title, sizeof(prompt_title), "REPLACE %s?",
-                 current_weapon_name);
 
         DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                       Fade(COLOR_SUNKEN_INK, 0.4f));
         DrawRectangle(boxX, boxY, boxW, boxH, COLOR_PULP_PAPER);
         DrawRectangleLines(boxX, boxY, boxW, boxH, COLOR_SUNKEN_INK);
 
-        DrawText(prompt_title, boxX + 20, boxY + 20, 18, COLOR_SUNKEN_INK);
+        DrawText("EQUIP TO WHICH WEAPON SLOT?", boxX + 20, boxY + 15, 16,
+                 COLOR_SUNKEN_INK);
 
-        Color yesColor =
-            (menu->prompt_selected == 0) ? COLOR_JADE : COLOR_SUNKEN_INK;
-        Color noColor =
-            (menu->prompt_selected == 1) ? COLOR_JADE : COLOR_SUNKEN_INK;
+        WeaponGrid *grid = &PLAYER->weapon_grid;
+        // Display a window around prompt_selected for visibility
+        int start_idx = menu->prompt_selected - 2;
+        if (start_idx < 0) start_idx = 0;
+        if (start_idx > max_slots - 5) start_idx = max_slots - 5;
+        if (start_idx < 0) start_idx = 0;
 
-        DrawText((menu->prompt_selected == 0) ? "> YES" : "  YES", boxX + 50,
-                 boxY + 65, 20, yesColor);
-        DrawText((menu->prompt_selected == 1) ? "> NO" : "  NO", boxX + 180,
-                 boxY + 65, 20, noColor);
+        int display_count = 5;
+        for (int i = 0; i < display_count && (start_idx + i) < max_slots; i++) {
+            int slot_idx = start_idx + i;
+            bool active = grid->slots[slot_idx].active;
+            int wid = grid->slots[slot_idx].weapon_id;
+            const char *w_name = active ? GetName(ENTITY_ITEM, wid) : "[EMPTY]";
+
+            Color slotColor = (slot_idx == menu->prompt_selected) ? COLOR_JADE : COLOR_SUNKEN_INK;
+
+            char slot_str[64];
+            snprintf(slot_str, sizeof(slot_str), "%sSlot %d: %s",
+                     (slot_idx == menu->prompt_selected) ? "> " : "  ", slot_idx + 1,
+                     w_name);
+
+            DrawText(slot_str, boxX + 25, boxY + 45 + (i * 22), 16, slotColor);
+        }
     } else if (menu->sub_state == ITEM_MENU_PROMPT_ACC) {
         int max_slots = PLAYER->stats.current[STAT_ACCESORY_COUNT];
         int boxW = 360;

@@ -20,6 +20,8 @@ extern ItemDefinition ITEM_REGISTRY[100];
 extern Portal PORTAL_REGISTRY[100];
 extern Projectile PROJECTILE_REGISTRY[100];
 extern Recipe RECIPE_REGISTRY[100];
+
+extern BasicStatBlock MINERAL_STATS[MINERAL_COUNT];
 //system register
 extern Message DIALOG_REGISTRY[500];
 extern Player GLOBAL_PLAYER;
@@ -60,4 +62,5 @@ Vector2 GetDestination(EntityType type, int id);
 char* GetWorldNameFromPortalId(int portal_id);
 PortalType GetPortalType(int id);
 Vector2 GetEntityCenter(MapEntity* entity);
+int GetCost(EntityType type, int id);
 #endif
