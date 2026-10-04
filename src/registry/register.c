@@ -21,6 +21,7 @@ ExchangeNode NODE_REGISTRY[100] = {0};
 Exchange EXCHANGE_REGISTRY[1000] = {0};
 Projectile PROJECTILE_REGISTRY[100] = {0};
 Recipe RECIPE_REGISTRY[100] = {0};
+AccesoryRecord ACCESORY_REGISTRY[30] ={0};
 
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
@@ -35,6 +36,7 @@ static int portal_count = 0;
 static int enemy_count = 0;
 static int projectile_count = 0;
 static int recipe_count = 0;
+int ACCESORY_COUNT = 0;
 
 Texture2D PORTAL_TV_SPRITE;
 Texture2D PORTAL_CRYSTAL_SPRITE;

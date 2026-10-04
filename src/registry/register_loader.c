@@ -122,6 +122,20 @@ void ParseEnemyRow(char *line) {
     }
 }
 
+void ParseAccesoryRow(char *line) {
+    char *id_token = strtok(line, ",");
+    char *item_id_token = strtok(NULL, ",");
+    char *sprite_token = strtok(NULL, ",");
+    char *region_token = strtok(NULL, ",");
+    if (id_token && item_id_token && sprite_token && region_token) {
+        int id = atoi(id_token);
+        AccesoryRecord *a = &ACCESORY_REGISTRY[id];
+        a->item_id = atoi(item_id_token);
+        a->sprite = LoadTexture(sprite_token);
+        a->region = atoi(region_token);
+    }
+}
+
 void ParseSpriteOverrideRow(char *line) {
     char *idToken = strtok(line, ",");
     char *spriteToken = strtok(NULL, ",");
@@ -536,6 +550,7 @@ void InitRegistries() {
     SetEntityTypeCount(ENTITY_PROJECTILE, LoadProjectileRegistry());
     SetEntityTypeCount(ENTITY_RECIPE, LoadRecipeRegistry());
     WORLD_COUNT = LoadRegistry("data/tables/worlds.csv", ParseWorldRow);
+    ACCESORY_COUNT = LoadRegistry("data/tables/accesories.csv", ParseAccesoryRow);
     LoadDialogRegistry();
     LoadSpriteOverrideRegistry();
     LoadNodeExchange();

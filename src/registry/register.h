@@ -20,7 +20,7 @@ extern ItemDefinition ITEM_REGISTRY[100];
 extern Portal PORTAL_REGISTRY[100];
 extern Projectile PROJECTILE_REGISTRY[100];
 extern Recipe RECIPE_REGISTRY[100];
-
+extern AccesoryRecord ACCESORY_REGISTRY[30];
 extern BasicStatBlock MINERAL_STATS[MINERAL_COUNT];
 //system register
 extern Message DIALOG_REGISTRY[500];
@@ -30,6 +30,7 @@ extern TileDefinition TILE_REGISTRY[42];
 
 //play register
 extern int WORLD_COUNT;
+extern int ACCESORY_COUNT;
 extern World WORLD_REGISTER[100];
 extern char* STATS_NAMES[STAT_COUNT];
 extern ExchangeNode NODE_REGISTRY[100];
