@@ -10,10 +10,10 @@
 #include "registry/register.h"
 #include "registry/weapon_register.h"
 #include "systems/input.h"
-#include "systems/weapon_grid.h"
 #include "systems/player.h"
-#include "systems/targeting.h"
 #include "systems/script_manager.h"
+#include "systems/targeting.h"
+#include "systems/weapon_grid.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -270,31 +270,45 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             Vector2 reticlePos;
 
             if (entity->type == ENTITY_ITEM) {
-                // Items are drawn at 0.5 scale, so center is width * 0.25 and height * 0.25 from drawPos
-                reticlePos = (Vector2){
-                    drawPos.x + (sprite->width * 0.25f),
-                    drawPos.y + (sprite->height * 0.25f)
-                };
+                // Items are drawn at 0.5 scale, so center is width * 0.25 and
+                // height * 0.25 from drawPos
+                reticlePos = (Vector2){drawPos.x + (sprite->width * 0.25f),
+                                       drawPos.y + (sprite->height * 0.25f)};
             } else if (sprite->height > 100) {
-                reticlePos = (Vector2){
-                    drawPos.x + (sprite->width / 2.0f),
-                    drawPos.y + (sprite->height * 0.8f)
-                };
+                reticlePos = (Vector2){drawPos.x + (sprite->width / 2.0f),
+                                       drawPos.y + (sprite->height * 0.8f)};
             } else {
-                reticlePos = (Vector2){
-                    drawPos.x + (sprite->width / 2.0f),
-                    drawPos.y + (sprite->height / 2.0f)
-                };
+                reticlePos = (Vector2){drawPos.x + (sprite->width / 2.0f),
+                                       drawPos.y + (sprite->height / 2.0f)};
             }
 
             DrawTargetReticle(reticlePos, entity->type);
         }
         if (entity == &map->player) {
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
-            WeaponSlot* slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
+            WeaponSlot *slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
 
             DrawWeapon(slot->weapon_id, handPos,
                        map->player.combat.attackAngle);
+        }
+
+        if (entity->type == ENTITY_ENEMY &&
+            GetEntityWeaponId(ENTITY_ENEMY, entity->entity_id) != -1) {
+            Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
+
+            // Get world positions
+            Vector2 playerPos = map->player.position;
+            Vector2 enemyPos = entity->position;
+
+            // Compute the angle in RADIANS directly (no * RAD2DEG)
+            float angle =
+                atan2f(playerPos.y - enemyPos.y, playerPos.x - enemyPos.x);
+
+            // Pass radians directly to DrawSimpleSword (or whatever wrapper
+            // calls it)
+            DrawWeapon(GetEntityWeaponId(ENTITY_ENEMY, entity->entity_id),
+                       handPos, angle);
+            // DrawSimpleSword(handPos, angle);
         }
     }
 }

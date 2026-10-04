@@ -1,4 +1,5 @@
 #include "systems/behavior.h"
+#include "defs/types_entities.h"
 #include "environment/map.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -229,7 +230,7 @@ bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
 
         if (other->type == ENTITY_ENEMY) {
             float projectileRadius = 8.0f;
-            float enemyRadius = 26.0f;
+            float enemyRadius =GetSprite(ENTITY_ENEMY, other->entity_id)->width;
 
             if (Vector2Distance(entity->position, other->position) < (projectileRadius + enemyRadius)) {
                 other->hp -= 35;

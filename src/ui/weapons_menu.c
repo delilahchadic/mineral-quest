@@ -234,8 +234,8 @@ void DrawWeaponsMenu(PlaySession *session) {
 
         if (hasWeapon) {
             int wid = grid->slots[i].weapon_id;
-            Vector2 drawPos = {(float)(x + slotSize / 2),
-                               (float)(y + slotSize / 2)};
+            Vector2 drawPos = {(float)(x + slotSize / 2.0),
+                               (float)(y + slotSize / 2.0)};
             DrawWeapon(wid, drawPos, 0.0f);
         } else {
             DrawText("[+]", x + 28, y + 30, 16, COLOR_SUNKEN_INK);
@@ -437,8 +437,8 @@ void DrawWeaponsMenu(PlaySession *session) {
             DrawRectangleLines(previewBoxX, previewBoxY, previewBoxW,
                                previewBoxH, COLOR_SUNKEN_INK);
 
-            Vector2 previewDrawPos = {(float)(previewBoxX + previewBoxW / 2),
-                                      (float)(previewBoxY + previewBoxH / 3)};
+            Vector2 previewDrawPos = {(float)(previewBoxX + previewBoxW / 2.0),
+                                      (float)(previewBoxY + previewBoxH / 3.0)};
             DrawLargeWeapon(wid, previewDrawPos, PI / 2);
 
             Vector2 textBeginning = {(float)(panelX + 20),

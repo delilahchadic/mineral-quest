@@ -51,6 +51,7 @@ typedef struct Enemy{
     char species_name[32];
     Texture2D sprite;
     int hp;
+    int weapon_id;
 }Enemy;
 
 typedef struct Recipe{

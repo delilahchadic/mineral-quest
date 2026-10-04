@@ -151,6 +151,14 @@ StatBlock *GetStats(EntityType type, int id) {
         return NULL;
     }
 }
+int GetEntityWeaponId(EntityType type, int id) {
+    switch (type) {
+    case ENTITY_ENEMY:
+        return ENEMY_REGISTRY[id].weapon_id;
+    default:
+        return -1;
+    }
+}
 
 int GetAccesorySlot(EntityType type, int id) {
     switch (type) {

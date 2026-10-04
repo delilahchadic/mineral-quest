@@ -110,6 +110,7 @@ void ParseEnemyRow(char *line) {
     char *nameToken = strtok(NULL, ",");
     char *spriteToken = strtok(NULL, ",");
     char *hpToken = strtok(NULL, ",");
+    char *weaponToken = strtok(NULL, ",");
     if (idToken && nameToken) {
         int id = atoi(idToken);
         Enemy *e = &ENEMY_REGISTRY[id];
@@ -117,6 +118,7 @@ void ParseEnemyRow(char *line) {
         e->species_name[sizeof(e->species_name) - 1] = '\0';
         e->sprite = LoadTexture(spriteToken);
         e->hp = atoi(hpToken);
+        e->weapon_id = atoi(weaponToken);
     }
 }
 

@@ -63,4 +63,5 @@ char* GetWorldNameFromPortalId(int portal_id);
 PortalType GetPortalType(int id);
 Vector2 GetEntityCenter(MapEntity* entity);
 int GetCost(EntityType type, int id);
+int GetEntityWeaponId(EntityType type, int id);
 #endif
