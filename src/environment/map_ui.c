@@ -285,6 +285,19 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             DrawTargetReticle(reticlePos, entity->type);
         }
         if (entity == &map->player) {
+            for (int i = 0; i < PLAYER->stats.current[STAT_ACCESORY_COUNT];
+                 i++) {
+                if (PLAYER->gear.accessory_ids[i] != -1) {
+                    for (int j = 0; j < ACCESORY_COUNT; j++) {
+                        if (ACCESORY_REGISTRY[j].item_id ==
+                            PLAYER->gear.accessory_ids[i]) {
+                            DrawTextureV(ACCESORY_REGISTRY[j].sprite, drawPos,
+                                         WHITE);
+                        }
+                    }
+                }
+            }
+
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
             WeaponSlot *slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
 
@@ -304,11 +317,8 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             float angle =
                 atan2f(playerPos.y - enemyPos.y, playerPos.x - enemyPos.x);
 
-            // Pass radians directly to DrawSimpleSword (or whatever wrapper
-            // calls it)
             DrawWeapon(GetEntityWeaponId(ENTITY_ENEMY, entity->entity_id),
                        handPos, angle);
-            // DrawSimpleSword(handPos, angle);
         }
     }
 }
