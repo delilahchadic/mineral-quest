@@ -164,4 +164,16 @@ typedef struct ExchangeNode{
     ExchangeNodeType type;
 }ExchangeNode;
 
+typedef enum AccesoryRegion{
+    ACCESORY_FOOT,
+    ACCESORY_NECK,
+}AccesoryRegion;
+
+typedef struct AccesoryRecord{
+    int id;
+    int item_id;
+    Texture2D sprite;
+    AccesoryRegion region;
+}AccesoryRecord;
+
 #endif
