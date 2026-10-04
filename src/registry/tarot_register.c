@@ -22,6 +22,7 @@ void (*tarot_callbacks[100])(void *) = {
     [0] = ThreeOfWands,
     [1] = ThreeOfCups,
     [2] = TheTower,
+    [3] = FourOfWands,
 };
 
 Vector2 GetTargetPosition(Map *map) {
@@ -100,4 +101,34 @@ void TheTower(void *context) { // Late game convenience spell cull all enemies n
         }
     }
 
+}
+
+void FourOfWands(void *context) { // Four orbiting fireballs that circle Rusty
+    Gamestate *gamestate = (Gamestate *)context;
+    Map *map = &gamestate->map;
+
+    float startAngles[4] = { 0.0f, PI / 2.0f, PI, 3.0f * PI / 2.0f };
+    float orbitRadius = 65.0f;
+
+    for (int i = 0; i < 4; i++) {
+        MapEntity *fireball = AddEntity(map);
+        if (!fireball)
+            break; // Stop if we hit map->entity_count limits
+
+        fireball->entity_id = 0;
+        fireball->type = ENTITY_PROJECTILE;
+        fireball->behavior = BEHAVIOR_ORBIT;
+        fireball->element_flags = ELEMENT_FIRE;
+        fireball->behavior_timer = startAngles[i]; // Store starting angle offset
+        fireball->speed = 0.0f;
+
+        // Spawn spaced evenly in a circle around Rusty
+        fireball->position = (Vector2){
+            map->player.position.x + cosf(startAngles[i]) * orbitRadius,
+            map->player.position.y + sinf(startAngles[i]) * orbitRadius
+        };
+
+        // Match player's hand/torso altitude
+        fireball->altitude = map->player.altitude + 12.0f;
+    }
 }

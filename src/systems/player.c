@@ -77,7 +77,7 @@ void SetDefaultStat(Player *player) {
     player->stats.base[STAT_ACCESORY_COUNT] = 2;
 }
 
-void RecalculateStats(Player* player) {
+void RecalculateStats(Player *player) {
     StatBlock *stats = &player->stats;
     Gear *gear = &player->gear;
     WeaponGrid *grid = &player->weapon_grid;
@@ -248,17 +248,16 @@ void UseItem(Player *player, ItemDefinition *item) {
         break;
 
         // Optional handler if you implement MP restoration items
-        /*
-        case USE_RESTORE_MP:
-            if (player->stats.current_mp < player->stats.max_mp) {
-                player->stats.current_mp += item->mp_bonus;
-                if (player->stats.current_mp > player->stats.max_mp) {
-                    player->stats.current_mp = player->stats.max_mp;
-                }
-                used = true;
+
+    case USE_RESTORE_MP:
+        if (player->stats.current_mp < player->stats.max_mp) {
+            player->stats.current_mp += item->mp_bonus;
+            if (player->stats.current_mp > player->stats.max_mp) {
+                player->stats.current_mp = player->stats.max_mp;
             }
-            break;
-        */
+            used = true;
+        }
+        break;
 
     case USE_PERM_BOOST:
         ApplyPermanentStat(player, item);

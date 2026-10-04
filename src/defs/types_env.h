@@ -23,7 +23,8 @@ typedef enum Behavior {
     BEHAVIOR_ATTACK,
     BEHAVIOR_RECOVERY,
     BEHAVIOR_STAGGERED,
-    BEHAVIOR_AIM
+    BEHAVIOR_AIM,
+    BEHAVIOR_ORBIT
 } Behavior;
 
 typedef enum ComboState { COMBO_NONE, COMBO_1, COMBO_2, COMBO_3 } ComboState;

@@ -17,11 +17,12 @@ typedef enum ItemType{
   ITEM_CONSUME
 } ItemType;
 
-typedef enum {
+typedef enum UseType{
     USE_NONE = 0,
     USE_RESTORE_HP,
     USE_TEMP_BUFF,
-    USE_PERM_BOOST
+    USE_PERM_BOOST,
+    USE_RESTORE_MP
 } UseType;
 
 typedef enum {

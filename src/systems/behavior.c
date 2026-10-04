@@ -257,6 +257,91 @@ bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
     return false;
 }
 
+bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
+    MapEntity *player = &map->player;
+
+    // Orbit configuration parameters
+    float orbitRadius = 65.0f;          // Distance from Rusty
+    float orbitSpeed = 2.5f;            // Radians per second (speed of rotation)
+
+    // Advance the angle over time using behavior_timer
+    entity->behavior_timer += orbitSpeed * dt;
+
+    // Calculate new position in a circle around the player
+    entity->position.x = player->position.x + cosf(entity->behavior_timer) * orbitRadius;
+    entity->position.y = player->position.y + sinf(entity->behavior_timer) * orbitRadius;
+
+    // Optional duration check: if you want the 4 of wands to expire after 8 seconds, uncomment below:
+    /*
+    entity->lifetime -= dt;
+    if (entity->lifetime <= 0.0f) {
+        RemoveEntityAt(map, index);
+        return true;
+    }
+    */
+
+    // Check collision with enemies
+    for (int j = 0; j < map->entity_count; j++) {
+        MapEntity *other = &map->entities[j];
+
+        if (other->type == ENTITY_PLANT) {
+            float projectileRadius = 8.0f;
+            float plantRadius = 20.0f;
+
+            if (Vector2Distance(entity->position, other->position) < (projectileRadius + plantRadius)) {
+                if (entity->element_flags & ELEMENT_FIRE) {
+                    printf("The plant catches fire and burns!\n");
+                }
+
+                // Track if plant 'j' was the last element before we remove the projectile
+                int plant_index = j;
+                int last_index = map->entity_count - 1;
+
+                // 1. Remove the projectile first (moves last element into 'index')
+                RemoveEntityAt(map, index);
+
+                // 2. If the plant was the last element, it was swapped into 'index'
+                if (plant_index == last_index) {
+                    plant_index = index;
+                }
+
+                // 3. Now safely remove the plant
+                RemoveEntityAt(map, plant_index);
+
+                return true;
+            }
+        }
+        if (other->type == ENTITY_ENEMY) {
+            float fireballRadius = 10.0f;
+            float enemyRadius = 26.0f;
+
+            if (Vector2Distance(entity->position, other->position) < (fireballRadius + enemyRadius)) {
+                // Deal minor damage (e.g., 12 damage, less than a heavy 35-damage fireball)
+                other->hp -= 20;
+                printf("Orbiting fireball hit enemy! Enemy HP: %d\n", other->hp);
+
+                int enemy_index = j;
+                int last_index = map->entity_count - 1;
+
+                // Remove the fireball projectile
+                RemoveEntityAt(map, index);
+                if (enemy_index == last_index) {
+                    enemy_index = index;
+                }
+
+                // If enemy dies, remove them too
+                if (other->hp <= 0) {
+                    RemoveEntityAt(map, enemy_index);
+                }
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void UpdateEntityMovement(Map *map, float dt) {
     if (map == NULL)
         return;
@@ -292,6 +377,11 @@ void UpdateEntityMovement(Map *map, float dt) {
             UpdateEnemyCombat(map, entity, dt);
         } else if (entity->behavior == BEHAVIOR_WANDER) {
             UpdateWanderBehavior(map, entity, dt);
+        }else if (entity->behavior == BEHAVIOR_ORBIT) {
+            if (UpdateOrbitBehavior(map, entity, i, dt)) {
+                i--; // Step back so the shifted array index isn't skipped
+                continue;
+            }
         }
     }
 }

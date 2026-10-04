@@ -285,6 +285,14 @@ void DrawInventory(Menu *menu) {
                 eff_idx++;
             }
 
+            if (item->mp_bonus != 0 && eff_idx < 16) {
+                snprintf(effect_buffers[eff_idx],
+                         sizeof(effect_buffers[eff_idx]), "MP %s%d",
+                         (item->mp_bonus > 0) ? "+" : "", item->mp_bonus);
+                effect_ptrs[eff_idx] = effect_buffers[eff_idx];
+                eff_idx++;
+            }
+
             for (int s = 0; s < STAT_COUNT; s++) {
                 int bonus = item->stat_bonuses[s];
                 if (bonus != 0 && eff_idx < 16) {
