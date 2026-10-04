@@ -12,13 +12,13 @@ void DrawRecipeInventory(PlaySession *session) {
     Menu *menu = &session->menu;
 
     // 1. Background & Header Setup
-    ClearBackground(COLOR_COBALT_TEAL_PALE);
+    ClearBackground(COLOR_RED_OCHRE);
 
     int margin = 50;
     int uiWidth = SCREEN_WIDTH - (margin * 2);
 
-    DrawText("ALCHEMY RECIPES", margin, 40, 30, COLOR_BONE_WHITE);
-    DrawRectangle(50, 80, uiWidth, 2, COLOR_BONE_WHITE);
+    DrawText("ALCHEMY RECIPES", margin, 40, 30, COLOR_SNOOT_PINK);
+    DrawRectangle(50, 80, uiWidth, 2, COLOR_SNOOT_PINK);
 
     if (menu->count == 0) {
         DrawText("YOUR RECIPE BOOK IS EMPTY...", margin, 130, 20,
@@ -33,17 +33,13 @@ void DrawRecipeInventory(PlaySession *session) {
         Exchange *e = &EXCHANGE_REGISTRY[r->exchangeId];
 
         Color textColor =
-            (menu->selected == i) ? COLOR_LIMESTONE_CHALK : COLOR_RED_OCHRE;
+            (menu->selected == i) ? COLOR_CHROME_YELLOW : COLOR_SNOOT_PINK;
 
         // Draw Recipe Name/ID
         char recipe_buf[64];
         snprintf(recipe_buf, sizeof(recipe_buf), "Recipe #%d: %s", recipeId + 1,
                  GetName(ENTITY_ITEM, e->item_id));
         DrawText(recipe_buf, margin, 120 + (i * 35), 20, textColor);
-
-        // Draw Output Item Name
-        // DrawText(GetName(ENTITY_ITEM, e->item_id), margin + 320, 120 + (i *
-        // 35), 20, textColor);
 
         // If this row is selected, render cost slots and affordability
         if (menu->selected == i) {
@@ -67,7 +63,7 @@ void DrawRecipeInventory(PlaySession *session) {
                 snprintf(amount_buf, sizeof(amount_buf), "x%d",
                          e->cost_slots[c].amount);
                 DrawText(amount_buf, cost_x + 110, 120 + (i * 35), 18,
-                         COLOR_BONE_WHITE);
+                         COLOR_SNOOT_PINK);
 
                 cost_x += 160;
             }
@@ -76,7 +72,7 @@ void DrawRecipeInventory(PlaySession *session) {
 
     // Footer Help Text
     DrawText("Press ENTER to Craft | Press T to Exit", margin,
-             SCREEN_HEIGHT - 60, 18, COLOR_BONE_WHITE);
+             SCREEN_HEIGHT - 60, 18, COLOR_SNOOT_PINK);
 }
 
 void UpdateRecipeInventory(PlaySession *session, Input *input) {
