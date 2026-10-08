@@ -29,5 +29,4 @@ typedef struct MineralDefinition{
     Color color;
     void (*draw_function)(Vector2 position);
 }MineralDefinition;
-void(*draw_functions[100]) (void* context);
 #endif
