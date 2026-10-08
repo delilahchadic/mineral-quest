@@ -16,6 +16,7 @@ typedef enum GameScreen {
     MENU,
     EDIT_SCREEN
 } GameScreen;
+
 typedef enum PlayState {
     ADVENTURE_STATE = 0,
     INVENTORY_MENU,
@@ -28,7 +29,8 @@ typedef enum PlayState {
     GAME_OVER,
     PLANT_INVENTORY,
     RECIPE_INVENTORY,
-    WEAPONS_MENU
+    WEAPONS_MENU,
+    VHS_MENU
 } PlayState;
 
 typedef enum EditState {
