@@ -7,6 +7,13 @@
 #include "defs/types_minerals.h"
 #include "defs/types_systems.h"
 
+typedef struct VHSTape{
+    int id;
+    int portal_id;
+    char name[32];
+    char description[128];
+}VHSTape;
+
 typedef enum ItemType{
   ITEM_VHS_TAPE,
   ITEM_TAROT_CARD,
@@ -97,6 +104,7 @@ typedef struct Portal{
     int world_id;
     PortalType type;
     Vector2 destination;
+    bool locked;
 } Portal;
 
 typedef enum EntityType{
@@ -110,7 +118,8 @@ typedef enum EntityType{
     ENTITY_ENEMY,
     ENTITY_PLAYER,
     ENTITY_PROJECTILE,
-    ENTITY_RECIPE
+    ENTITY_RECIPE,
+    ENTITY_VHS
 } EntityType;
 
 typedef enum TraitFlags{
@@ -120,6 +129,7 @@ typedef enum TraitFlags{
   TRAIT_TELEPORT = 1 <<2, // used to designate that a enity can change the map
   TRAIT_NODE = 1 <<3, // used to designate characters that associated to a node
   TRAIT_DAMAGE = 1 <<4,
+  TRAIT_TELEPORT_LOCKED = 1 <<5,
 } TraitFlags;
 
 typedef enum CharacterType{
