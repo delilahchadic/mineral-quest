@@ -1,2 +1,3 @@
-id,name,sprite,hp
-0,beast,data/sprites/beast.png,45
+id,name,sprite,hp,equip
+0,beast,data/sprites/beast.png,45,-1
+1,skeleton,data/sprites/skeleton.png,120,5

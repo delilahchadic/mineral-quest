@@ -1,0 +1,4 @@
+id,item id,sprite,region
+0,7,data/sprites/running_shoes.png,0
+1,13,data/sprites/scarf.png,1
+2,23,data/sprites/jacket.png,1
