@@ -27,7 +27,7 @@ void LoadMap(const char *mapName, Map *map) {
   }
   TraceLog(LOG_INFO, "File Loaded - %s", filePath);
 
-  char line[1024];
+  char line[2048];
 
   // 1. Read Metadata Header (rows,columns,name)
   if (fgets(line, sizeof(line), file)) {
