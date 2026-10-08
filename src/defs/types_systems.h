@@ -55,6 +55,7 @@ typedef enum ButtonPressed {
     KEY_F_PRESSED = 1 << 28,
     KEY_A_PRESSED = 1 << 29,
     KEY_D_PRESSED = 1 << 30,
+    KEY_V_PRESSED = 1<<31,
 } ButtonPressed;
 
 typedef struct Message {
@@ -157,6 +158,7 @@ typedef struct Player {
     int item_inventory[100];
     int mineral_inventory[MINERAL_COUNT];
     int plant_inventory[100];
+    int vhs_inventory[50];
     WeaponGrid weapon_grid;
     float speed;
     Texture2D sprite; // How fast we move
