@@ -29,6 +29,7 @@
 #include "ui/plant_inventory.h"
 #include "ui/recipe_menu.h"
 #include "ui/stats_menu.h"
+#include "ui/vhs_inventory.h"
 #include "ui/weapons_menu.h"
 #include <math.h>
 #include <stdbool.h>
@@ -78,7 +79,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     PlaySession *session = &gamestate->session;
     // Refresh nearby targets every frame
     UpdatePlayerTargets(&gamestate->map, &gamestate->session.player->targeting);
-    // int worrld
+
     if (PLAYER->stats.current_hp <= 0) {
         session->state = GAME_OVER;
         return;
@@ -87,11 +88,10 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         session->state = GAME_OVER;
         return;
     }
-    if (input->attack_dir.x != 0.0f || input->attack_dir.y != 0.0f) {
-        ExecuteDirectionalAttack(&gamestate->map,input);
-
+    if ((input->attack_dir.x != 0.0f || input->attack_dir.y != 0.0f) &&
+        !gamestate->map.player.combat.isAttacking) {
+        ExecuteDirectionalAttack(&gamestate->map, input);
     }
-
     if (input->buttons_pressed & KEY_N_PRESSED) {
         RebindItemMenu(&session->menu, session->player);
         session->state = INVENTORY_MENU;
@@ -144,24 +144,26 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         }
     }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        ExecuteTargetedAttack(&gamestate->map, gamestate->session.player);
+        ExecuteTargetedAttack(&gamestate->map, PLAYER);
     }
 
     if (input->buttons_pressed & KEY_G_PRESSED) {
         session->state = EQUIPMENT_MENU;
     }
 
+    if (input->buttons_pressed & KEY_V_PRESSED) {
+        RebindVHSMenu(&session->menu, session->player);
+        session->state = VHS_MENU;
+    }
     if (input->buttons_pressed & KEY_E_PRESSED) {
         HandleInteract(gamestate);
     }
 
     if (gamestate->map.hitstop_timer > 0.0f) {
-        // If we are in hitstop, count down the timer but SKIP updating the
-        // world
         gamestate->map.hitstop_timer -= dt;
     } else {
         UpdatePlayerCombatAnimation(&gamestate->map.player, dt);
-        // Update facing direction based on movement
+
         if (input->buttons_pressed &
             (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
             if (input->dir.x != 0.0f || input->dir.y != 0.0f) {
@@ -174,16 +176,16 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         UpdateBuffs(session->player, dt);
         UpdateCombat(&gamestate->map);
         CheckAndCollectMinerals(&gamestate->map);
+        CheckForVHS(&gamestate->map);
         UpdateEntityMovement(&gamestate->map, dt);
     }
     AdjustCamera(gamestate, false, dt);
 
     int portal_index = PollTrait(&gamestate->map, TRAIT_TELEPORT, 32.0f);
     if (portal_index > -1) {
-
         MapEntity *entity = &gamestate->map.entities[portal_index];
         if (GetPortalType(entity->entity_id) == PORTAL_CRYSTAL) {
-           FullyRestPlayer(session->player);
+            FullyRestPlayer(session->player);
         }
         ChangeMap(gamestate, GetWorldNameFromPortalId(entity->entity_id),
                   GetDestination(ENTITY_PORTAL, entity->entity_id));
@@ -232,8 +234,13 @@ void UpdatePlaySession(Gamestate *gamestate) {
         break;
     case RECIPE_INVENTORY:
         UpdateRecipeInventory(session, &input);
+        break;
     case WEAPONS_MENU:
         UpdateWeaponsMenu(session, &input);
+        break;
+    case VHS_MENU:
+        UpdateVHSInventory(session, &input);
+        break;
     default:
         return;
     }
