@@ -35,7 +35,7 @@ void UpdatePlayerTargets(Map *map, PlayerTargeting *targeting) {
         MapEntity *e = &map->entities[i];
 
         // Skip player, minerals, or items only
-        if (e == &map->player || e->type == ENTITY_MINERAL)
+        if (e == &map->player || e->type == ENTITY_MINERAL || e->type ==ENTITY_VHS)
             continue;
 
         Vector2 enemy_center = GetEntityCenter(e);
