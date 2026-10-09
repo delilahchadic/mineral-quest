@@ -10,6 +10,7 @@ void InitDialog(Player* player,Map* map, ScriptManager* manager);
 char* GatherEntity(Player* player, Map* map);
 char *GatherTarget(Player *player, Map *map);
 void CheckAndCollectMinerals(Map* map);
+void CheckForVHS(Map* map);
 void CheckHazards(Map *map, float dt);
 void HandleInteract(Gamestate* gamestate);
 #endif

@@ -10,7 +10,7 @@
 #include "defs/types_ui.h"
 #include "engine/palette.h"
 #include "environment/map.h"
-#include "environment/map_ui.h"
+#include "rendering/map_renderer.h"
 #include "raylib.h"
 #include "registry/mineral_register.h"
 #include "play/play_inventory.h"
@@ -21,6 +21,7 @@
 #include "ui/recipe_menu.h"
 #include "ui/stats_menu.h"
 #include "ui/plant_inventory.h"
+#include "ui/vhs_inventory.h"
 #include "systems/script_manager.h"
 #include "systems/player.h"
 #include "ui/weapons_menu.h"
@@ -84,6 +85,8 @@ void DrawPlaySession(Gamestate* gamestate){
     PlaySession* session = &gamestate->session;
     if(session->state==PLANT_INVENTORY){
         DrawPlantInventory(&session->menu);
+    }else if(session->state==VHS_MENU){
+        DrawVHSInventory(&session->menu);
     }else if(session->state==NODE_MENU){
         DrawNodeSession(session);
     }else if(session->state==EQUIPMENT_MENU){

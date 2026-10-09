@@ -37,6 +37,24 @@ void CheckAndCollectMinerals(Map *map) {
     }
 }
 
+void CheckForVHS(Map* map){
+
+    float collectionRadius = 64.0f;
+    for (int i = 0; i < map->entity_count; i++) {
+        MapEntity *entity = &map->entities[i];
+        // Check if it's a mineral (or has your collection trait/type)
+        if (entity->type == ENTITY_VHS && !entity->isCollecting) {
+            float dist =
+                Vector2Distance(map->player.position, entity->position);
+            if (dist < collectionRadius) {
+                // float pitch = 0.95f + ((float)(e->id % 10)/ 100.0f);
+                PlaySound(MINERAL_SOUND);
+                PLAYER->vhs_inventory[entity->entity_id]++;
+                RemoveEntityAt(map, i);
+            }
+        }
+    }
+}
 char *GatherTarget(Player *player, Map *map){
     int target = player->targeting.target_id;
     if (target == -1) return NULL;
@@ -120,6 +138,20 @@ void HandleInteract(Gamestate* gamestate){
         session->state = GATHER_PROMPT;
         sprintf(session->pendingItemName, "You got a %s !", item);
         return;
+    }
+
+    int locked_portal_index =
+        CheckTargetTrait(session->player, &gamestate->map, TRAIT_TELEPORT_LOCKED);
+    if(locked_portal_index > -1){
+        MapEntity *locked_entity = &gamestate->map.entities[locked_portal_index];
+        int vhs_index =-1;
+        for(int i =0; i < GetEntityTypeCount(ENTITY_VHS);i++){
+            if(VHS_REGISTRY[i].portal_id ==  locked_entity->entity_id) vhs_index = i;
+        }
+        if(vhs_index != -1 &&PLAYER->vhs_inventory[vhs_index] > 0){
+            locked_entity->trait_flags = TRAIT_TELEPORT;
+            PORTAL_REGISTRY[locked_entity->entity_id].locked = 0;
+        }
     }
     int node_index =
         CheckTargetTrait(session->player, &gamestate->map, TRAIT_NODE);

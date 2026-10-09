@@ -11,7 +11,7 @@
 #include "ui/ui_helpers.h"
 #include "ui/menu.h"
 #include "editor/edit_loader.h"
-#include "environment/map_ui.h"
+#include "rendering/map_renderer.h"
 
 void DrawCurrentPanel(Gamestate* gamestate){
     EditSession* session = &gamestate->edit_session;
