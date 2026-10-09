@@ -124,8 +124,8 @@ bool HandleMapPlacement(Map* map, EntityDrawer* drawer, Camera2D* camera, Input*
         newEntity->type = drawer->current_type;
         newEntity->entity_id = drawer->selected_id;
         newEntity->altitude = map->grid[iy][ix].height * 8.0f;
-        newEntity->state = NORMAL_STATE;
-        newEntity->jumpoffset = 0.0f;
+        // newEntity->state = NORMAL_STATE;
+        // newEntity->jumpoffset = 0.0f;
         newEntity->position.x = gridCoords.x * TILE_SIZE + (TILE_SIZE / 2.0f);
         newEntity->position.y = gridCoords.y * TILE_SIZE + (TILE_SIZE / 2.0f);
         return true;

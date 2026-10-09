@@ -25,4 +25,6 @@ int  PollTrait(Map* map, TraitFlags traits, float distance);
 void AddBuilding(Map* map, BuildingZone* building);
 void Remove_Building(Map* map, BuildingZone* building);
 int CheckTargetTrait(Player *player,Map *map, TraitFlags trait);
+void AssignNewMovementComponent(Map* map, MapEntity* entity);
+MovementComponent* GetPlayerMovementComponent(Map* map);
 #endif

@@ -73,9 +73,11 @@ void ThreeOfWands(void *context) { // simple fire spell
     fireball->altitude = map->player.altitude + 12.0f;
 
     fireball->type = ENTITY_PROJECTILE;
-    fireball->target_position = GetTargetPosition(map);
-    fireball->behavior = BEHAVIOR_AIM;
-    fireball->speed = 200.0f;
+    AssignNewMovementComponent(map, fireball);
+    MovementComponent* movement_component = &map->movement_components[fireball->movement_component_id];
+    movement_component->target_position = GetTargetPosition(map);
+    movement_component->behavior = BEHAVIOR_AIM;
+    movement_component->speed = 200.0f;
     fireball->element_flags = ELEMENT_FIRE;
 }
 
@@ -117,10 +119,12 @@ void FourOfWands(void *context) { // Four orbiting fireballs that circle Rusty
 
         fireball->entity_id = 0;
         fireball->type = ENTITY_PROJECTILE;
-        fireball->behavior = BEHAVIOR_ORBIT;
+        AssignNewMovementComponent(map, fireball);
+        MovementComponent* movement_component = &map->movement_components[fireball->movement_component_id];
+        movement_component->behavior = BEHAVIOR_ORBIT;
         fireball->element_flags = ELEMENT_FIRE;
-        fireball->behavior_timer = startAngles[i]; // Store starting angle offset
-        fireball->speed = 0.0f;
+        movement_component->behavior_timer = startAngles[i]; // Store starting angle offset
+        movement_component->speed = 0.0f;
 
         // Spawn spaced evenly in a circle around Rusty
         fireball->position = (Vector2){

@@ -54,13 +54,19 @@ void InitPlayer(Map *map) {
         return;
 
     player->type = ENTITY_PLAYER;
-    player->state = NORMAL_STATE;
-    player->jumpoffset = 0.0f;
+    AssignNewMovementComponent(map, player);
+    MovementComponent *movement_component= &map->movement_components[player->movement_component_id];
+    movement_component->state = NORMAL_STATE;
+    movement_component->jumpoffset = 0.0f;
     player->combat.isAttacking = false;
     player->combat.attackTimer = 0;
     player->combat.attackDuration = 0.25f;
     player->stats = GetStats(ENTITY_PLAYER, 0);
     player->instance_id = -2;
+}
+
+MovementComponent* GetPlayerMovementComponent(Map* map){
+    return &map->movement_components[map->player.movement_component_id];
 }
 
 void Close_Map(Map *map) {
@@ -178,6 +184,14 @@ void RemoveEntityAt(Map *map, int index) {
     if (index < 0 || index >= map->entity_count)
         return;
 
+    MapEntity *entity = &map->entities[index];
+
+    // Release the movement component back to the pool if it has one
+    if (entity->movement_component_id != -1 && entity->movement_component_id < 250) {
+        map->movement_components[entity->movement_component_id].is_active = false;
+        entity->movement_component_id = -1;
+    }
+
     // If the entity being removed isn't already the last one,
     // overwrite its slot with the last entity in the array.
     if (index < map->entity_count - 1) {
@@ -196,7 +210,7 @@ MapEntity *AddEntity(Map *map) {
     memset(slot, 0, sizeof(MapEntity));
 
     // Automatically handle unique instance ID here!
-    slot->instance_id = map->entitity_id++;
+    slot->instance_id = map->instance_id_count++;
 
     map->entity_count++;
     return slot;
@@ -247,4 +261,22 @@ int getExchangeNodeByCharacterId(
             return map->active_nodes[i];
     }
     return -1;
+}
+
+void AssignNewMovementComponent(Map *map, MapEntity *entity) {
+    // Scan the fixed pool for an available inactive slot
+    for (int i = 0; i < 250; i++) {
+        if (!map->movement_components[i].is_active) {
+            // Clear out old data from the slot
+            memset(&map->movement_components[i], 0, sizeof(MovementComponent));
+            map->movement_components[i].is_active = true;
+
+            entity->movement_component_id = i;
+            return;
+        }
+    }
+
+    // If we get here, all 250 slots are taken!
+    TraceLog(LOG_ERROR, "Movement component pool exhausted (max 250 reached)!");
+    entity->movement_component_id = -1;
 }

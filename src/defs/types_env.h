@@ -12,7 +12,7 @@
 // Physical dimensions in pixels
 #define WORLD_WIDTH_PX (MAP_WIDTH * TILE_SIZE)
 #define WORLD_HEIGHT_PX (MAP_HEIGHT * TILE_SIZE)
-
+#define INVALID_INDEX -1
 typedef enum State { NORMAL_STATE, JUMPING_STATE } State;
 
 typedef enum Behavior {
@@ -39,28 +39,37 @@ typedef struct {
     float facing_direction; // Base angle (e.g. 0 for right, PI for left)
 } CombatState;
 
-typedef struct MapEntity {
-    EntityType type;  // Is this a person or a flower?
-    Vector2 position; // Pointer to the actual Character, Item, or Plant struct
+typedef struct MovementComponent{
     Vector2 target_position;
     Behavior behavior;
     float behavior_timer;
-    int hp;
-    int instance_id;
     State state;
     Vector2 velocity;
     float speed;
     float jumpoffset;
     float vertical_velocity;
+    int is_active;
+}MovementComponent;
+
+typedef struct MapEntity {
+    //identity
+    EntityType type;  // Is this a person or a flower?
+    int entity_id; // Which member of its type is it
+    int instance_id; // which entity on the board is it
+    uint32_t trait_flags; // what traits does it have
+    //location
+    Vector2 position;
     float altitude;
-    uint32_t trait_flags;
-    struct MapEntity *next_in_bucket;
+    struct MapEntity *next_in_bucket; // render help
+    int movement_component_id;
+    // TODO implement combat_component
+    int hp;
     CombatState combat;
     bool hitThisSwing;
     bool isCollecting;
     StatBlock *stats;
     uint32_t element_flags;
-    int entity_id;// unique on any entitiy in a map instance
+
 } MapEntity;
 
 typedef struct Tile {
@@ -96,9 +105,11 @@ typedef struct Map {
     float hitstop_timer;
     MapEntity *buckets[MAP_HEIGHT];
     MapEntity entities[MAX_ENTITIES];
+    MovementComponent movement_components[250];
+    int movement_component_count;
     int entity_count;
     BuildingZone *buildings;
     int building_id; // used to guarantee any new building has a unique id
-    int entitity_id;
+    int instance_id_count;
 } Map;
 #endif

@@ -1,6 +1,7 @@
 #include "systems/physics.h"
 
 #include "defs/types_entities.h"
+#include "defs/types_env.h"
 #include "environment/map.h"
 #include "raymath.h"
 #include "registry/register.h"
@@ -22,33 +23,35 @@ void UpdateVelocity(Map *map, const Input *input) {
         Clamp((int)(map->player.position.x / TILE_SIZE), 0, map->columns - 1);
     int ty = Clamp((int)(map->player.position.y / TILE_SIZE), 0, map->rows - 1);
     float floorY = map->grid[ty][tx].height * 8.0f;
-
+    MovementComponent *movement_component = GetPlayerMovementComponent(map);
     // JUMP: If altitude is close to the floor, BLAST OFF.
     if (input->buttons_pressed & JUMP_PRESSED) {
         // Allow jumping if we are on the floor (or within 2 pixels for "coyote
         // time")
         if (map->player.altitude <= floorY + 2.0f) {
-            map->player.state = JUMPING_STATE;
-            map->player.vertical_velocity =
+
+            movement_component->state = JUMPING_STATE;
+            movement_component->vertical_velocity =
                 (500.0f + (float)PLAYER->stats.current[STAT_AEROBICS]);
         }
     }
 
     if (input->buttons_pressed & MOVEMENT_PRESSED) {
         float length = (input->dir.x != 0 && input->dir.y != 0) ? 0.707f : 1.0f;
-        map->player.velocity.x =
+        movement_component->velocity.x =
             input->dir.x *
             (PLAYER->speed + (float)PLAYER->stats.current[STAT_SPEED]) * length;
-        map->player.velocity.y =
+        movement_component->velocity.y =
             input->dir.y *
             (PLAYER->speed + (float)PLAYER->stats.current[STAT_SPEED]) * length;
     } else {
-        map->player.velocity.x = 0;
-        map->player.velocity.y = 0;
+        movement_component->velocity.x = 0;
+        movement_component->velocity.y = 0;
     }
 }
 
 void ApplyGravity(Map *map) {
+    MovementComponent *movement_component = GetPlayerMovementComponent(map);
     float dt = GetFrameTime();
     if (dt > 0.1f)
         dt = 0.1f;
@@ -63,34 +66,34 @@ void ApplyGravity(Map *map) {
 
     // 1. GRAVITY ALWAYS PULLS DOWN
     const float GRAVITY = 1200.0f;
-    map->player.vertical_velocity -= GRAVITY * dt;
+    movement_component->vertical_velocity -= GRAVITY * dt;
 
     // Move the player's altitude
-    map->player.altitude += map->player.vertical_velocity * dt;
+    map->player.altitude += movement_component->vertical_velocity * dt;
 
     // 2. THE HARD FLOOR
     if (map->player.altitude <= currentFloorY) {
         map->player.altitude = currentFloorY;
-        map->player.vertical_velocity = 0;
-        map->player.state = NORMAL_STATE;
+        movement_component->vertical_velocity = 0;
+        movement_component->state = NORMAL_STATE;
     }
 }
 
 bool ResolveMovement(Map *map) {
-
+    MovementComponent *movement_component = GetPlayerMovementComponent(map);
     float dt = GetFrameTime();
     if (dt > 0.1f)
         dt = 0.1f; // Keep your clamp!
     Vector2 nextX = map->player.position;
     bool moved = false;
-    nextX.x += map->player.velocity.x * dt;
+    nextX.x += movement_component->velocity.x * dt;
     if (!CheckCollision(map, nextX)) {
         map->player.position.x = nextX.x;
         moved = true;
     }
 
     Vector2 nextY = map->player.position;
-    nextY.y += map->player.velocity.y * dt;
+    nextY.y += movement_component->velocity.y * dt;
     if (!CheckCollision(map, nextY)) {
         map->player.position.y = nextY.y;
         moved = true;
