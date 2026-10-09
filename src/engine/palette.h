@@ -142,4 +142,11 @@
 
 // Deep damp peat / charred underbrush shadow
 #define COLOR_PEAT_BLACK        (Color){  42,  36,  34, 255 }
+
+
+/* --- MOONSTONE / ADULARESCENCE SPECTRUM --- */
+#define COLOR_MOONSTONE_MIST      (Color){ 205, 196, 224, 255 } // Pale lavender feldspar
+#define COLOR_LUNAR_SLATE         (Color){ 111, 105, 155, 255 } // Dusky violet mineral shadow
+#define COLOR_MOONSTONE_SHEEN     (Color){ 174, 220, 255, 255 } // Blue-white adularescent flash
+#define COLOR_GHOST_PEARL         (Color){ 250, 249, 255, 255 } // Spectral near-white highlight
 #endif

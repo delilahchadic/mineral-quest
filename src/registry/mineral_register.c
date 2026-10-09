@@ -3,9 +3,8 @@
 #include "defs/types_minerals.h"
 #include "engine/palette.h"
 #include <stddef.h>
-#include "systems/minerals/mineral_draw_functions.h"
+#include "rendering/mineral_render.h"
 #include "raylib.h"
-#include "systems/minerals/mineral_draw_functions.h"
 MineralDefinition mineral_register[MINERAL_COUNT] = {
     [MINERAL_RUBY] = {
         .label = "Ruby",
@@ -96,6 +95,11 @@ MineralDefinition mineral_register[MINERAL_COUNT] = {
         .label = "Lapis Lazuli",
         .color = COLOR_ULTRAMARINE,
         .draw_function = DrawLapisLazuli
+    },
+    [MINERAL_MOON_STONE]={
+        .label = "Moon Stone",
+        .color = COLOR_POTTERS_PINK,
+        .draw_function = DrawMoonstone
     }
 };
 
