@@ -18,6 +18,12 @@ float EaseOutCubic(float x) {
 }
 
 void ExecuteDirectionalAttack(Map *map, Input *input) {
+    if (!map) {
+        // Prevent immediate crash if map is null
+        return;
+    }
+    if (!input)
+        return;
     // 1. Update facing direction immediately to match the IJKL input
     map->player.combat.facing_direction =
         atan2f(input->attack_dir.y, input->attack_dir.x);
@@ -96,9 +102,9 @@ static bool ProcessHit(Map *map, MapEntity *player, int index) {
                 PLAYER->targeting.locked = false;
             }
             RemoveEntityAt(map, index);
-            WeaponSlot * slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
+            WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
             slot->exp += 10;
-            while (slot->exp >= slot->next_level_exp){
+            while (slot->exp >= slot->next_level_exp) {
                 slot->exp = slot->exp % slot->next_level_exp;
                 int base_socket_count = slot->max_socket / slot->level;
                 int base_level_exp = slot->next_level_exp / slot->level;
@@ -125,7 +131,7 @@ void UpdateCombat(Map *map) {
     if (PLAYER->weapon_grid.activeIndex == -1)
         return;
     MapEntity *player = &map->player;
-    WeaponSlot* slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
+    WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
     if (!player->combat.isAttacking)
         return;
 
@@ -164,7 +170,7 @@ void UpdateCombat(Map *map) {
 
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *e = &map->entities[i];
-        if (e != player && e->type != ENTITY_MINERAL) {
+        if (e != player && e->type != ENTITY_MINERAL && e->type != ENTITY_VHS) {
             bool hit = false;
             float entityRadius = e->type == ENTITY_ENEMY ? 16.0f : 5.0f;
             Vector2 eCenter = GetEntityCenter(e);
