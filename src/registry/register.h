@@ -20,8 +20,10 @@ extern ItemDefinition ITEM_REGISTRY[100];
 extern Portal PORTAL_REGISTRY[100];
 extern Projectile PROJECTILE_REGISTRY[100];
 extern Recipe RECIPE_REGISTRY[100];
+extern VHSTape VHS_REGISTRY[50];
 extern AccesoryRecord ACCESORY_REGISTRY[30];
 extern BasicStatBlock MINERAL_STATS[MINERAL_COUNT];
+
 //system register
 extern Message DIALOG_REGISTRY[500];
 extern Player GLOBAL_PLAYER;
@@ -39,6 +41,7 @@ extern Exchange EXCHANGE_REGISTRY[1000];
 //Media Register
 extern Texture2D PORTAL_TV_SPRITE;
 extern Texture2D PORTAL_CRYSTAL_SPRITE;
+extern Texture2D PORTAL_TV_LOCKED_SPRITE;
 extern Texture2D RUSTY_HEADSHOT_SPRITE;
 extern Texture2D SPRITE_OVERRIDE[10];
 extern Sound MINERAL_SOUND;

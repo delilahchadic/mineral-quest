@@ -22,6 +22,7 @@ Exchange EXCHANGE_REGISTRY[1000] = {0};
 Projectile PROJECTILE_REGISTRY[100] = {0};
 Recipe RECIPE_REGISTRY[100] = {0};
 AccesoryRecord ACCESORY_REGISTRY[30] ={0};
+VHSTape VHS_REGISTRY[50]={0};
 
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
@@ -36,9 +37,11 @@ static int portal_count = 0;
 static int enemy_count = 0;
 static int projectile_count = 0;
 static int recipe_count = 0;
+static int vhs_count = 0;
 int ACCESORY_COUNT = 0;
 
 Texture2D PORTAL_TV_SPRITE;
+Texture2D PORTAL_TV_LOCKED_SPRITE;
 Texture2D PORTAL_CRYSTAL_SPRITE;
 Texture2D RUSTY_HEADSHOT_SPRITE;
 
@@ -139,6 +142,8 @@ char *GetName(EntityType type, int id) {
                  RECIPE_REGISTRY[id].name);
         return buffer;
     }
+    case ENTITY_VHS:
+        return VHS_REGISTRY[id].name;
     default:
         return NULL;
     }
@@ -197,7 +202,8 @@ Texture2D *GetSprite(EntityType type, int id) {
         case PORTAL_CRYSTAL:
             return &PORTAL_CRYSTAL_SPRITE;
         case PORTAL_TV:
-            return &PORTAL_TV_SPRITE;
+            if(PORTAL_REGISTRY[id].locked) return &PORTAL_TV_LOCKED_SPRITE;
+            else return &PORTAL_TV_SPRITE;
         }
     case ENTITY_ENEMY:
         return &ENEMY_REGISTRY[id].sprite;
@@ -231,7 +237,8 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id) {
     case ENTITY_RECIPE:
         return TRAIT_GATHER;
     case ENTITY_PORTAL:
-        return TRAIT_TELEPORT;
+        if(PORTAL_REGISTRY[id].locked) return TRAIT_TELEPORT_LOCKED;
+        else return TRAIT_TELEPORT;
     default:
         return TRAIT_NONE;
     }
@@ -257,6 +264,8 @@ int GetEntityTypeCount(EntityType type) {
         return recipe_count;
     case ENTITY_PLAYER:
         return 1;
+    case ENTITY_VHS:
+        return vhs_count;
     default:
         return -1;
     }
@@ -281,8 +290,13 @@ void SetEntityTypeCount(EntityType type, int count) {
         return;
     case ENTITY_PROJECTILE:
         projectile_count = count;
+        return;
     case ENTITY_RECIPE:
         recipe_count = count;
+        return;
+    case ENTITY_VHS:
+        vhs_count = count;
+        return;
     default:
         return;
     }

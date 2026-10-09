@@ -16,6 +16,7 @@ void CloseEnemyRegistry() {
 
 void ClosePortalRegistry() {
     UnloadTexture(PORTAL_CRYSTAL_SPRITE);
+    UnloadTexture(PORTAL_TV_LOCKED_SPRITE);
     UnloadTexture(PORTAL_TV_SPRITE);
 }
 
@@ -92,8 +93,9 @@ void ParsePortalRow(char *line) {
     char *typeToken = strtok(NULL, ",");
     char *startXToken = strtok(NULL, ",");
     char *startYToken = strtok(NULL, ",");
+    char *lockedToken = strtok(NULL, ",");
     if (idToken && nameToken && worldIdToken && typeToken && startXToken &&
-        startYToken) {
+        startYToken && lockedToken) {
         int id = atoi(idToken);
         Portal *p = &PORTAL_REGISTRY[id];
         strncpy(p->name, nameToken, sizeof(p->name) - 1);
@@ -102,6 +104,23 @@ void ParsePortalRow(char *line) {
         p->type = (PortalType)atoi(typeToken);
         p->destination.x = atoi(startXToken) * TILE_SIZE;
         p->destination.y = atoi(startYToken) * TILE_SIZE;
+        p->locked = atoi(lockedToken);
+    }
+}
+
+void ParseVHSRow(char *line) {
+    char *idToken = strtok(line, ",");
+    char *portalIDToken = strtok(NULL, ",");
+    char *nameToken = strtok(NULL, ",");
+    char *descriptionToken = strtok(NULL, ",");
+    if (idToken && nameToken && nameToken && descriptionToken) {
+        int id = atoi(idToken);
+        VHSTape *v = &VHS_REGISTRY[id];
+        v->portal_id = atoi(portalIDToken);
+        strncpy(v->name, nameToken, sizeof(v->name) - 1);
+        v->name[sizeof(v->name) - 1] = '\0';
+        strncpy(v->description, descriptionToken, sizeof(v->description) - 1);
+        v->description[sizeof(v->description) - 1] = '\0';
     }
 }
 
@@ -538,6 +557,7 @@ int LoadPortalRegistry() {
 void InitRegistries() {
     PORTAL_CRYSTAL_SPRITE = LoadTexture("data/sprites/portal_crystal.png");
     PORTAL_TV_SPRITE = LoadTexture("data/sprites/tv_portal.png");
+    PORTAL_TV_LOCKED_SPRITE = LoadTexture("data/sprites/tv_locked.png");
     RUSTY_HEADSHOT_SPRITE = LoadTexture("data/sprites/rusty_headshot.png");
     MINERAL_SOUND = LoadSound("data/audio/mineral.wav");
 
@@ -549,6 +569,7 @@ void InitRegistries() {
     SetEntityTypeCount(ENTITY_ENEMY, LoadEnemyRegistry());
     SetEntityTypeCount(ENTITY_PROJECTILE, LoadProjectileRegistry());
     SetEntityTypeCount(ENTITY_RECIPE, LoadRecipeRegistry());
+    SetEntityTypeCount(ENTITY_VHS, LoadRegistry("data/tables/vhs.csv", ParseVHSRow));
     WORLD_COUNT = LoadRegistry("data/tables/worlds.csv", ParseWorldRow);
     ACCESORY_COUNT = LoadRegistry("data/tables/accesories.csv", ParseAccesoryRow);
     LoadDialogRegistry();
