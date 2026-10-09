@@ -144,7 +144,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         }
     }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        ExecuteTargetedAttack(&gamestate->map, PLAYER);
+        ExecuteTargetedAttack(&gamestate->map, gamestate->session.player);
     }
 
     if (input->buttons_pressed & KEY_G_PRESSED) {
