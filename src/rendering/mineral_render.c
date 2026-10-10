@@ -841,3 +841,69 @@ void DrawMoonstone(Vector2 center) {
         Fade(shadowColor, 0.55f)
     );
 }
+
+typedef struct { float dx, dy, depth, radius; int seed; } MalachiteLobe;
+
+static void DrawMalachiteLobe(Vector2 c, float radius, int seed, float time) {
+    const int rings = 7;
+    const Color pattern[7] = {
+        COLOR_MALACHITE_DEEP, COLOR_MALACHITE_BAND, COLOR_MALACHITE_DEEP,
+        COLOR_MALACHITE_PALE, COLOR_MALACHITE_BAND, COLOR_MALACHITE_DEEP,
+        COLOR_MALACHITE_BAND
+    };
+    // Undercut gives the lobe thickness
+    DrawEllipse((int)c.x, (int)(c.y + 2.0f), radius, radius * 0.55f, COLOR_MALACHITE_SHADOW);
+
+    // Concentric bands, each ring nudged up-left so the lobe reads as a dome
+    for (int i = 0; i < rings; i++) {
+        float t = (float)i / (float)rings;
+        float r = radius * (1.0f - t * 0.85f);
+        DrawEllipse((int)(c.x - t * 1.2f), (int)(c.y - t * 0.9f),
+                    r, r * 0.55f, pattern[(i + seed) % 7]);
+    }
+    DrawEllipseLines((int)c.x, (int)c.y, radius, radius * 0.55f,
+                     Fade(COLOR_MALACHITE_SHADOW, 0.6f));
+
+    // Polish highlight, plus an occasional sparkle
+    DrawEllipse((int)(c.x - radius * 0.35f), (int)(c.y - radius * 0.22f),
+                radius * 0.18f, radius * 0.10f, Fade(COLOR_MALACHITE_PALE, 0.55f));
+    if (sinf(time * 2.2f + seed * 1.9f) > 0.9f) {
+        DrawLineEx((Vector2){ c.x - radius * 0.5f, c.y - radius * 0.1f },
+                   (Vector2){ c.x - radius * 0.1f, c.y - radius * 0.3f },
+                   1.0f, Fade(COLOR_VERDIGRIS_GLINT, 0.8f));
+    }
+}
+
+void DrawMalachite(Vector2 center) {
+    float time = (float)GetTime();
+    float rotation = time * 1.4f;
+
+    DrawCircleGradient((int)center.x, (int)center.y, 12.0f,
+                       Fade(COLOR_VERDIGRIS_GLINT, 0.18f), BLANK);
+
+    // Fixed, uneven lobes so it reads as grown rock, not a stamped pattern
+    const float baseAngle[3] = { 0.0f, 2.3f, 4.1f };
+    const float dist[3]      = { 4.6f, 3.8f, 4.2f };
+    const float rad[3]       = { 4.4f, 3.6f, 4.0f };
+
+    MalachiteLobe lobes[4];
+    for (int i = 0; i < 3; i++) {
+        float a = baseAngle[i] + rotation;
+        float y = sinf(a) * dist[i] * 0.5f;
+        lobes[i] = (MalachiteLobe){ cosf(a) * dist[i], y, y, rad[i], i * 2 + 1 };
+    }
+    // Center lobe sits higher, but sorts as depth 0 so it draws over the back lobes
+    lobes[3] = (MalachiteLobe){ 0.0f, -2.5f, 0.0f, 5.2f, 3 };
+
+    // Painter's order: back to front (insertion sort, 4 items)
+    for (int i = 1; i < 4; i++) {
+        MalachiteLobe key = lobes[i];
+        int j = i - 1;
+        while (j >= 0 && lobes[j].depth > key.depth) { lobes[j + 1] = lobes[j]; j--; }
+        lobes[j + 1] = key;
+    }
+    for (int i = 0; i < 4; i++) {
+        DrawMalachiteLobe((Vector2){ center.x + lobes[i].dx, center.y + lobes[i].dy },
+                          lobes[i].radius, lobes[i].seed, time);
+    }
+}

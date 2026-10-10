@@ -22,6 +22,7 @@ typedef enum Mineral{
     MINERAL_HALITE,
     MINERAL_LAPIS_LAZULI,
     MINERAL_MOON_STONE,
+    MINERAL_MALACHITE,
     MINERAL_COUNT
 }Mineral;
 

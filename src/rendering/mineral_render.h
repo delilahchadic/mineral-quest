@@ -29,4 +29,5 @@ void DrawHalite(Vector2 center);
 void DrawLapisLazuli(Vector2 center);
 void DrawMoonstone(Vector2 center);
 void DrawIsometricCube(Vector2 center, float width, float height, Color baseColor, float rotation, float transparency, bool isMetallic);
+void DrawMalachite(Vector2 center);
 #endif

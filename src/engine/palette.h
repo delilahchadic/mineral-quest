@@ -149,4 +149,11 @@
 #define COLOR_LUNAR_SLATE         (Color){ 111, 105, 155, 255 } // Dusky violet mineral shadow
 #define COLOR_MOONSTONE_SHEEN     (Color){ 174, 220, 255, 255 } // Blue-white adularescent flash
 #define COLOR_GHOST_PEARL         (Color){ 250, 249, 255, 255 } // Spectral near-white highlight
+
+/* --- MALACHITE / BANDED COPPER GREEN --- */
+#define COLOR_MALACHITE_SHADOW (Color){   6,  40,  32, 255 } // Undercut / rim
+#define COLOR_MALACHITE_DEEP   (Color){  14,  82,  58, 255 } // Dark band
+#define COLOR_MALACHITE_BAND   (Color){  52, 156, 108, 255 } // Bright band
+#define COLOR_MALACHITE_PALE   (Color){ 170, 214, 184, 255 } // Thin pale line
+#define COLOR_VERDIGRIS_GLINT  (Color){ 120, 225, 205, 255 } // Glow + sparkle
 #endif
