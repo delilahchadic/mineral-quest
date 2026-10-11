@@ -1,3 +1,3 @@
-id,name,sprite,hp,equip
-0,beast,data/sprites/beast.png,45,-1
-1,skeleton,data/sprites/skeleton.png,120,5
+id,name,sprite,equip,hp,mp,str,def,mag_off,mag_def,speed,geology,botany,alchemy,aerobics,acc,exp
+0,beast,data/sprites/beast.png,-1,55,20,15,10,0,0,10,0,0,0,10,0,12
+1,skeleton,data/sprites/skeleton.png,5,120,80,40,24,10,10,25,0,0,25,10,0,40
