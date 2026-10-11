@@ -57,8 +57,10 @@ typedef struct ItemDefinition {
 typedef struct Enemy{
     char species_name[32];
     Texture2D sprite;
-    int hp;
+    int hp,mp;
+    int stats[STAT_COUNT];
     int weapon_id;
+    int exp;
 }Enemy;
 
 typedef struct Recipe{
