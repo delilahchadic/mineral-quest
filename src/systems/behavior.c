@@ -1,10 +1,12 @@
 #include "systems/behavior.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "defs/types_systems.h"
 #include "defs/types_tarot.h"
 #include "environment/map.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "registry/mineral_register.h"
 #include "registry/register.h"
 #include <math.h>
 #include <stdlib.h>
@@ -95,7 +97,6 @@ void UpdateWanderBehavior(Map *map, MapEntity *entity, float dt) {
 }
 
 void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
-
     MovementComponent *movement_componment =
         &map->movement_components[e->movement_component_id];
     if (e->type != ENTITY_ENEMY)
@@ -114,11 +115,9 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
 
     switch (movement_componment->behavior) {
     case BEHAVIOR_WANDER:
-        // Existing wander behavior, but poll for player proximity
         if (distToPlayer < 140.0f) {
             movement_componment->behavior = BEHAVIOR_CHASE;
         } else {
-            // Run normal wander movement
             UpdateWanderBehavior(map, e, dt);
         }
         break;
@@ -127,11 +126,9 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
         if (distToPlayer > 220.0f) {
             movement_componment->behavior = BEHAVIOR_WANDER;
         } else if (distToPlayer < 80.0f) {
-            // Close enough to strike! Enter telegraph/windup
             movement_componment->behavior = BEHAVIOR_WINDUP;
             movement_componment->behavior_timer = 0.0f;
         } else {
-            // Move smoothly toward player
             Vector2 dir = Vector2Normalize(
                 Vector2Subtract(player->position, e->position));
             e->position = Vector2Add(
@@ -142,7 +139,6 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
 
     case BEHAVIOR_WINDUP:
         movement_componment->behavior_timer += dt;
-        // 300ms visual telegraph window
         if (movement_componment->behavior_timer >= 0.3f) {
             movement_componment->behavior = BEHAVIOR_ATTACK;
             movement_componment->behavior_timer = 0.0f;
@@ -150,22 +146,21 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
         break;
 
     case BEHAVIOR_ATTACK: {
-        // Give enemies a generous hit footprint matching their 64x64
-        // transparent sprite bounds
         float enemyRadius = 26.0f;
-        float playerRadius = 12.0f; // Adjust to your player core size
+        float playerRadius = 12.0f;
         Vector2 dir =
             Vector2Normalize(Vector2Subtract(player->position, e->position));
-        e->position =
-            Vector2Add(e->position, Vector2Scale(dir, movement_componment->speed * 0.9f * dt));
-        // Check edge-to-edge distance instead of strict center-to-center
+        e->position = Vector2Add(
+            e->position,
+            Vector2Scale(dir, movement_componment->speed * 0.9f * dt));
         if (distToPlayer < (enemyRadius + playerRadius + 10.0f)) {
-            // Hurt player logic
             printf("Player hit by enemy!\n");
-            map->hitstop_timer = 0.06f; // Impact hitstop
-            DamagePlayer(35);
+            map->hitstop_timer = 0.06f;
+            Enemy *enemy = &ENEMY_REGISTRY[e->entity_id];
+            int damage =
+                enemy->stats[STAT_STR] - (PLAYER->stats.current[STAT_DEF] / 5);
+            DamagePlayer(damage);
 
-            // Apply knockback to player
             Vector2 kbDir = Vector2Normalize(
                 Vector2Subtract(player->position, e->position));
             player->position =
@@ -173,13 +168,11 @@ void UpdateEnemyCombat(Map *map, MapEntity *e, float dt) {
             movement_componment->behavior = BEHAVIOR_RECOVERY;
             movement_componment->behavior_timer = 0.0f;
         }
-
         break;
     }
 
     case BEHAVIOR_RECOVERY:
         movement_componment->behavior_timer += dt;
-        // 400ms recovery window where enemy is vulnerable
         if (movement_componment->behavior_timer >= 0.4f) {
             movement_componment->behavior = BEHAVIOR_CHASE;
         }
@@ -227,24 +220,15 @@ bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
                     printf("The plant catches fire and burns!\n");
                 }
 
-                // Track if plant 'j' was the last element before we remove the
-                // projectile
                 int plant_index = j;
                 int last_index = map->entity_count - 1;
 
-                // 1. Remove the projectile first (moves last element into
-                // 'index')
                 RemoveEntityAt(map, index);
-
-                // 2. If the plant was the last element, it was swapped into
-                // 'index'
                 if (plant_index == last_index) {
                     plant_index = index;
                 }
 
-                // 3. Now safely remove the plant
                 RemoveEntityAt(map, plant_index);
-
                 return true;
             }
         }
@@ -256,9 +240,6 @@ bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
 
             if (Vector2Distance(entity->position, other->position) <
                 (projectileRadius + enemyRadius)) {
-                other->hp -= 35;
-                printf("Fireball hit enemy! Dealt damage. Enemy HP: %d\n",
-                       other->hp);
 
                 int enemy_index = j;
                 int last_index = map->entity_count - 1;
@@ -268,11 +249,10 @@ bool UpdateAimBehavior(Map *map, MapEntity *entity, int index, float dt) {
                 if (enemy_index == last_index) {
                     enemy_index = index;
                 }
-
+                Enemy *enemy = &ENEMY_REGISTRY[other->entity_id];
+                int damage = PLAYER->stats.current[STAT_MAG_OFF] - (enemy->stats[STAT_MAG_DEF]/5);
                 // If enemy dies, remove it too
-                if (other->hp <= 0) {
-                    RemoveEntityAt(map, enemy_index);
-                }
+                ApplyDamageToEnemy(map, enemy_index, damage);
 
                 return true;
             }
@@ -291,10 +271,8 @@ bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
     float orbitRadius = 65.0f; // Distance from Rusty
     float orbitSpeed = 2.5f;   // Radians per second (speed of rotation)
 
-    // Advance the angle over time using behavior_timer
     movement_componment->behavior_timer += orbitSpeed * dt;
 
-    // Calculate new position in a circle around the player
     entity->position.x =
         player->position.x +
         cosf(movement_componment->behavior_timer) * orbitRadius;
@@ -302,17 +280,6 @@ bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
         player->position.y +
         sinf(movement_componment->behavior_timer) * orbitRadius;
 
-    // Optional duration check: if you want the 4 of wands to expire after 8
-    // seconds, uncomment below:
-    /*
-    entity->lifetime -= dt;
-    if (entity->lifetime <= 0.0f) {
-        RemoveEntityAt(map, index);
-        return true;
-    }
-    */
-
-    // Check collision with enemies
     for (int j = 0; j < map->entity_count; j++) {
         MapEntity *other = &map->entities[j];
 
@@ -326,24 +293,15 @@ bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
                     printf("The plant catches fire and burns!\n");
                 }
 
-                // Track if plant 'j' was the last element before we remove the
-                // projectile
                 int plant_index = j;
                 int last_index = map->entity_count - 1;
 
-                // 1. Remove the projectile first (moves last element into
-                // 'index')
                 RemoveEntityAt(map, index);
-
-                // 2. If the plant was the last element, it was swapped into
-                // 'index'
                 if (plant_index == last_index) {
                     plant_index = index;
                 }
 
-                // 3. Now safely remove the plant
                 RemoveEntityAt(map, plant_index);
-
                 return true;
             }
         }
@@ -353,11 +311,6 @@ bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
 
             if (Vector2Distance(entity->position, other->position) <
                 (fireballRadius + enemyRadius)) {
-                // Deal minor damage (e.g., 12 damage, less than a heavy
-                // 35-damage fireball)
-                other->hp -= 20;
-                printf("Orbiting fireball hit enemy! Enemy HP: %d\n",
-                       other->hp);
 
                 int enemy_index = j;
                 int last_index = map->entity_count - 1;
@@ -368,11 +321,10 @@ bool UpdateOrbitBehavior(Map *map, MapEntity *entity, int index, float dt) {
                     enemy_index = index;
                 }
 
-                // If enemy dies, remove them too
-                if (other->hp <= 0) {
-                    RemoveEntityAt(map, enemy_index);
-                }
-
+                Enemy *enemy = &ENEMY_REGISTRY[other->entity_id];
+                int damage = PLAYER->stats.current[STAT_MAG_OFF] - (enemy->stats[STAT_MAG_DEF]/3);
+                // If enemy dies, remove it too
+                ApplyDamageToEnemy(map, enemy_index, damage);
                 return true;
             }
         }
@@ -387,6 +339,7 @@ void UpdateEntityMovement(Map *map, float dt) {
 
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *entity = &map->entities[i];
+
         if (entity->type == ENTITY_MINERAL && entity->isCollecting) {
             Vector2 targetPos = map->player.position;
             entity->position =
@@ -398,30 +351,34 @@ void UpdateEntityMovement(Map *map, float dt) {
                     0.95f + ((float)(entity->entity_id % 10) / 100.0f);
                 SetSoundPitch(MINERAL_SOUND, pitch);
                 PlaySound(MINERAL_SOUND);
-
+                SpawnFloatingText(map, entity->position,
+                                  GetMineralLabel(entity->entity_id),
+                                  GetMineralColor(entity->entity_id));
                 RemoveEntityAt(map, i);
                 i--;
                 continue;
             }
-        }else if(entity->movement_component_id != INVALID_INDEX){
-            MovementComponent *movement_component = &map->movement_components[entity->movement_component_id];
-            // Handle Aim / Projectile Behavior
+        } else if (entity->movement_component_id != INVALID_INDEX) {
+            MovementComponent *movement_component =
+                &map->movement_components[entity->movement_component_id];
+
+            bool consumed = false;
             if (movement_component->behavior == BEHAVIOR_AIM) {
-                if (UpdateAimBehavior(map, entity, i, dt)) {
-                    i--; // Step back so the newly shifted element isn't skipped
-                    continue;
-                }
+                consumed = UpdateAimBehavior(map, entity, i, dt);
             } else if (entity->type == ENTITY_ENEMY) {
                 UpdateEnemyCombat(map, entity, dt);
             } else if (movement_component->behavior == BEHAVIOR_WANDER) {
                 UpdateWanderBehavior(map, entity, dt);
             } else if (movement_component->behavior == BEHAVIOR_ORBIT) {
-                if (UpdateOrbitBehavior(map, entity, i, dt)) {
-                    i--; // Step back so the shifted array index isn't skipped
-                    continue;
-                }
+                consumed = UpdateOrbitBehavior(map, entity, i, dt);
+            }
+
+            // If the projectile hit something and was removed inside the
+            // behavior function, make sure our loop index steps back safely.
+            if (consumed) {
+                i--;
+                continue;
             }
         }
-
     }
 }

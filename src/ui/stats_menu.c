@@ -16,7 +16,7 @@ void DrawStatsMenu(Gamestate *gamestate) {
     // 1. Background - The Aged Paper
     ClearBackground(COLOR_CERULEAN_COBALT);
     Color textColor = COLOR_LIMESTONE_CHALK;
-
+    StatBlock* stats= &gamestate->session.player->stats;
     int margin_x = 50, padding_y = 40;
     int uiWidth = SCREEN_WIDTH - (margin_x * 2);
     int text_start_x = 250;
@@ -36,8 +36,8 @@ void DrawStatsMenu(Gamestate *gamestate) {
 
     char current_hp[16], max_hp[16];
     snprintf(current_hp, sizeof(current_hp), "%d",
-             gamestate->map.player.stats->current_hp);
-    snprintf(max_hp, sizeof(max_hp), "%d", gamestate->map.player.stats->max_hp);
+             stats->current_hp);
+    snprintf(max_hp, sizeof(max_hp), "%d", stats->max_hp);
 
     DrawText(current_hp, text_start_x, current_y, 20, textColor);
     DrawText(max_hp, text_start_x + 200, current_y, 20, textColor);
@@ -50,8 +50,8 @@ void DrawStatsMenu(Gamestate *gamestate) {
 
     char current_mp[16], max_mp[16];
     snprintf(current_mp, sizeof(current_mp), "%d",
-             gamestate->map.player.stats->current_mp);
-    snprintf(max_mp, sizeof(max_mp), "%d", gamestate->map.player.stats->current_mp);
+             stats->current_mp);
+    snprintf(max_mp, sizeof(max_mp), "%d", stats->max_mp);
 
     DrawText(current_mp, text_start_x, current_y, 20, textColor);
     DrawText(max_mp, text_start_x + 200, current_y, 20, textColor);
@@ -65,9 +65,9 @@ void DrawStatsMenu(Gamestate *gamestate) {
     for (int i = 0; i < STAT_COUNT; i++) {
         char base[16], current[16];
         snprintf(current, sizeof(current), "%d",
-                 gamestate->map.player.stats->current[i]);
+                 stats->current[i]);
         snprintf(base, sizeof(base), "%d",
-                 gamestate->map.player.stats->base[i]);
+                 stats->base[i]);
 
         DrawText(STATS_NAMES[i], margin_x, current_y, 15, textColor);
         DrawText(base, text_start_x, current_y, 20, textColor);
@@ -83,7 +83,7 @@ void DrawStatsMenu(Gamestate *gamestate) {
 
     bool found_buff = false;
     for (int b = 0; b < MAX_ACTIVE_BUFFS; b++) {
-        ActiveBuff *buff = &gamestate->map.player.stats->buffs[b];
+        ActiveBuff *buff = &stats->buffs[b];
         if (!buff->active)
             continue;
 

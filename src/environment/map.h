@@ -26,5 +26,9 @@ void AddBuilding(Map* map, BuildingZone* building);
 void Remove_Building(Map* map, BuildingZone* building);
 int CheckTargetTrait(Player *player,Map *map, TraitFlags trait);
 void AssignNewMovementComponent(Map* map, MapEntity* entity);
+void AssignNewCombatComponent(Map *map, MapEntity *entity);
 MovementComponent* GetPlayerMovementComponent(Map* map);
+void ApplyDamageToEnemy(Map *map, int enemy_entity_index, int damage);
+void SpawnFloatingText(Map *map, Vector2 worldPos, const char *text,
+                       Color color);
 #endif

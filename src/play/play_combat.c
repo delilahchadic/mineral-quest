@@ -17,7 +17,7 @@ float EaseOutCubic(float x) {
     return 1.0f - (f * f * f);
 }
 
-void ExecuteDirectionalAttack(Map *map, Input *input) {
+void ExecuteDirectionalAttack(Map *map,CombatState *combat, Input *input) {
     if (!map) {
         // Prevent immediate crash if map is null
         return;
@@ -25,67 +25,66 @@ void ExecuteDirectionalAttack(Map *map, Input *input) {
     if (!input)
         return;
     // 1. Update facing direction immediately to match the IJKL input
-    map->player.combat.facing_direction =
+    combat->facing_direction =
         atan2f(input->attack_dir.y, input->attack_dir.x);
 
     // 2. Trigger the attack combo (InitCombat handles combo states 1, 2,
     // and 3)
-    InitCombat(map);
+    InitCombat(map,combat);
 }
 
-void ExecuteTargetedAttack(Map *map, Player *player) {
+void ExecuteTargetedAttack(Map *map, Player *player, CombatState* combat) {
     if (player->targeting.target_id != -1) {
         MapEntity *target = GetTargetEntity(map, player->targeting.target_id);
         if (target) {
             // Point player straight at the target
             Vector2 diff = Vector2Subtract(GetEntityCenter(target),
                                            GetEntityCenter(&map->player));
-            map->player.combat.facing_direction = atan2f(diff.y, diff.x);
+            combat->facing_direction = atan2f(diff.y, diff.x);
 
             // Trigger a combat swing/lunge immediately
-            InitCombat(map);
+            InitCombat(map,combat);
         }
     } else {
-        InitCombat(map);
+        InitCombat(map,combat);
     }
     return;
 }
 
-void InitCombat(Map *map) {
-    if (!map->player.combat.isAttacking) {
-        if (map->player.combat.combo_state == COMBO_NONE ||
-            map->player.combat.combo_timer <= 0) {
-            map->player.combat.combo_state = COMBO_1;
-            map->player.combat.attackDuration =
+void InitCombat(Map *map,CombatState* combat) {
+    if (!combat->isAttacking) {
+        if (combat->combo_state == COMBO_NONE ||
+            combat->combo_timer <= 0) {
+            combat->combo_state = COMBO_1;
+            combat->attackDuration =
                 0.20f; // Slipped down from 0.25f for speed
-        } else if (map->player.combat.combo_state == COMBO_1) {
-            map->player.combat.combo_state = COMBO_2;
-            map->player.combat.attackDuration =
+        } else if (combat->combo_state == COMBO_1) {
+            combat->combo_state = COMBO_2;
+            combat->attackDuration =
                 0.20f; // Slipped down from 0.25f for speed
-        } else if (map->player.combat.combo_state == COMBO_2) {
-            map->player.combat.combo_state = COMBO_3;
-            map->player.combat.attackDuration =
+        } else if (combat->combo_state == COMBO_2) {
+            combat->combo_state = COMBO_3;
+            combat->attackDuration =
                 0.35f; // Slipped down from 0.45f for speed
         } else {
-            map->player.combat.combo_state = COMBO_1;
-            map->player.combat.attackDuration = 0.20f;
+            combat->combo_state = COMBO_1;
+            combat->attackDuration = 0.20f;
         }
 
-        map->player.combat.isAttacking = true;
-        map->player.combat.attackTimer = 0;
-        map->player.combat.combo_timer = 0.5f;
+        combat->isAttacking = true;
+        combat->attackTimer = 0;
+        combat->combo_timer = 0.5f;
         ResetAllHitFlags(map);
     }
 }
 
 // Internal helper function (not exposed in header)
-static bool ProcessHit(Map *map, MapEntity *player, int index) {
+static bool ProcessHit(Map *map,CombatState *combat_state, MapEntity *player, int index) {
     MapEntity *target = &map->entities[index];
-    target->hitThisSwing = true;
 
     // Hitstop freeze frame
     map->hitstop_timer =
-        (player->combat.combo_state == COMBO_3) ? 0.12f : 0.05f;
+        (combat_state->combo_state == COMBO_3) ? 0.12f : 0.05f;
 
     // Instant destruction (Plants)
     if (target->type == ENTITY_PLANT) {
@@ -95,53 +94,39 @@ static bool ProcessHit(Map *map, MapEntity *player, int index) {
 
     // Damage dealing (Enemies)
     if (target->type == ENTITY_ENEMY) {
-        target->hp -= PLAYER->stats.current[STAT_STR];
-        if (target->hp <= 0) {
-            if (PLAYER->targeting.locked &&
-                PLAYER->targeting.target_id == target->instance_id) {
-                PLAYER->targeting.locked = false;
-            }
-            RemoveEntityAt(map, index);
-            WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
-            slot->exp += 10;
-            while (slot->exp >= slot->next_level_exp) {
-                slot->exp = slot->exp % slot->next_level_exp;
-                int base_socket_count = slot->max_socket / slot->level;
-                int base_level_exp = slot->next_level_exp / slot->level;
-                slot->level++;
-                slot->max_socket = base_socket_count * slot->level;
-                slot->next_level_exp = base_level_exp * slot->level;
-            }
-            return true;
-        }
+        CombatComponent *enemy_combat_component = &map->combat_components[target->combat_component_id];
+        enemy_combat_component->hitThisSwing = true;
+        Enemy* enemy = &ENEMY_REGISTRY[target->entity_id];
+        ApplyDamageToEnemy(map,index, PLAYER->stats.current[STAT_STR] - (enemy->stats[STAT_DEF] / 10));
+
     }
 
     // Unified Knockback for all remaining entities
     Vector2 dir =
         Vector2Normalize(Vector2Subtract(target->position, player->position));
     float knockbackForce =
-        (player->combat.combo_state == COMBO_3) ? 40.0f : 20.0f;
+        (combat_state->combo_state == COMBO_3) ? 40.0f : 20.0f;
 
     target->position.x += dir.x * knockbackForce;
     target->position.y += dir.y * knockbackForce;
     return false;
 }
 
-void UpdateCombat(Map *map) {
+void UpdateCombat(Map *map, CombatState* player_combat_state) {
     if (PLAYER->weapon_grid.activeIndex == -1)
         return;
     MapEntity *player = &map->player;
     WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
-    if (!player->combat.isAttacking)
+    if (!player_combat_state->isAttacking)
         return;
 
-    float t = player->combat.attackTimer / player->combat.attackDuration;
+    float t = player_combat_state->attackTimer / player_combat_state->attackDuration;
 
     // Only hit during active swing window
     if (t < 0.3f || t > 0.7f)
         return;
 
-    float baseAngle = player->combat.facing_direction;
+    float baseAngle = player_combat_state->facing_direction;
     bool useSword = slot->weapon_id == 5;
 
     // 1. DYNAMIC HITBOX SETTINGS (Increased reach distance)
@@ -151,10 +136,10 @@ void UpdateCombat(Map *map) {
     float arcStartDeg = useSword ? -90.0f : -110.0f;
     float arcEndDeg = useSword ? 90.0f : 110.0f;
 
-    if (player->combat.combo_state == COMBO_2) {
+    if (player_combat_state->combo_state == COMBO_2) {
         arcStartDeg = useSword ? -75.0f : -105.0f;
         arcEndDeg = useSword ? 75.0f : 105.0f;
-    } else if (player->combat.combo_state == COMBO_3) {
+    } else if (player_combat_state->combo_state == COMBO_3) {
         reachDistance = 80.0f; // Bumped up from 65.0f for the heavy finisher
         arcStartDeg = -120.0f;
         arcEndDeg = 120.0f;
@@ -170,9 +155,10 @@ void UpdateCombat(Map *map) {
 
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *e = &map->entities[i];
-        if (e != player && e->type != ENTITY_MINERAL && e->type != ENTITY_VHS) {
+        if (e->combat_component_id != INVALID_INDEX) {
             bool hit = false;
-            float entityRadius = e->type == ENTITY_ENEMY ? 16.0f : 5.0f;
+            CombatComponent *entity_combat_component = &map->combat_components[e->combat_component_id];
+            float entityRadius = 16.0f;
             Vector2 eCenter = GetEntityCenter(e);
 
             for (float offset = arcStartRad; offset <= arcEndRad;
@@ -188,8 +174,8 @@ void UpdateCombat(Map *map) {
                 }
             }
 
-            if (hit && !e->hitThisSwing) {
-                if (ProcessHit(map, &map->player, i)) {
+            if (hit && !entity_combat_component->hitThisSwing) {
+                if (ProcessHit(map,player_combat_state, &map->player, i)) {
                     i--;
                 }
             }
@@ -197,26 +183,26 @@ void UpdateCombat(Map *map) {
     }
 }
 
-void UpdatePlayerCombatAnimation(MapEntity *player, float dt) {
+void UpdatePlayerCombatAnimation(MapEntity *player, CombatState* combat,float dt) {
 
     if (PLAYER->weapon_grid.activeIndex == -1)
         return;
-    float baseAngle = player->combat.facing_direction;
-    if (baseAngle == 0 && !player->combat.isAttacking) {
-        baseAngle = -1.2f;
-    }
+    float baseAngle = combat->facing_direction;
+    if (baseAngle == -999.0f && combat->isAttacking) {
+            baseAngle = -1.2f;
+        }
 
-    if (player->combat.isAttacking) {
-        player->combat.attackTimer += dt;
+    if (combat->isAttacking) {
+        combat->attackTimer += dt;
 
-        float t = player->combat.attackTimer / player->combat.attackDuration;
+        float t = combat->attackTimer / combat->attackDuration;
         float easeT = EaseOutCubic(t);
 
         // LUNGE / STEP-IN MOMENTUM (slightly scaled up to match the extra
         // reach) LUNGE / STEP-IN MOMENTUM (Rusty-style smooth dash)
         if (t < 0.5f) {
             float maxLungeSpeed = 0.0f;
-            switch (player->combat.combo_state) {
+            switch (combat->combo_state) {
             case COMBO_1:
                 maxLungeSpeed = 500.0f;
                 break;
@@ -241,16 +227,16 @@ void UpdatePlayerCombatAnimation(MapEntity *player, float dt) {
         }
 
         if (t >= 1.0f) {
-            player->combat.isAttacking = false;
-            player->combat.attackTimer = 0;
-            player->combat.attackAngle = baseAngle;
+            combat->isAttacking = false;
+            combat->attackTimer = 0;
+            combat->attackAngle = baseAngle;
         } else {
             float startOffsetDeg = 0.0f;
             float endOffsetDeg = 0.0f;
             WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
             bool useSword = slot->weapon_id == 5;
 
-            switch (player->combat.combo_state) {
+            switch (combat->combo_state) {
             case COMBO_1:
                 startOffsetDeg = useSword ? -90.0f : -110.0f;
                 endOffsetDeg = useSword ? 90.0f : 110.0f;
@@ -272,16 +258,16 @@ void UpdatePlayerCombatAnimation(MapEntity *player, float dt) {
             float startRad = startOffsetDeg * DEG2RAD;
             float endRad = endOffsetDeg * DEG2RAD;
 
-            player->combat.attackAngle =
+            combat->attackAngle =
                 baseAngle + startRad + ((endRad - startRad) * easeT);
         }
     } else {
-        player->combat.attackAngle = baseAngle;
+        combat->attackAngle = baseAngle;
 
-        if (player->combat.combo_timer > 0) {
-            player->combat.combo_timer -= dt;
-            if (player->combat.combo_timer <= 0) {
-                player->combat.combo_state = COMBO_NONE;
+        if (combat->combo_timer > 0) {
+            combat->combo_timer -= dt;
+            if (combat->combo_timer <= 0) {
+                combat->combo_state = COMBO_NONE;
             }
         }
     }

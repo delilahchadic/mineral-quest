@@ -128,16 +128,26 @@ void ParseEnemyRow(char *line) {
     char *idToken = strtok(line, ",");
     char *nameToken = strtok(NULL, ",");
     char *spriteToken = strtok(NULL, ",");
-    char *hpToken = strtok(NULL, ",");
     char *weaponToken = strtok(NULL, ",");
+    char *hpToken = strtok(NULL, ",");
+    char *mpToken = strtok(NULL, ",");
     if (idToken && nameToken) {
         int id = atoi(idToken);
         Enemy *e = &ENEMY_REGISTRY[id];
         strncpy(e->species_name, nameToken, sizeof(e->species_name) - 1);
         e->species_name[sizeof(e->species_name) - 1] = '\0';
         e->sprite = LoadTexture(spriteToken);
-        e->hp = atoi(hpToken);
         e->weapon_id = atoi(weaponToken);
+        e->hp = atoi(hpToken);
+        e->mp = atoi(mpToken);
+        // 3. Parse Stat Bonuses (Loops over all 9 stats in StatType order)
+        for (uint8_t i = 0; i < STAT_COUNT; i++) {
+            char *statToken = strtok(NULL, ",");
+            e->stats[i] = statToken ? atoi(statToken) : 0;
+        }
+        char *exp_token = strtok(NULL,",");
+        e->exp=atoi(exp_token);
+
     }
 }
 

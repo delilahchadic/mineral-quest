@@ -25,10 +25,10 @@ void (*tarot_callbacks[100])(void *) = {
     [3] = FourOfWands,
 };
 
-Vector2 GetTargetPosition(Map *map) {
+Vector2 GetTargetPosition(Map *map,CombatState* combat) {
     if (PLAYER->targeting.target_id == -1) {
         // Convert the float angle into a direction vector using trig
-        float angle = map->player.combat.facing_direction;
+        float angle = combat->facing_direction;
         Vector2 facing = { cosf(angle), sinf(angle) };
 
         // Shoot roughly 4 tiles (150 pixels) ahead in that direction
@@ -74,8 +74,9 @@ void ThreeOfWands(void *context) { // simple fire spell
 
     fireball->type = ENTITY_PROJECTILE;
     AssignNewMovementComponent(map, fireball);
+    CombatState* combat = &gamestate->session.player->player_combat_state;
     MovementComponent* movement_component = &map->movement_components[fireball->movement_component_id];
-    movement_component->target_position = GetTargetPosition(map);
+    movement_component->target_position = GetTargetPosition(map,combat);
     movement_component->behavior = BEHAVIOR_AIM;
     movement_component->speed = 200.0f;
     fireball->element_flags = ELEMENT_FIRE;

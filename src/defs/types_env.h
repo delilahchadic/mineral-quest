@@ -27,18 +27,6 @@ typedef enum Behavior {
     BEHAVIOR_ORBIT
 } Behavior;
 
-typedef enum ComboState { COMBO_NONE, COMBO_1, COMBO_2, COMBO_3 } ComboState;
-
-typedef struct {
-    bool isAttacking;
-    float attackTimer;
-    float attackDuration;
-    float attackAngle;
-    ComboState combo_state;
-    float combo_timer;
-    float facing_direction; // Base angle (e.g. 0 for right, PI for left)
-} CombatState;
-
 typedef struct MovementComponent{
     Vector2 target_position;
     Behavior behavior;
@@ -51,6 +39,12 @@ typedef struct MovementComponent{
     int is_active;
 }MovementComponent;
 
+typedef struct CombatComponent{
+    bool hitThisSwing;
+    int hp, mp, exp;
+    int is_active;
+}CombatComponent;
+
 typedef struct MapEntity {
     //identity
     EntityType type;  // Is this a person or a flower?
@@ -62,14 +56,9 @@ typedef struct MapEntity {
     float altitude;
     struct MapEntity *next_in_bucket; // render help
     int movement_component_id;
-    // TODO implement combat_component
-    int hp;
-    CombatState combat;
-    bool hitThisSwing;
+    int combat_component_id;
     bool isCollecting;
-    StatBlock *stats;
     uint32_t element_flags;
-
 } MapEntity;
 
 typedef struct Tile {
@@ -106,10 +95,13 @@ typedef struct Map {
     MapEntity *buckets[MAP_HEIGHT];
     MapEntity entities[MAX_ENTITIES];
     MovementComponent movement_components[250];
+    CombatComponent combat_components[250];
     int movement_component_count;
+    int combat_component_count;
     int entity_count;
     BuildingZone *buildings;
     int building_id; // used to guarantee any new building has a unique id
     int instance_id_count;
+    FloatingText floating_text_pool[MAX_FLOATING_TEXTS];
 } Map;
 #endif

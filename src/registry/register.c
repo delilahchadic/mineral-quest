@@ -335,7 +335,6 @@ Vector2 GetDestination(EntityType type, int id) {
 
 Vector2 GetEntityCenter(MapEntity *entity) {
     Texture2D *texture = GetSprite(entity->type, entity->entity_id);
-
     float center_x =
         entity->position.x; // Or entity->position.x + (texture->width / 2.0f)
                             // depending on your origin

@@ -60,6 +60,9 @@ void InitPlaySession(Gamestate *gamestate) {
     session->equip_menu.activeSlot = 0;
     session->equip_menu.activeItemSlot = 0;
     session->equip_menu.mode = SLOT_NONE;
+    session->player->player_combat_state.isAttacking = false;
+    session->player->player_combat_state.attackTimer = 0;
+    session->player->player_combat_state.attackDuration = 0.25f;
 }
 
 void ChangeMap(Gamestate *gamestate, char *map_name, Vector2 destination) {
@@ -89,8 +92,8 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         return;
     }
     if ((input->attack_dir.x != 0.0f || input->attack_dir.y != 0.0f) &&
-        !gamestate->map.player.combat.isAttacking) {
-        ExecuteDirectionalAttack(&gamestate->map, input);
+        !session->player->player_combat_state.isAttacking) {
+        ExecuteDirectionalAttack(&gamestate->map,&session->player->player_combat_state, input);
     }
     if (input->buttons_pressed & KEY_N_PRESSED) {
         RebindItemMenu(&session->menu, session->player);
@@ -144,7 +147,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         }
     }
     if (input->buttons_pressed & KEY_P_PRESSED) {
-        ExecuteTargetedAttack(&gamestate->map, gamestate->session.player);
+        ExecuteTargetedAttack(&gamestate->map, gamestate->session.player, &gamestate->session.player->player_combat_state);
     }
 
     if (input->buttons_pressed & KEY_G_PRESSED) {
@@ -162,19 +165,19 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
     if (gamestate->map.hitstop_timer > 0.0f) {
         gamestate->map.hitstop_timer -= dt;
     } else {
-        UpdatePlayerCombatAnimation(&gamestate->map.player, dt);
+        UpdatePlayerCombatAnimation(&gamestate->map.player,&gamestate->session.player->player_combat_state, dt);
 
         if (input->buttons_pressed &
             (KEY_W_PRESSED | KEY_S_PRESSED | MOVEMENT_PRESSED)) {
             if (input->dir.x != 0.0f || input->dir.y != 0.0f) {
-                gamestate->map.player.combat.facing_direction =
+                gamestate->session.player->player_combat_state.facing_direction =
                     atan2f(input->dir.y, input->dir.x);
             }
         }
         CheckHazards(&gamestate->map, dt);
         UpdatePhysics(&gamestate->map, input);
         UpdateBuffs(session->player, dt);
-        UpdateCombat(&gamestate->map);
+        UpdateCombat(&gamestate->map, &gamestate->session.player->player_combat_state);
         CheckAndCollectMinerals(&gamestate->map);
         CheckForVHS(&gamestate->map);
         UpdateEntityMovement(&gamestate->map, dt);

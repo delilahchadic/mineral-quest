@@ -12,6 +12,7 @@
 #include "systems/input.h"
 #include "systems/player.h"
 #include "systems/script_manager.h"
+#include "systems/weapon_grid.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -55,17 +56,14 @@ void InitPlayer(Map *map) {
 
     player->type = ENTITY_PLAYER;
     AssignNewMovementComponent(map, player);
-    MovementComponent *movement_component= &map->movement_components[player->movement_component_id];
+    MovementComponent *movement_component =
+        &map->movement_components[player->movement_component_id];
     movement_component->state = NORMAL_STATE;
     movement_component->jumpoffset = 0.0f;
-    player->combat.isAttacking = false;
-    player->combat.attackTimer = 0;
-    player->combat.attackDuration = 0.25f;
-    player->stats = GetStats(ENTITY_PLAYER, 0);
     player->instance_id = -2;
 }
 
-MovementComponent* GetPlayerMovementComponent(Map* map){
+MovementComponent *GetPlayerMovementComponent(Map *map) {
     return &map->movement_components[map->player.movement_component_id];
 }
 
@@ -143,9 +141,11 @@ Vector2 GetIsoWorldToGridWithHeight(Map *map, Vector2 screenWorldPos) {
 }
 
 void ResetAllHitFlags(Map *map) {
-    for (int i = 0; i < map->entity_count; i++) {
-        MapEntity *e = &map->entities[i];
-        e->hitThisSwing = false;
+    printf("Resetting hit flags\n");
+    for (int i = 0; i < 250; i++) {
+        if (map->combat_components[i].is_active) {
+            map->combat_components[i].hitThisSwing = false;
+        }
     }
 }
 
@@ -187,9 +187,17 @@ void RemoveEntityAt(Map *map, int index) {
     MapEntity *entity = &map->entities[index];
 
     // Release the movement component back to the pool if it has one
-    if (entity->movement_component_id != -1 && entity->movement_component_id < 250) {
-        map->movement_components[entity->movement_component_id].is_active = false;
+    if (entity->movement_component_id != -1 &&
+        entity->movement_component_id < 250) {
+        map->movement_components[entity->movement_component_id].is_active =
+            false;
         entity->movement_component_id = -1;
+    }
+
+    if (entity->combat_component_id != -1 &&
+        entity->combat_component_id < 250) {
+        map->combat_components[entity->combat_component_id].is_active = false;
+        entity->combat_component_id = -1;
     }
 
     // If the entity being removed isn't already the last one,
@@ -279,4 +287,85 @@ void AssignNewMovementComponent(Map *map, MapEntity *entity) {
     // If we get here, all 250 slots are taken!
     TraceLog(LOG_ERROR, "Movement component pool exhausted (max 250 reached)!");
     entity->movement_component_id = -1;
+}
+
+void AssignNewCombatComponent(Map *map, MapEntity *entity) {
+    // Scan the fixed pool for an available inactive slot
+    for (int i = 0; i < 250; i++) {
+        if (!map->combat_components[i].is_active) {
+            // Clear out old data from the slot
+            memset(&map->combat_components[i], 0, sizeof(CombatComponent));
+            map->combat_components[i].is_active = true;
+
+            entity->combat_component_id = i;
+            return;
+        }
+    }
+
+    // If we get here, all 250 slots are taken!
+    TraceLog(LOG_ERROR, "Combat component pool exhausted (max 250 reached)!");
+    entity->combat_component_id = -1;
+}
+
+void SpawnFloatingText(Map *map, Vector2 worldPos, const char *text,
+                       Color color) {
+    for (int i = 0; i < MAX_FLOATING_TEXTS; i++) {
+        if (!map->floating_text_pool[i].is_active) {
+            map->floating_text_pool[i].is_active = true;
+            map->floating_text_pool[i].position = worldPos;
+            snprintf(map->floating_text_pool[i].text,
+                     sizeof(map->floating_text_pool[i].text), "%s", text);
+            map->floating_text_pool[i].color = color;
+            map->floating_text_pool[i].lifetime = 1.0f; // Lasts 1 second
+            map->floating_text_pool[i].max_lifetime = 1.0f;
+            return;
+        }
+    }
+}
+
+void ApplyDamageToEnemy(Map *map, int enemy_entity_index, int damage) {
+    MapEntity *target = &map->entities[enemy_entity_index];
+    if (target->type != ENTITY_ENEMY)
+        return;
+
+    if (target->combat_component_id == INVALID_INDEX)
+        return;
+    CombatComponent *enemy_combat_component =
+        &map->combat_components[target->combat_component_id];
+
+    // Apply damage
+    enemy_combat_component->hp -= damage;
+
+    // Check for death
+    if (enemy_combat_component->hp <= 0) {
+        if (PLAYER->targeting.locked &&
+            PLAYER->targeting.target_id == target->instance_id) {
+            PLAYER->targeting.locked = false;
+        }
+
+        WeaponSlot *slot = GetActiveWeaponsSlot(&PLAYER->weapon_grid);
+        if (slot) {
+            Enemy *enemy = &ENEMY_REGISTRY[target->entity_id];
+            int gained_exp = enemy->exp;
+            slot->exp += gained_exp;
+
+            char expStr[32];
+            snprintf(expStr, sizeof(expStr), "+%d EXP", gained_exp);
+            SpawnFloatingText(map, target->position, expStr, GOLD);
+            while (slot->exp >= slot->next_level_exp) {
+                slot->exp = slot->exp % slot->next_level_exp;
+                int base_socket_count = slot->max_socket / slot->level;
+                int base_level_exp = slot->next_level_exp / slot->level;
+                slot->level++;
+                slot->max_socket = base_socket_count * slot->level;
+                slot->next_level_exp = base_level_exp * slot->level;
+                char lvlStr[32];
+                snprintf(lvlStr, sizeof(lvlStr), "Level up! %s +%d!", GetName(ENTITY_ITEM, slot->weapon_id), slot->level);
+                SpawnFloatingText(map, map->player.position, lvlStr, COLOR_CAMO_WOODLAND_GREEN);
+            }
+        }
+
+        // REMOVE THE ENEMY
+        RemoveEntityAt(map, enemy_entity_index);
+    }
 }

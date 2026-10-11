@@ -4,6 +4,31 @@
 #include "defs/types_minerals.h"
 #include "raylib.h"
 #include <stdint.h>
+#define MAX_FLOATING_TEXTS 64
+
+typedef enum ComboState { COMBO_NONE, COMBO_1, COMBO_2, COMBO_3 } ComboState;
+
+
+
+
+typedef struct {
+    Vector2 position;       // World position (or isometric screen space position)
+    char text[32];          // The string to display (e.g., "+150 EXP")
+    Color color;            // Color of the text (e.g., gold or white)
+    float lifetime;         // Remaining life in seconds (e.g., 1.0f down to 0.0f)
+    float max_lifetime;     // Initial lifetime for alpha fading
+    bool is_active;         // Pool slot status
+} FloatingText;
+
+typedef struct {
+    bool isAttacking;
+    float attackTimer;
+    float attackDuration;
+    float attackAngle;
+    ComboState combo_state;
+    float combo_timer;
+    float facing_direction; // Base angle (e.g. 0 for right, PI for left)
+} CombatState;
 
 typedef enum ElementFlags {
     ELEMENT_NONE     = 0,
@@ -165,6 +190,7 @@ typedef struct Player {
     StatBlock stats;
     Gear gear;
     PlayerTargeting targeting;
+    CombatState player_combat_state;
     // Inside your Player struct or stats definition:
     float damage_cooldown;
     uint8_t recipe_inventory[100];

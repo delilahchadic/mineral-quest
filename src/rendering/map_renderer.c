@@ -246,8 +246,9 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             }
 
             if (entity->type == ENTITY_ENEMY) {
+                CombatComponent *enemy_combat_component = &map->combat_components[entity->combat_component_id];
                 char hpStr[16];
-                snprintf(hpStr, sizeof(hpStr), "hp:%d", entity->hp);
+                snprintf(hpStr, sizeof(hpStr), "hp:%d", enemy_combat_component->hp);
                 DrawText(hpStr, drawPos.x + 20, drawPos.y - 10.0, 12.0,
                          COLOR_SUNKEN_INK);
             }
@@ -304,7 +305,7 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             WeaponSlot *slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
 
             DrawWeapon(slot->weapon_id, handPos,
-                       map->player.combat.attackAngle);
+                       PLAYER->player_combat_state.attackAngle);
         }
 
         if (entity->type == ENTITY_ENEMY &&
@@ -322,6 +323,44 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             DrawWeapon(GetEntityWeaponId(ENTITY_ENEMY, entity->entity_id),
                        handPos, angle);
         }
+    }
+}
+
+void UpdateAndDrawFloatingTexts(Map *map, float dt) {
+    for (int i = 0; i < MAX_FLOATING_TEXTS; i++) {
+        FloatingText *ft = &map->floating_text_pool[i];
+        if (!ft->is_active) continue;
+
+        // Tick down lifetime
+        ft->lifetime -= dt;
+        if (ft->lifetime <= 0.0f) {
+            ft->is_active = false;
+            continue;
+        }
+
+        // Drift upward over time in world/vertical space
+        ft->position.y -= 15.0f * dt;
+
+        // 1. Convert world position to isometric screen space
+        Vector2 position = GetWorldToIso(ft->position);
+
+        // 2. Account for terrain height and entity altitude just like Draw_MapEntity does
+        int tx = (int)(ft->position.x / TILE_SIZE);
+        int ty = (int)(ft->position.y / TILE_SIZE);
+        float floorY = 0.0f;
+        if (tx >= 0 && tx < map->columns && ty >= 0 && ty < map->rows) {
+            floorY = map->grid[ty][tx].height * 8.0f;
+        }
+
+        // Subtract floor height / altitude offset to match the isometric projection
+        position.y -= floorY;
+
+        // Fade out alpha based on remaining lifetime
+        float alpha = ft->lifetime / ft->max_lifetime;
+        Color renderColor = Fade(ft->color, alpha);
+
+        // Draw the text centered above the entity
+        DrawText(ft->text, (int)position.x - 10, (int)position.y - 30, 10, renderColor);
     }
 }
 
@@ -456,7 +495,7 @@ void Draw_Map(Map *map, Camera2D *camera, bool drawPlayer) {
         DrawCircleLines(pPos.x, pPos.y - 12, 10, WHITE);
     }
     // }
-
+    UpdateAndDrawFloatingTexts(map, GetFrameTime());
     EndMode2D();
     DrawFPS(10, 10);
 }

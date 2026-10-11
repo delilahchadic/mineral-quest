@@ -2,6 +2,7 @@
 #include "defs/types_engine.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "engine/palette.h"
 #include "environment/map.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -9,7 +10,7 @@
 #include "systems/script_manager.h"
 #include <stdbool.h>
 
-void InitDialog(Player* player,Map *map, ScriptManager *manager) {
+void InitDialog(Player *player, Map *map, ScriptManager *manager) {
     // get characterid
     // set dialg
     int characterIndex = CheckTargetTrait(player, map, TRAIT_TALK);
@@ -37,7 +38,7 @@ void CheckAndCollectMinerals(Map *map) {
     }
 }
 
-void CheckForVHS(Map* map){
+void CheckForVHS(Map *map) {
 
     float collectionRadius = 64.0f;
     for (int i = 0; i < map->entity_count; i++) {
@@ -50,37 +51,56 @@ void CheckForVHS(Map* map){
                 // float pitch = 0.95f + ((float)(e->id % 10)/ 100.0f);
                 PlaySound(MINERAL_SOUND);
                 PLAYER->vhs_inventory[entity->entity_id]++;
+                SpawnFloatingText(map, entity->position, GetName(entity->type, entity->entity_id), COLOR_SUNKEN_INK);
                 RemoveEntityAt(map, i);
             }
         }
     }
 }
-char *GatherTarget(Player *player, Map *map){
+char *GatherTarget(Player *player, Map *map) {
     int target = player->targeting.target_id;
-    if (target == -1) return NULL;
+    if (target == -1)
+        return NULL;
     int index = CheckTargetTrait(player, map, TRAIT_GATHER);
-    if(index != -1){
-        MapEntity* entity = &map->entities[index];
-        if(entity->type ==  ENTITY_ITEM){
+    if (index != -1) {
+        MapEntity *entity = &map->entities[index];
+        if (entity->type == ENTITY_ITEM) {
             int item_id = entity->entity_id;
+            ItemDefinition *item_def = &ITEM_REGISTRY[item_id];
             GiveItem(player, item_id);
+            Color text_color;
+            switch (item_def->slot) {
+                case SLOT_WEAPON:text_color=COLOR_CAMO_WOODLAND_GREEN;break;
+                case SLOT_ACCESSORY:text_color=COLOR_CERULEAN_WISTFUL;break;
+                case SLOT_TAROT:text_color=COLOR_MUTED_FUCHSIA;break;
+                default:text_color=COLOR_SUNKEN_INK;break;
+            }
+            SpawnFloatingText(map, entity->position,
+                              GetName(entity->type, entity->entity_id),
+                              text_color);
             RemoveEntityAt(map, index);
             return GetName(ENTITY_ITEM, item_id);
-        }else if (map->entities[index].type == ENTITY_PLANT){
+        } else if (map->entities[index].type == ENTITY_PLANT) {
             Plant *pl = &PLANT_REGISTRY[entity->entity_id];
             int plant_id = entity->entity_id;
-            if (PLAYER->stats.current[STAT_BOTANY] >= pl->gather_level){
+            if (PLAYER->stats.current[STAT_BOTANY] >= pl->gather_level) {
                 PLAYER->plant_inventory[entity->entity_id]++;
+                SpawnFloatingText(map, entity->position,
+                                  GetName(entity->type, entity->entity_id),
+                                  COLOR_PTHALO_EMERALD);
                 RemoveEntityAt(map, index);
                 return GetName(ENTITY_PLANT, plant_id);
             }
-        }else if(map->entities[index].type == ENTITY_RECIPE){
-            Recipe* recipe = &RECIPE_REGISTRY[entity->entity_id];
+        } else if (map->entities[index].type == ENTITY_RECIPE) {
+            Recipe *recipe = &RECIPE_REGISTRY[entity->entity_id];
             int recipe_id = recipe->id;
             player->recipe_inventory[recipe_id] = 1;
+            SpawnFloatingText(map, entity->position,
+                              GetName(entity->type, entity->entity_id),
+                              COLOR_RED_OCHRE);
             RemoveEntityAt(map, index);
             return GetName(ENTITY_RECIPE, recipe_id);
-        }else{
+        } else {
             return NULL;
         }
     }
@@ -89,7 +109,8 @@ char *GatherTarget(Player *player, Map *map){
 }
 
 void CheckHazards(Map *map, float dt) {
-    // Tick down damage cooldown using whatever player reference or timer you use
+    // Tick down damage cooldown using whatever player reference or timer you
+    // use
     if (PLAYER->damage_cooldown > 0.0f) {
         PLAYER->damage_cooldown -= dt;
         return;
@@ -103,12 +124,14 @@ void CheckHazards(Map *map, float dt) {
         // Negative damage amount = healing (like upcoming Mint)
         if (p->damage_amount < 0) {
             int heal_amount = -p->damage_amount;
-            PLAYER->stats.current_hp = (PLAYER->stats.current_hp + heal_amount > PLAYER->stats.max_hp)
-                                       ? PLAYER->stats.max_hp
-                                       : PLAYER->stats.current_hp + heal_amount;
+            PLAYER->stats.current_hp =
+                (PLAYER->stats.current_hp + heal_amount > PLAYER->stats.max_hp)
+                    ? PLAYER->stats.max_hp
+                    : PLAYER->stats.current_hp + heal_amount;
 
             PLAYER->damage_cooldown = 1.0f;
-            printf("Stepped on %s and recovered %d HP!\n", p->species_name, heal_amount);
+            printf("Stepped on %s and recovered %d HP!\n", p->species_name,
+                   heal_amount);
             return;
         }
 
@@ -120,35 +143,39 @@ void CheckHazards(Map *map, float dt) {
             // Apply Knockback
             Vector2 plantCenter = GetEntityCenter(&map->entities[painPoint]);
             Vector2 playerCenter = GetEntityCenter(&map->player);
-            Vector2 pushDir = Vector2Normalize(Vector2Subtract(playerCenter, plantCenter));
+            Vector2 pushDir =
+                Vector2Normalize(Vector2Subtract(playerCenter, plantCenter));
 
             if (Vector2LengthSqr(pushDir) == 0.0f) {
                 pushDir = (Vector2){0.0f, 1.0f};
             }
 
-            map->player.position = Vector2Add(map->player.position, Vector2Scale(pushDir, 40.0f));
+            map->player.position =
+                Vector2Add(map->player.position, Vector2Scale(pushDir, 40.0f));
         }
     }
 }
 
-void HandleInteract(Gamestate* gamestate){
+void HandleInteract(Gamestate *gamestate) {
     PlaySession *session = &gamestate->session;
     char *item = GatherTarget(session->player, &gamestate->map);
     if (item) {
-        session->state = GATHER_PROMPT;
-        sprintf(session->pendingItemName, "You got a %s !", item);
+        // session->state = GATHER_PROMPT;
+        // sprintf(session->pendingItemName, "You got a %s !", item);
         return;
     }
 
-    int locked_portal_index =
-        CheckTargetTrait(session->player, &gamestate->map, TRAIT_TELEPORT_LOCKED);
-    if(locked_portal_index > -1){
-        MapEntity *locked_entity = &gamestate->map.entities[locked_portal_index];
-        int vhs_index =-1;
-        for(int i =0; i < GetEntityTypeCount(ENTITY_VHS);i++){
-            if(VHS_REGISTRY[i].portal_id ==  locked_entity->entity_id) vhs_index = i;
+    int locked_portal_index = CheckTargetTrait(session->player, &gamestate->map,
+                                               TRAIT_TELEPORT_LOCKED);
+    if (locked_portal_index > -1) {
+        MapEntity *locked_entity =
+            &gamestate->map.entities[locked_portal_index];
+        int vhs_index = -1;
+        for (int i = 0; i < GetEntityTypeCount(ENTITY_VHS); i++) {
+            if (VHS_REGISTRY[i].portal_id == locked_entity->entity_id)
+                vhs_index = i;
         }
-        if(vhs_index != -1 &&PLAYER->vhs_inventory[vhs_index] > 0){
+        if (vhs_index != -1 && PLAYER->vhs_inventory[vhs_index] > 0) {
             locked_entity->trait_flags = TRAIT_TELEPORT;
             PORTAL_REGISTRY[locked_entity->entity_id].locked = 0;
         }

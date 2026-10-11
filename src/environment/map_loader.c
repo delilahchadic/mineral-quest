@@ -130,7 +130,14 @@ void LoadMap(const char *mapName, Map *map) {
             m->trait_flags = GetDefaultTraitFlags(m->type, m->entity_id);
 
             if (m->type == ENTITY_ENEMY) {
-                m->hp = ENEMY_REGISTRY[m->entity_id].hp;
+                AssignNewCombatComponent(map, m);
+                CombatComponent *combat_component =
+                    &map->combat_components[m->combat_component_id];
+                Enemy* enemy =  &ENEMY_REGISTRY[m->entity_id];
+                combat_component->hp = enemy->hp;
+                combat_component->mp = enemy->mp;
+            }else{
+                m->combat_component_id=INVALID_INDEX;
             }
             if (m->type == ENTITY_CHARACTER || m->type == ENTITY_ENEMY) {
                 AssignNewMovementComponent(map, m);
@@ -141,7 +148,7 @@ void LoadMap(const char *mapName, Map *map) {
                 movement_component->speed = 30.0f;
                 movement_component->target_position = m->position;
             }else{
-                m->movement_component_id=-1;
+                m->movement_component_id=INVALID_INDEX;
             }
 
             if (gx >= 0 && gx < map->columns && gy >= 0 && gy < map->rows) {
