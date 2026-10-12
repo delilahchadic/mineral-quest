@@ -219,7 +219,8 @@ MapEntity *AddEntity(Map *map) {
 
     // Automatically handle unique instance ID here!
     slot->instance_id = map->instance_id_count++;
-
+    slot->movement_component_id = INVALID_INDEX;
+    slot->combat_component_id = INVALID_INDEX;
     map->entity_count++;
     return slot;
 }
