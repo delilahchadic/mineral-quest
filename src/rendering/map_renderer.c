@@ -220,9 +220,9 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
 
     Vector2 position = GetWorldToIso(entity->position);
     position.y -= entity->altitude;
-    if(entity->type == ENTITY_VHS){
+    if (entity->type == ENTITY_VHS) {
         DrawVHSTape(position);
-    }else if (entity->type == ENTITY_MINERAL) {
+    } else if (entity->type == ENTITY_MINERAL) {
         DrawMineral(entity->entity_id, position);
     } else {
         Texture2D *sprite = GetSprite(entity->type, entity->entity_id);
@@ -246,9 +246,11 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
             }
 
             if (entity->type == ENTITY_ENEMY) {
-                CombatComponent *enemy_combat_component = &map->combat_components[entity->combat_component_id];
+                CombatComponent *enemy_combat_component =
+                    &map->combat_components[entity->combat_component_id];
                 char hpStr[16];
-                snprintf(hpStr, sizeof(hpStr), "hp:%d", enemy_combat_component->hp);
+                snprintf(hpStr, sizeof(hpStr), "hp:%d",
+                         enemy_combat_component->hp);
                 DrawText(hpStr, drawPos.x + 20, drawPos.y - 10.0, 12.0,
                          COLOR_SUNKEN_INK);
             }
@@ -303,9 +305,10 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
 
             Vector2 handPos = {drawPos.x + 12, drawPos.y + 48};
             WeaponSlot *slot = GetActiveWeaponsSlot(&GLOBAL_PLAYER.weapon_grid);
-
-            DrawWeapon(slot->weapon_id, handPos,
-                       PLAYER->player_combat_state.attackAngle);
+            if (slot) {
+                DrawWeapon(slot->weapon_id, handPos,
+                           PLAYER->player_combat_state.attackAngle);
+            }
         }
 
         if (entity->type == ENTITY_ENEMY &&
@@ -329,7 +332,8 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
 void UpdateAndDrawFloatingTexts(Map *map, float dt) {
     for (int i = 0; i < MAX_FLOATING_TEXTS; i++) {
         FloatingText *ft = &map->floating_text_pool[i];
-        if (!ft->is_active) continue;
+        if (!ft->is_active)
+            continue;
 
         // Tick down lifetime
         ft->lifetime -= dt;
@@ -344,7 +348,8 @@ void UpdateAndDrawFloatingTexts(Map *map, float dt) {
         // 1. Convert world position to isometric screen space
         Vector2 position = GetWorldToIso(ft->position);
 
-        // 2. Account for terrain height and entity altitude just like Draw_MapEntity does
+        // 2. Account for terrain height and entity altitude just like
+        // Draw_MapEntity does
         int tx = (int)(ft->position.x / TILE_SIZE);
         int ty = (int)(ft->position.y / TILE_SIZE);
         float floorY = 0.0f;
@@ -352,7 +357,8 @@ void UpdateAndDrawFloatingTexts(Map *map, float dt) {
             floorY = map->grid[ty][tx].height * 8.0f;
         }
 
-        // Subtract floor height / altitude offset to match the isometric projection
+        // Subtract floor height / altitude offset to match the isometric
+        // projection
         position.y -= floorY;
 
         // Fade out alpha based on remaining lifetime
@@ -360,7 +366,8 @@ void UpdateAndDrawFloatingTexts(Map *map, float dt) {
         Color renderColor = Fade(ft->color, alpha);
 
         // Draw the text centered above the entity
-        DrawText(ft->text, (int)position.x - 10, (int)position.y - 30, 10, renderColor);
+        DrawText(ft->text, (int)position.x - 10, (int)position.y - 30, 10,
+                 renderColor);
     }
 }
 

@@ -103,28 +103,23 @@ bool ResolveMovement(Map *map) {
 }
 
 bool CheckCollision(Map *map, Vector2 nextPos) {
-    int cur_x = (int)(map->player.position.x / TILE_SIZE);
-    int cur_y = (int)(map->player.position.y / TILE_SIZE);
-    if (cur_x < 0 || cur_x >= map->columns || cur_y < 0 || cur_y >= map->rows)
-        return true;
-
-    // The player's actual height is just their altitude
-    float currentWorldHeight = map->player.altitude / 8.0f;
-
+    // Define the player's bounding box footprint
     float foot_left = nextPos.x - 14;
     float foot_right = nextPos.x + 14;
     float foot_top = nextPos.y - 8;
     float foot_bottom = nextPos.y + 8;
 
-    int checkX[] = {(int)(foot_left / TILE_SIZE),
-                    (int)(foot_right / TILE_SIZE)};
-    int checkY[] = {(int)(foot_top / TILE_SIZE),
-                    (int)(foot_bottom / TILE_SIZE)};
+    int checkX[] = {(int)(foot_left / TILE_SIZE), (int)(foot_right / TILE_SIZE)};
+    int checkY[] = {(int)(foot_top / TILE_SIZE), (int)(foot_bottom / TILE_SIZE)};
+
+    float currentWorldHeight = map->player.altitude / 8.0f;
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
+            // Safely clamp indices to valid map bounds instead of blocking outright
             int cx = Clamp(checkX[i], 0, map->columns - 1);
             int cy = Clamp(checkY[j], 0, map->rows - 1);
+
             float targetHeight = (float)map->grid[cy][cx].height;
             bool is_blocking = TILE_REGISTRY[map->grid[cy][cx].type].is_blocking;
 
@@ -132,10 +127,9 @@ bool CheckCollision(Map *map, Vector2 nextPos) {
                 return true;
 
             // STEP HEIGHT LOGIC:
-            // If the tile is more than 1.5 units higher than our CURRENT
-            // feet...
+            // If the tile is more than 1.5 units higher than our CURRENT feet...
             if (targetHeight > currentWorldHeight + 1.5f) {
-                return true; // We hit a wall
+                return true; // We hit a step wall
             }
         }
     }
