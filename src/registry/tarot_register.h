@@ -11,4 +11,5 @@ void ThreeOfWands(void* context);
 void ThreeOfCups(void* context);
 void TheTower(void *context);
 void FourOfWands(void *context);
+void FourOfCups(void *context);
 #endif

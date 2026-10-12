@@ -2,10 +2,11 @@
 #include "defs/types_engine.h"
 #include "defs/types_entities.h"
 #include "defs/types_env.h"
+#include "defs/types_systems.h"
 #include "environment/map.h"
 #include "registry/register.h"
-#include <stdlib.h>
 #include <raymath.h>
+#include <stdlib.h>
 static int tarot_card_count = 78;
 
 TarotCard TAROT_REGISTRY[78] = {0};
@@ -19,17 +20,15 @@ TarotCard *GetTarotCardByItemId(int item_id) {
 }
 
 void (*tarot_callbacks[100])(void *) = {
-    [0] = ThreeOfWands,
-    [1] = ThreeOfCups,
-    [2] = TheTower,
-    [3] = FourOfWands,
+    [0] = ThreeOfWands, [1] = ThreeOfCups, [2] = TheTower,
+    [3] = FourOfWands,  [4] = FourOfCups,
 };
 
-Vector2 GetTargetPosition(Map *map,CombatState* combat) {
+Vector2 GetTargetPosition(Map *map, CombatState *combat) {
     if (PLAYER->targeting.target_id == -1) {
         // Convert the float angle into a direction vector using trig
         float angle = combat->facing_direction;
-        Vector2 facing = { cosf(angle), sinf(angle) };
+        Vector2 facing = {cosf(angle), sinf(angle)};
 
         // Shoot roughly 4 tiles (150 pixels) ahead in that direction
         return Vector2Add(map->player.position, Vector2Scale(facing, 150.0f));
@@ -74,43 +73,44 @@ void ThreeOfWands(void *context) { // simple fire spell
 
     fireball->type = ENTITY_PROJECTILE;
     AssignNewMovementComponent(map, fireball);
-    CombatState* combat = &gamestate->session.player->player_combat_state;
-    MovementComponent* movement_component = &map->movement_components[fireball->movement_component_id];
-    movement_component->target_position = GetTargetPosition(map,combat);
+    CombatState *combat = &gamestate->session.player->player_combat_state;
+    MovementComponent *movement_component =
+        &map->movement_components[fireball->movement_component_id];
+    movement_component->target_position = GetTargetPosition(map, combat);
     movement_component->behavior = BEHAVIOR_AIM;
     movement_component->speed = 200.0f;
     fireball->element_flags = ELEMENT_FIRE;
 }
 
 void ThreeOfCups(void *context) { // simple heal
-    (void)context; // may implement rendering later
+    (void)context;                // may implement rendering later
     int newHp = PLAYER->stats.current_hp + 20 > PLAYER->stats.max_hp
                     ? PLAYER->stats.max_hp
                     : PLAYER->stats.current_hp + 20;
     PLAYER->stats.current_hp = newHp;
 }
 
-void TheTower(void *context) { // Late game convenience spell cull all enemies no exp
+void TheTower(
+    void *context) { // Late game convenience spell cull all enemies no exp
     Gamestate *gamestate = (Gamestate *)context;
-    int enemyFound =1;
-    while(enemyFound){
-        enemyFound =0;
-        for(int i =0;i< gamestate->map.entity_count;i++){
-            if(gamestate->map.entities[i].type == ENTITY_ENEMY){
-                RemoveEntityAt(&gamestate->map,i);
+    int enemyFound = 1;
+    while (enemyFound) {
+        enemyFound = 0;
+        for (int i = 0; i < gamestate->map.entity_count; i++) {
+            if (gamestate->map.entities[i].type == ENTITY_ENEMY) {
+                RemoveEntityAt(&gamestate->map, i);
                 enemyFound = 1;
                 break;
             }
         }
     }
-
 }
 
 void FourOfWands(void *context) { // Four orbiting fireballs that circle Rusty
     Gamestate *gamestate = (Gamestate *)context;
     Map *map = &gamestate->map;
 
-    float startAngles[4] = { 0.0f, PI / 2.0f, PI, 3.0f * PI / 2.0f };
+    float startAngles[4] = {0.0f, PI / 2.0f, PI, 3.0f * PI / 2.0f};
     float orbitRadius = 65.0f;
 
     for (int i = 0; i < 4; i++) {
@@ -121,19 +121,53 @@ void FourOfWands(void *context) { // Four orbiting fireballs that circle Rusty
         fireball->entity_id = 0;
         fireball->type = ENTITY_PROJECTILE;
         AssignNewMovementComponent(map, fireball);
-        MovementComponent* movement_component = &map->movement_components[fireball->movement_component_id];
+        MovementComponent *movement_component =
+            &map->movement_components[fireball->movement_component_id];
         movement_component->behavior = BEHAVIOR_ORBIT;
         fireball->element_flags = ELEMENT_FIRE;
-        movement_component->behavior_timer = startAngles[i]; // Store starting angle offset
+        movement_component->behavior_timer =
+            startAngles[i]; // Store starting angle offset
         movement_component->speed = 0.0f;
 
         // Spawn spaced evenly in a circle around Rusty
         fireball->position = (Vector2){
             map->player.position.x + cosf(startAngles[i]) * orbitRadius,
-            map->player.position.y + sinf(startAngles[i]) * orbitRadius
-        };
+            map->player.position.y + sinf(startAngles[i]) * orbitRadius};
 
         // Match player's hand/torso altitude
         fireball->altitude = map->player.altitude + 12.0f;
+    }
+}
+
+void FourOfCups(void *context) { // Four orbiting fireballs that circle Rusty
+    Gamestate *gamestate = (Gamestate *)context;
+    Map *map = &gamestate->map;
+
+    float startAngles[4] = {0.0f, PI / 2.0f, PI, 3.0f * PI / 2.0f};
+    float orbitRadius = 65.0f;
+
+    for (int i = 0; i < 4; i++) {
+        MapEntity *plant = AddEntity(map);
+        if (!plant)
+            break; // Stop if we hit map->entity_count limits
+
+        plant->entity_id = PLAYER->stats.current[STAT_BOTANY] > 30? 7:2;
+        plant->type = ENTITY_PLANT;
+        plant->trait_flags =  GetDefaultTraitFlags(plant->type, plant->entity_id);
+        // / Calculate world position around the player
+        Vector2 spawnPos = (Vector2){
+            map->player.position.x + cosf(startAngles[i]) * orbitRadius,
+            map->player.position.y + sinf(startAngles[i]) * orbitRadius};
+        plant->position = spawnPos;
+
+        // 2. Derive the correct ground altitude from the grid tile it lands on
+        int gx = (int)(spawnPos.x / TILE_SIZE);
+        int gy = (int)(spawnPos.y / TILE_SIZE);
+
+        if (gx >= 0 && gx < map->columns && gy >= 0 && gy < map->rows) {
+            plant->altitude = map->grid[gy][gx].height * 8.0f;
+        } else {
+            plant->altitude = map->player.altitude; // Fallback if out of bounds
+        }
     }
 }

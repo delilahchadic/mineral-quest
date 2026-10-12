@@ -23,3 +23,4 @@ id,name,description,type,use_type,duration,equip_slot,hp,mp,str,def,mag_off,mag_
 21,Mint Potion,Restores MP,6,4,0.0,-1,0,50,0,0,0,0,0,0,0,0,0,0,-1,
 22,Four of Wands,A nice party,1,0,0.0,2,10,0,2,0,6,3,0,0,0,0,0,0,-1,
 23,Dad's Jacket,Rusty's dads jacket,1,0,0.0,1,20,20,10,10,0,0,0,20,20,20,0,0,-1,
+24,Four of Cups,Some plants would be nice,1,0,0.0,2,30,0,0,0,0,0,0,0,30,0,0,0,-1,
