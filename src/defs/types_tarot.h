@@ -1,5 +1,6 @@
 #ifndef TYPE_TAROT_H
 #define TYPE_TAROT_H
+#include "raylib.h"
 #include "stdint.h"
 
 typedef enum TarotSuit{
@@ -27,5 +28,6 @@ typedef struct TarotCard{
     float duration;
     TarotBehavior behavior;
     int item_id;
+    Texture2D sprite;
 }TarotCard;
 #endif
