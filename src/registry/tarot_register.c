@@ -4,12 +4,14 @@
 #include "defs/types_env.h"
 #include "defs/types_systems.h"
 #include "environment/map.h"
+#include "raylib.h"
 #include "registry/register.h"
 #include <raymath.h>
 #include <stdlib.h>
 static int tarot_card_count = 78;
 
 TarotCard TAROT_REGISTRY[78] = {0};
+Texture2D TAROT_BACK_SPRITE;
 TarotCard *GetTarotCardByItemId(int item_id) {
     for (int i = 0; i < tarot_card_count; i++) {
         if (TAROT_REGISTRY[i].item_id == item_id) {

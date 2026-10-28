@@ -390,9 +390,10 @@ void ParseTarotRow(char *line) {
     char *durationToken = strtok(NULL, ",");
     char *potencyToken = strtok(NULL, ",");
     char *behaviorToken = strtok(NULL, ",");
+    char *spriteToken = strtok(NULL, ",");
 
     if (idToken && nameToken && suitToken && valueToken && itemIDToken &&
-        equipCostToken && useCostToken && durationToken && behaviorToken) {
+        equipCostToken && useCostToken && durationToken && behaviorToken &&spriteToken) {
         int id = atoi(idToken);
         TarotCard *t = &TAROT_REGISTRY[id];
 
@@ -408,6 +409,7 @@ void ParseTarotRow(char *line) {
         t->duration = atof(durationToken);
         t->potency = atoi(potencyToken);
         t->behavior = atoi(behaviorToken);
+        t->sprite = LoadTexture(spriteToken);
     }
 }
 
@@ -558,6 +560,7 @@ void LoadCommandRegistry() {
 
 void LoadTarotRegistry() {
     LoadRegistry("data/tables/tarot.csv", ParseTarotRow);
+    TAROT_BACK_SPRITE = LoadTexture("data/sprites/tarot-cards/CardBacks.png");
 }
 
 int LoadPortalRegistry() {

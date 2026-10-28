@@ -8,7 +8,9 @@
 #include "raymath.h"
 #include "registry/mineral_register.h"
 #include "registry/register.h"
+#include "registry/tarot_register.h"
 #include "registry/weapon_register.h"
+#include "rendering/tarot_renderer.h"
 #include "rendering/vhs_renderer.h"
 #include "systems/input.h"
 #include "systems/player.h"
@@ -236,7 +238,15 @@ void Draw_MapEntity(MapEntity *entity, Map *map) {
                            position.y - renderHeight};
 
         if (entity->type == ENTITY_ITEM) {
-            DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
+            ItemDefinition* item = &ITEM_REGISTRY[entity->entity_id];
+            if(item->slot == SLOT_TAROT){
+                TarotCard* t = GetTarotCardByItemId(item->id);
+                float spinRotation = GetTime() * 1.5f;
+                // Pass 'position' (bottom-center) directly to align with the tile base
+                DrawTarotCard3D(t, position, spinRotation, 1.0f, true);
+            } else {
+                DrawTextureEx(*sprite, drawPos, 0.0, 0.5, WHITE);
+            }
         } else {
             DrawTextureV(*sprite, drawPos, WHITE);
             if (entity->type == ENTITY_PORTAL) {

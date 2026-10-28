@@ -2,8 +2,10 @@
 #define TAROT_REGISTER_H
 #include "defs/types_entities.h"
 #include "defs/types_tarot.h"
+#include "raylib.h"
 extern TarotCard TAROT_REGISTRY[78];
 
+extern Texture2D TAROT_BACK_SPRITE;
 TarotCard* GetTarotCardByItemId(int item_id);
 void(*tarot_callbacks[100]) (void*);
 void ExecuteTarotCommand(int id, void* context);
