@@ -340,20 +340,20 @@ void UpdateEntityMovement(Map *map, float dt) {
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *entity = &map->entities[i];
 
-        if (entity->type == ENTITY_MINERAL && entity->isCollecting) {
+        if (entity->isCollecting) {
             Vector2 targetPos = map->player.position;
             entity->position =
                 Vector2Lerp(entity->position, targetPos, 40.0f * dt);
 
             if (Vector2DistanceSqr(entity->position, targetPos) < 10.0f) {
-                GLOBAL_PLAYER.mineral_inventory[entity->entity_id]++;
+                GivePlayerEntity(PLAYER, entity);
                 float pitch =
                     0.95f + ((float)(entity->entity_id % 10) / 100.0f);
                 SetSoundPitch(MINERAL_SOUND, pitch);
                 PlaySound(MINERAL_SOUND);
                 SpawnFloatingText(map, entity->position,
-                                  GetMineralLabel(entity->entity_id),
-                                  GetMineralColor(entity->entity_id));
+                                  GetName(entity->type,entity->entity_id),
+                                  COLOR_SUNKEN_INK);
                 RemoveEntityAt(map, i);
                 i--;
                 continue;

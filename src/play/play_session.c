@@ -178,8 +178,7 @@ void UpdateAdventure(Gamestate *gamestate, Input *input, float dt) {
         UpdatePhysics(&gamestate->map, input);
         UpdateBuffs(session->player, dt);
         UpdateCombat(&gamestate->map, &gamestate->session.player->player_combat_state);
-        CheckAndCollectMinerals(&gamestate->map);
-        CheckForVHS(&gamestate->map);
+        CheckForCollectible(&gamestate->map);
         UpdateEntityMovement(&gamestate->map, dt);
     }
     AdjustCamera(gamestate, false, dt);

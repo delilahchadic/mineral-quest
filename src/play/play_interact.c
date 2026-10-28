@@ -22,13 +22,12 @@ void InitDialog(Player *player, Map *map, ScriptManager *manager) {
     }
 }
 
-void CheckAndCollectMinerals(Map *map) {
-    float collectionRadius =
-        30.0f + ((float)GLOBAL_PLAYER.stats.current[STAT_GEOLOGY] * 0.5f);
+void CheckForCollectible(Map *map) {
     for (int i = 0; i < map->entity_count; i++) {
         MapEntity *entity = &map->entities[i];
-        // Check if it's a mineral (or has your collection trait/type)
-        if (entity->type == ENTITY_MINERAL && !entity->isCollecting) {
+        if ( entity->trait_flags & TRAIT_COLLECTIBLE && !entity->isCollecting) {
+            float collectionRadius = entity->type == ENTITY_MINERAL ?
+                30.0f + ((float)GLOBAL_PLAYER.stats.current[STAT_GEOLOGY] * 0.5f) : 64.0f;
             float dist =
                 Vector2Distance(map->player.position, entity->position);
             if (dist < collectionRadius) {
@@ -38,25 +37,6 @@ void CheckAndCollectMinerals(Map *map) {
     }
 }
 
-void CheckForVHS(Map *map) {
-
-    float collectionRadius = 64.0f;
-    for (int i = 0; i < map->entity_count; i++) {
-        MapEntity *entity = &map->entities[i];
-        // Check if it's a mineral (or has your collection trait/type)
-        if (entity->type == ENTITY_VHS && !entity->isCollecting) {
-            float dist =
-                Vector2Distance(map->player.position, entity->position);
-            if (dist < collectionRadius) {
-                // float pitch = 0.95f + ((float)(e->id % 10)/ 100.0f);
-                PlaySound(MINERAL_SOUND);
-                PLAYER->vhs_inventory[entity->entity_id]++;
-                SpawnFloatingText(map, entity->position, GetName(entity->type, entity->entity_id), COLOR_SUNKEN_INK);
-                RemoveEntityAt(map, i);
-            }
-        }
-    }
-}
 char *GatherTarget(Player *player, Map *map) {
     int target = player->targeting.target_id;
     if (target == -1)
