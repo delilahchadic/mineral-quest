@@ -9,6 +9,7 @@
 Player Get_Default_Player();
 void ClosePlayer(Player *player);
 void GiveItem(Player *player, int id);
+void GivePlayerEntity(Player* player, MapEntity* entity);
 void RecalculateStats(Player* player);
 int CanAfford(Player *player, CostSlot slot);
 void ProcessRecipe(Player *player, Exchange e);

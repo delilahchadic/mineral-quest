@@ -157,6 +157,25 @@ Player Get_Default_Player() {
 
 void ClosePlayer(Player *player) { UnloadTexture(player->sprite); }
 
+void GivePlayerEntity(Player* player, MapEntity* entity){
+    switch (entity->type) {
+    case ENTITY_MINERAL:
+        player->mineral_inventory[entity->entity_id]++;
+        return;
+    case ENTITY_VHS:
+        player->vhs_inventory[entity->entity_id]++;
+        return;
+    case ENTITY_ITEM:
+        player->item_inventory[entity->entity_id]++;
+        return;
+    case ENTITY_PLANT:
+        player->plant_inventory[entity->entity_id]++;
+        return;
+    default:
+        return;
+    }
+}
+
 void GiveItem(Player *player, int id) {
     if (id < 0)
         return;
