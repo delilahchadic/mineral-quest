@@ -6,8 +6,6 @@
 #include "raylib.h"
 #include "registry/mineral_register.h"
 
-
-
 BasicStatBlock MINERAL_STATS[MINERAL_COUNT] = {0};
 
 Enemy ENEMY_REGISTRY[100] = {0};
@@ -21,8 +19,8 @@ ExchangeNode NODE_REGISTRY[100] = {0};
 Exchange EXCHANGE_REGISTRY[1000] = {0};
 Projectile PROJECTILE_REGISTRY[100] = {0};
 Recipe RECIPE_REGISTRY[100] = {0};
-AccesoryRecord ACCESORY_REGISTRY[30] ={0};
-VHSTape VHS_REGISTRY[50]={0};
+AccesoryRecord ACCESORY_REGISTRY[30] = {0};
+VHSTape VHS_REGISTRY[50] = {0};
 
 Sound MINERAL_SOUND;
 Player GLOBAL_PLAYER;
@@ -202,8 +200,10 @@ Texture2D *GetSprite(EntityType type, int id) {
         case PORTAL_CRYSTAL:
             return &PORTAL_CRYSTAL_SPRITE;
         case PORTAL_TV:
-            if(PORTAL_REGISTRY[id].locked) return &PORTAL_TV_LOCKED_SPRITE;
-            else return &PORTAL_TV_SPRITE;
+            if (PORTAL_REGISTRY[id].locked)
+                return &PORTAL_TV_LOCKED_SPRITE;
+            else
+                return &PORTAL_TV_SPRITE;
         }
     case ENTITY_ENEMY:
         return &ENEMY_REGISTRY[id].sprite;
@@ -232,13 +232,21 @@ uint32_t GetDefaultTraitFlags(EntityType type, int id) {
         break;
     case ENTITY_CHARACTER:
         return CHARACTER_REGISTRY[id].default_trait_flags;
-    case ENTITY_ITEM:
-        return TRAIT_GATHER;
+    case ENTITY_ITEM: {
+        ItemDefinition *item = &ITEM_REGISTRY[id];
+        return item->slot == SLOT_TAROT ? TRAIT_COLLECTIBLE : TRAIT_GATHER;
+    }
     case ENTITY_RECIPE:
         return TRAIT_GATHER;
     case ENTITY_PORTAL:
-        if(PORTAL_REGISTRY[id].locked) return TRAIT_TELEPORT_LOCKED;
-        else return TRAIT_TELEPORT;
+        if (PORTAL_REGISTRY[id].locked)
+            return TRAIT_TELEPORT_LOCKED;
+        else
+            return TRAIT_TELEPORT;
+    case ENTITY_MINERAL:
+        return TRAIT_COLLECTIBLE;
+    case ENTITY_VHS:
+        return TRAIT_COLLECTIBLE;
     default:
         return TRAIT_NONE;
     }
@@ -335,30 +343,28 @@ Vector2 GetDestination(EntityType type, int id) {
 
 Vector2 GetEntityCenter(MapEntity *entity) {
     Texture2D *texture = GetSprite(entity->type, entity->entity_id);
-    float center_x =
-        entity->position.x; // Or entity->position.x + (texture->width / 2.0f)
-                            // depending on your origin
+    float center_x = entity->position.x;
     float center_y;
+
     if (entity->type == ENTITY_ITEM) {
         center_x = entity->position.x - (texture->width / 4.0);
         center_y = (entity->position.y - (texture->height / 4.0));
     } else if (texture->height > 100) {
-        // Since position.y is the base, keep it right at the base
-        // or subtract a tiny fraction to move slightly up into the trunk.
         center_y = entity->position.y - (texture->height * 0.05f);
     } else {
-        // For normal plants (where position.y is the base, center is halfway
-        // up)
         center_y = entity->position.y - (texture->height / 2.0f);
     }
 
     return (Vector2){center_x, center_y};
 }
 
-int GetCost(EntityType type, int id){
-    switch(type){
-        case ENTITY_PLANT: return PLANT_REGISTRY[id].cost;
-        case ENTITY_MINERAL: return MINERAL_STATS[id].cost;
-        default: return 0;
+int GetCost(EntityType type, int id) {
+    switch (type) {
+    case ENTITY_PLANT:
+        return PLANT_REGISTRY[id].cost;
+    case ENTITY_MINERAL:
+        return MINERAL_STATS[id].cost;
+    default:
+        return 0;
     }
 }
