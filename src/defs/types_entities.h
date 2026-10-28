@@ -132,6 +132,7 @@ typedef enum TraitFlags{
   TRAIT_NODE = 1 <<3, // used to designate characters that associated to a node
   TRAIT_DAMAGE = 1 <<4,
   TRAIT_TELEPORT_LOCKED = 1 <<5,
+  TRAIT_COLLECTIBLE = 1<<6,
 } TraitFlags;
 
 typedef enum CharacterType{
